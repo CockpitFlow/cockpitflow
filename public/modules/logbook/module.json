@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Flight logbook — track flights, hours, landings.",
+  "desktop_only": true,
+  "enabled": true,
+  "icon": "book",
+  "id": "logbook",
+  "name": "Logbook",
+  "order": 9,
+  "version": "1.0.0"
+}

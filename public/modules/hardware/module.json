@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Hardware mapping — map joystick buttons and axes to sim functions.",
+  "desktop_only": true,
+  "enabled": false,
+  "icon": "cpu",
+  "id": "hardware",
+  "name": "Hardware",
+  "order": 7,
+  "version": "1.0.0"
+}

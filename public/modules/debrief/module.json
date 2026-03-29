@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Flight analysis — landing rate, G-forces, approach quality, flight phases.",
+  "desktop_only": true,
+  "enabled": false,
+  "icon": "chart",
+  "id": "debrief",
+  "name": "Debrief",
+  "order": 5,
+  "version": "1.0.0"
+}

@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Navigation tools — weight & balance, crosswind, density altitude, fuel planner, V-speeds.",
+  "desktop_only": true,
+  "enabled": false,
+  "icon": "navigation",
+  "id": "nav",
+  "name": "Nav",
+  "order": 6,
+  "version": "1.0.0"
+}

@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Community features — leaderboards, shared presets.",
+  "desktop_only": true,
+  "enabled": true,
+  "icon": "users",
+  "id": "community",
+  "name": "Community",
+  "order": 11,
+  "version": "1.0.0"
+}

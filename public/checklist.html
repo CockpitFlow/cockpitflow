@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SkyFlow Checklist</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap');
+:root {
+  --bg: #0a0e14; --surface: #0f1319; --surface2: #141a22;
+  --border: #1e2736; --text: #b8c4d0; --dim: #4e5c6e;
+  --accent: #4a9eff; --green: #34d058; --red: #ea4a5a; --amber: #e3b341;
+  --mono: 'Share Tech Mono', 'Consolas', monospace;
+  --display: 'Orbitron', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  height:100dvh;background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',-apple-system,system-ui,sans-serif;
+  font-size:14px;overflow:hidden;
+  touch-action:manipulation;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.screen{display:none;flex-direction:column;height:100dvh}
+.screen.active{display:flex}
+
+/* ═══ SELECTOR SCREEN ═══ */
+.sel{align-items:center;justify-content:center;gap:12px;padding:16px}
+.sel-title{font-family:var(--display);font-size:10px;color:var(--dim);letter-spacing:3px}
+.sel-list{display:flex;flex-direction:column;gap:6px;width:100%;max-width:360px;overflow-y:auto;flex:1;max-height:60dvh}
+.sel-card{
+  padding:14px 16px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:8px;cursor:pointer;transition:all .12s;
+}
+.sel-card:active{border-color:var(--accent);background:rgba(74,158,255,.03)}
+.sel-card.default{border-color:rgba(74,158,255,.3)}
+.sel-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.sel-meta{display:flex;gap:10px;font-size:10px;color:var(--dim)}
+.sel-meta span{display:flex;align-items:center;gap:3px}
+.sel-badge{
+  font-family:var(--mono);font-size:8px;padding:2px 6px;
+  border-radius:3px;background:rgba(74,158,255,.08);
+  color:var(--accent);border:1px solid rgba(74,158,255,.2);
+  margin-left:6px;
+}
+.sel-actions{display:flex;gap:8px;width:100%;max-width:360px}
+.sel-btn{
+  flex:1;padding:12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;
+  color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;
+  text-align:center;font-family:inherit;
+}
+.sel-btn:active{border-color:var(--accent);color:var(--accent)}
+
+/* ═══ CHECKLIST SCREEN ═══ */
+.topbar{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;background:var(--surface);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.topbar-back{
+  padding:4px 10px;background:none;border:1px solid var(--border);
+  border-radius:4px;color:var(--dim);font-size:12px;cursor:pointer;
+}
+.topbar-back:active{border-color:var(--accent);color:var(--accent)}
+.topbar-title{font-family:var(--display);font-size:9px;color:var(--dim);letter-spacing:2px;flex:1}
+.topbar-mode{
+  font-family:var(--mono);font-size:9px;padding:3px 8px;
+  border-radius:3px;border:1px solid var(--border);color:var(--dim);
+}
+.topbar-mode.strict{border-color:var(--amber);color:var(--amber)}
+.topbar-mode.smart{border-color:var(--accent);color:var(--accent)}
+.topbar-btn{
+  padding:4px 10px;background:none;border:1px solid var(--border);
+  border-radius:3px;color:var(--dim);font-size:10px;font-weight:600;cursor:pointer;
+}
+.topbar-btn:active{border-color:var(--accent);color:var(--accent)}
+
+/* Phase tabs */
+.phase-bar{
+  display:flex;overflow-x:auto;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 4px;gap:2px;
+}
+.phase-bar::-webkit-scrollbar{height:0}
+.phase-tab{
+  padding:10px 14px;border:none;background:none;
+  color:var(--dim);font-family:var(--mono);font-size:11px;
+  font-weight:600;letter-spacing:.3px;cursor:pointer;
+  white-space:nowrap;border-bottom:2px solid transparent;
+  flex-shrink:0;transition:all .1s;
+}
+.phase-tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.phase-tab.done{color:var(--green)}
+.phase-count{font-size:9px;color:var(--dim);margin-left:4px;opacity:.6}
+
+/* Items */
+.items{flex:1;overflow-y:auto;padding:6px 8px}
+.item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:16px 14px;margin-bottom:4px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;transition:all .12s;
+  min-height:58px;
+}
+.item:active{background:var(--surface2)}
+.item.checked{border-color:rgba(52,208,88,.15)}
+.item.checked .chk{background:var(--green);border-color:var(--green)}
+.item.checked .chk::after{display:block}
+.item.checked .i-label{text-decoration:line-through;color:var(--dim)}
+.item.locked{opacity:.3;pointer-events:none}
+.item.current{border-color:var(--accent);background:rgba(74,158,255,.03)}
+.chk{
+  width:26px;height:26px;border-radius:6px;flex-shrink:0;
+  border:2px solid var(--border);position:relative;
+  transition:all .12s;margin-top:1px;
+}
+.chk::after{
+  content:'';display:none;position:absolute;
+  left:7px;top:2px;width:7px;height:13px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;
+  transform:rotate(45deg);
+}
+.i-body{flex:1;min-width:0}
+.i-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.i-label{font-size:15px;font-weight:600;line-height:1.3}
+.i-expected{
+  font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700;
+  padding:2px 8px;background:rgba(74,158,255,.06);border-radius:3px;
+}
+.i-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:8px}
+.i-dot.ok{background:var(--green);box-shadow:0 0 4px var(--green)}
+.i-dot.fail{background:var(--red);box-shadow:0 0 4px var(--red)}
+.i-dot.unknown{background:var(--dim)}
+.i-how{
+  font-size:12px;color:var(--dim);margin-top:8px;line-height:1.4;
+  display:none;padding:8px 0;border-top:1px solid rgba(255,255,255,.03);
+}
+.i-loc{font-family:var(--mono);font-size:10px;color:var(--dim);opacity:.6;margin-top:4px}
+.item.expanded .i-how{display:block}
+
+/* Bottom */
+.bottom{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;background:var(--surface);
+  border-top:1px solid var(--border);flex-shrink:0;
+}
+.progress{display:flex;align-items:center;gap:8px}
+.progress-text{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.progress-text strong{color:var(--green)}
+.progress-bar{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .2s}
+.bottom-btns{display:flex;gap:4px}
+.b-btn{
+  padding:6px 12px;background:none;border:1px solid var(--border);
+  border-radius:4px;color:var(--dim);font-size:10px;font-weight:600;
+  cursor:pointer;font-family:var(--mono);
+}
+.b-btn:active{border-color:var(--accent);color:var(--accent)}
+.b-btn.danger:active{border-color:var(--red);color:var(--red)}
+
+/* Settings overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100}
+.overlay.active{display:flex}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;width:320px;display:flex;flex-direction:column;gap:14px}
+.ov-title{font-family:var(--display);font-size:9px;color:var(--dim);letter-spacing:2px}
+.ov-section{font-family:var(--display);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px}
+.ov-opts{display:flex;gap:6px}
+.ov-opt{flex:1;padding:10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;cursor:pointer;text-align:center}
+.ov-opt strong{display:block;font-size:12px;color:var(--text);margin-bottom:2px}
+.ov-opt span{font-size:9px;color:var(--dim);line-height:1.2}
+.ov-opt.on{border-color:var(--accent);background:rgba(74,158,255,.04)}
+.ov-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.ov-toggle-label{font-size:13px}
+.ov-toggle-btns{display:flex;gap:2px}
+.ov-tgl{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);font-size:10px;font-family:var(--mono);font-weight:700;color:var(--dim);cursor:pointer}
+.ov-tgl:first-child{border-radius:4px 0 0 4px}.ov-tgl:last-child{border-radius:0 4px 4px 0}
+.ov-tgl.on{background:rgba(74,158,255,.08);border-color:var(--accent);color:var(--accent)}
+.ov-close{padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--dim);font-size:12px;cursor:pointer;text-align:center}
+
+.loading{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--display);font-size:10px;letter-spacing:2px}
+</style>
+</head>
+<body>
+
+<!-- SELECTOR -->
+<div id="scrSelect" class="screen active">
+  <div class="sel">
+    <div class="sel-title">SELECT CHECKLIST</div>
+    <div class="sel-list" id="selList"><div class="loading">LOADING...</div></div>
+    <div class="sel-actions">
+      <button class="sel-btn" id="btnImport">IMPORT JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="scrChecklist" class="screen">
+  <div id="clApp"></div>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="settingsOv">
+  <div class="ov-card">
+    <div class="ov-title">CHECKLIST SETTINGS</div>
+    <div>
+      <div class="ov-section">MODE</div>
+      <div class="ov-opts">
+        <div class="ov-opt" id="optStrict" onclick="setSetting('mode','strict')"><strong>Strict</strong><span>Items in order</span></div>
+        <div class="ov-opt" id="optSmart" onclick="setSetting('mode','smart')"><strong>Smart</strong><span>Any order</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="ov-section">AUTO-DETECT</div>
+      <div class="ov-toggle"><span class="ov-toggle-label">Auto Check</span><div class="ov-toggle-btns"><button class="ov-tgl" id="autoOn" onclick="setSetting('auto_check','on')">ON</button><button class="ov-tgl" id="autoOff" onclick="setSetting('auto_check','off')">OFF</button></div></div>
+      <div class="ov-toggle"><span class="ov-toggle-label">Feedback Dots</span><div class="ov-toggle-btns"><button class="ov-tgl" id="fbOn" onclick="setSetting('check_feedback','on')">ON</button><button class="ov-tgl" id="fbOff" onclick="setSetting('check_feedback','off')">OFF</button></div></div>
+    </div>
+    <button class="ov-close" onclick="closeSettings()">Done</button>
+  </div>
+</div>
+
+<script>
+const _p = new URLSearchParams(window.location.search);
+const API = _p.get('api') || window.location.origin;
+
+let checklist = null, currentPhase = 0, checked = {};
+let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on' };
+let simValues = {}, defaultChecklist = 'cessna-172';
+
+function saveChecked(id) { localStorage.setItem('skyflow_cl_' + id, JSON.stringify(checked)); }
+function loadChecked(id) { try { checked = JSON.parse(localStorage.getItem('skyflow_cl_' + id) || '{}'); } catch { checked = {}; } }
+
+/* ═══ SCREENS ═══ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ═══ SELECTOR ═══ */
+async function loadSelector() {
+  // Get settings
+  try {
+    const r = await fetch(API + '/api/settings');
+    if (r.ok) { const s = await r.json(); Object.assign(settings, s); if (s.active_checklist) defaultChecklist = s.active_checklist; }
+  } catch {}
+
+  // Get checklist list
+  const list = document.getElementById('selList');
+  try {
+    const r = await fetch(API + '/api/checklists');
+    if (!r.ok) throw new Error();
+    const checklists = await r.json();
+
+    if (checklists.length === 0) {
+      list.innerHTML = '<div class="loading">NO CHECKLISTS FOUND</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    checklists.forEach(cl => {
+      const isDefault = cl.id === defaultChecklist;
+      const card = document.createElement('div');
+      card.className = 'sel-card' + (isDefault ? ' default' : '');
+      card.innerHTML = `
+        <div class="sel-name">${cl.name || cl.id}${isDefault ? '<span class="sel-badge">DEFAULT</span>' : ''}</div>
+        <div class="sel-meta">
+          ${cl.author ? `<span>${cl.author}</span>` : ''}
+          ${cl.phases ? `<span>${cl.phases} phases</span>` : ''}
+          ${cl.items ? `<span>${cl.items} items</span>` : ''}
+          ${cl.category ? `<span>${cl.category}</span>` : ''}
+        </div>
+      `;
+      card.addEventListener('click', () => openChecklist(cl.id));
+      list.appendChild(card);
+    });
+
+    // Auto-open if only one or if preset specified
+    const preset = _p.get('checklist');
+    if (preset) { openChecklist(preset); return; }
+    if (checklists.length === 1) { openChecklist(checklists[0].id); }
+  } catch {
+    list.innerHTML = '<div class="loading">COULD NOT LOAD CHECKLISTS</div>';
+  }
+}
+
+async function openChecklist(id) {
+  try {
+    const r = await fetch(API + '/api/checklist/' + id);
+    if (!r.ok) throw new Error();
+    checklist = await r.json();
+    checklist._id = id;
+    currentPhase = 0;
+    loadChecked(id);
+    showScreen('scrChecklist');
+    renderChecklist();
+    startPoll();
+  } catch {
+    alert('Could not load checklist: ' + id);
+  }
+}
+
+/* ═══ IMPORT ═══ */
+document.getElementById('btnImport').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.phases || !data.name) { alert('Invalid checklist JSON'); return; }
+      const name = (data.id || file.name.replace('.json', '')).toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      // Save to server
+      await fetch(API + '/api/checklist/' + name, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: text
+      });
+      loadSelector(); // refresh list
+    } catch (e) { alert('Error: ' + e.message); }
+  };
+  input.click();
+});
+
+/* ═══ RENDER CHECKLIST ═══ */
+function renderChecklist() {
+  const app = document.getElementById('clApp');
+  app.innerHTML = '';
+  app.style.display = 'flex';
+  app.style.flexDirection = 'column';
+  app.style.height = '100dvh';
+
+  // Topbar
+  const topbar = document.createElement('div');
+  topbar.className = 'topbar';
+  topbar.innerHTML = `
+    <button class="topbar-back" id="clBack">&#9664;</button>
+    <span class="topbar-title">${checklist.name || 'CHECKLIST'}</span>
+    <span class="topbar-mode ${settings.mode}">${settings.mode.toUpperCase()}</span>
+    <button class="topbar-btn" onclick="openSettings()">&#9881;</button>
+  `;
+  app.appendChild(topbar);
+  document.getElementById('clBack').addEventListener('click', () => {
+    showScreen('scrSelect');
+    loadSelector();
+  });
+
+  // Phase tabs
+  const bar = document.createElement('div');
+  bar.className = 'phase-bar';
+  checklist.phases.forEach((phase, i) => {
+    const done = phase.items.every(it => checked[it.id]);
+    const count = phase.items.filter(it => checked[it.id]).length;
+    const tab = document.createElement('button');
+    tab.className = 'phase-tab' + (i === currentPhase ? ' on' : '') + (done ? ' done' : '');
+    tab.innerHTML = `${phase.name}<span class="phase-count">${count}/${phase.items.length}</span>`;
+    tab.addEventListener('click', () => { currentPhase = i; renderChecklist(); });
+    bar.appendChild(tab);
+  });
+  app.appendChild(bar);
+
+  // Items
+  const items = document.createElement('div');
+  items.className = 'items';
+  const phase = checklist.phases[currentPhase];
+  const firstUnchecked = phase.items.findIndex(it => !checked[it.id]);
+
+  phase.items.forEach((item, idx) => {
+    const isChecked = !!checked[item.id];
+    const isCurrent = settings.mode === 'strict' && idx === firstUnchecked;
+    const isLocked = settings.mode === 'strict' && idx > firstUnchecked && firstUnchecked >= 0 && !isChecked;
+
+    const el = document.createElement('div');
+    el.className = 'item' + (isChecked ? ' checked' : '') + (isCurrent ? ' current' : '') + (isLocked ? ' locked' : '');
+
+    let dotHtml = '';
+    if (settings.check_feedback === 'on' && item.auto_detect) {
+      dotHtml = `<div class="i-dot ${getAutoState(item)}"></div>`;
+    }
+
+    el.innerHTML = `
+      <div class="chk"></div>
+      <div class="i-body">
+        <div class="i-top"><span class="i-label">${item.label}</span><span class="i-expected">${item.expected}</span></div>
+        ${item.how_to ? `<div class="i-how">${item.how_to}${item.location ? `<div class="i-loc">${item.location}</div>` : ''}</div>` : ''}
+      </div>
+      ${dotHtml}
+    `;
+
+    el.querySelector('.chk').addEventListener('click', e => {
+      e.stopPropagation(); if (isLocked) return;
+      checked[item.id] = !checked[item.id];
+      saveChecked(checklist._id); renderChecklist();
+    });
+    el.querySelector('.i-body').addEventListener('click', () => el.classList.toggle('expanded'));
+    items.appendChild(el);
+  });
+  app.appendChild(items);
+
+  const activeTab = bar.querySelector('.phase-tab.on');
+  if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  if (settings.mode === 'strict') {
+    const cur = items.querySelector('.item.current');
+    if (cur) setTimeout(() => cur.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  }
+
+  // Bottom
+  const total = checklist.phases.reduce((s, p) => s + p.items.length, 0);
+  const done = Object.values(checked).filter(Boolean).length;
+  const phaseDone = phase.items.filter(it => checked[it.id]).length;
+  const bottom = document.createElement('div');
+  bottom.className = 'bottom';
+  bottom.innerHTML = `
+    <div class="progress">
+      <span class="progress-text"><strong>${phaseDone}</strong>/${phase.items.length}</span>
+      <div class="progress-bar"><div class="progress-fill" style="width:${total ? (done/total*100) : 0}%"></div></div>
+      <span class="progress-text" style="opacity:.5">${done}/${total}</span>
+    </div>
+    <div class="bottom-btns">
+      ${phaseDone === phase.items.length && currentPhase < checklist.phases.length - 1 ? '<button class="b-btn" id="nextPhase">NEXT &#9654;</button>' : ''}
+      <button class="b-btn danger" id="resetBtn">RESET</button>
+    </div>
+  `;
+  app.appendChild(bottom);
+  const nb = document.getElementById('nextPhase');
+  if (nb) nb.addEventListener('click', () => { currentPhase++; renderChecklist(); });
+  document.getElementById('resetBtn').addEventListener('click', () => { checked = {}; saveChecked(checklist._id); renderChecklist(); });
+}
+
+/* ═══ AUTO-DETECT ═══ */
+function getAutoState(item) {
+  if (!item.auto_detect) return 'unknown';
+  const mappings = { 'MASTER BATTERY SWITCH': 'MASTER_BATTERY', 'FUEL TANK SELECTOR:1': 'FUEL_SEL' };
+  const key = mappings[item.auto_detect.var_name] || item.auto_detect.var_name;
+  if (simValues[key] !== undefined) {
+    try { return new Function('v', `return v ${item.auto_detect.condition}`)(simValues[key]) ? 'ok' : 'fail'; } catch {}
+  }
+  return 'unknown';
+}
+
+/* ═══ POLL ═══ */
+let pollTimer = null;
+function startPoll() {
+  if (pollTimer) clearTimeout(pollTimer);
+  async function poll() {
+    try {
+      const r = await fetch(API + '/api/sim-state');
+      const d = await r.json();
+      simValues = d.values || {};
+      if (settings.auto_check === 'on' && checklist) {
+        let changed = false;
+        checklist.phases.forEach(phase => {
+          phase.items.forEach(item => {
+            if (!checked[item.id] && item.auto_detect && getAutoState(item) === 'ok') {
+              checked[item.id] = true; changed = true;
+            }
+          });
+        });
+        if (changed) { saveChecked(checklist._id); renderChecklist(); }
+      }
+      // Update dots
+      document.querySelectorAll('.item').forEach((el, idx) => {
+        const phase = checklist?.phases[currentPhase];
+        if (!phase?.items[idx]) return;
+        const dot = el.querySelector('.i-dot');
+        if (dot) dot.className = 'i-dot ' + getAutoState(phase.items[idx]);
+      });
+    } catch {}
+    pollTimer = setTimeout(poll, 1000);
+  }
+  poll();
+}
+
+/* ═══ SETTINGS ═══ */
+function openSettings() {
+  document.getElementById('optStrict').classList.toggle('on', settings.mode === 'strict');
+  document.getElementById('optSmart').classList.toggle('on', settings.mode === 'smart');
+  document.getElementById('autoOn').classList.toggle('on', settings.auto_check === 'on');
+  document.getElementById('autoOff').classList.toggle('on', settings.auto_check !== 'on');
+  document.getElementById('fbOn').classList.toggle('on', settings.check_feedback === 'on');
+  document.getElementById('fbOff').classList.toggle('on', settings.check_feedback !== 'on');
+  document.getElementById('settingsOv').classList.add('active');
+}
+function closeSettings() { document.getElementById('settingsOv').classList.remove('active'); renderChecklist(); }
+function setSetting(key, val) {
+  settings[key] = val;
+  if (key === 'mode') { document.getElementById('optStrict').classList.toggle('on', val === 'strict'); document.getElementById('optSmart').classList.toggle('on', val === 'smart'); }
+  if (key === 'auto_check') { document.getElementById('autoOn').classList.toggle('on', val === 'on'); document.getElementById('autoOff').classList.toggle('on', val !== 'on'); }
+  if (key === 'check_feedback') { document.getElementById('fbOn').classList.toggle('on', val === 'on'); document.getElementById('fbOff').classList.toggle('on', val !== 'on'); }
+}
+
+/* ═══ INIT ═══ */
+loadSelector();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  /* EFB checklist theme vars */
+  --efb-bg: #0a0e14;
+  --efb-surface: #0f1319;
+  --efb-text: #b8c4d0;
+  --efb-text-dim: #4e5c6e;
+  --efb-accent: #4a9eff;
+  --efb-success: #34d058;
+  --efb-border: #1e2736;
+  --efb-current: rgba(74,158,255,.06);
+  --efb-checked: rgba(52,208,88,.04);
+  --efb-mono: 'Cascadia Code', 'JetBrains Mono', monospace;
+  --efb-font: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  --color-bg: #0a0e14;
+  --color-surface: #0f1319;
+  --color-surface-2: #141a22;
+  --color-border: #1e2736;
+  --color-dim: #4e5c6e;
+  --color-fg: #b8c4d0;
+  --color-bright: #e2e8f0;
+  --color-accent: #4a9eff;
+  --color-green: #34d058;
+  --color-red: #ea4a5a;
+  --color-yellow: #e3b341;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #app { width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* Number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }

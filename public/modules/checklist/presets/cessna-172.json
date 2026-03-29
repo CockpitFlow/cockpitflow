@@ -1,0 +1,1032 @@
+{
+  "id": "cessna-172",
+  "name": "Cessna 172 Skyhawk",
+  "author": "CockpitFlow",
+  "version": "1.0",
+  "category": "GA",
+  "phases": [
+    {
+      "id": "preflight",
+      "name": "Pre-Flight",
+      "items": [
+        {
+          "id": "documents",
+          "label": "Documents (ARROW)",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Verify Airworthiness certificate, Registration, Operating handbook, Weight & balance, and Radio license (ARROW) are on board.",
+          "location": "Glove compartment or side pocket"
+        },
+        {
+          "id": "fuel-quantity",
+          "label": "Fuel Quantity",
+          "expected": "CHECK",
+          "auto_detect": {
+            "var_name": "FUEL TOTAL QUANTITY WEIGHT",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_totalizer_sum_kg"
+          },
+          "how_to": "Visually check fuel level through filler caps on each wing and compare with fuel gauges.",
+          "location": "Wing fuel tanks \u00e2\u2020\u2019 Left and Right wing roots"
+        },
+        {
+          "id": "fuel-selector",
+          "label": "Fuel Selector",
+          "expected": "BOTH",
+          "auto_detect": {
+            "var_name": "FUEL TANK SELECTOR:1",
+            "var_type": "A",
+            "condition": "== 4",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_tank_selector"
+          },
+          "how_to": "Turn the fuel selector valve handle to the BOTH position.",
+          "location": "Cabin floor \u00e2\u2020\u2019 Between front seats"
+        },
+        {
+          "id": "master-switch",
+          "label": "Master Switch",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "MASTER BATTERY SWITCH",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/battery_on"
+          },
+          "how_to": "Push both halves of the red master switch (BAT and ALT) to the ON (up) position.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Below left side gauges"
+        },
+        {
+          "id": "fuel-gauges",
+          "label": "Fuel Gauges",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Compare fuel gauge readings against visual inspection to confirm gauges are accurate.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower left cluster"
+        },
+        {
+          "id": "flaps",
+          "label": "Flaps",
+          "expected": "UP",
+          "auto_detect": {
+            "var_name": "FLAPS HANDLE INDEX",
+            "var_type": "A",
+            "condition": "< 1",
+            "xplane_dataref": "sim/cockpit2/controls/flap_ratio"
+          },
+          "how_to": "Move the flap lever fully up to retract the flaps to zero degrees.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, between pilot seats"
+        },
+        {
+          "id": "master-off-preflight",
+          "label": "Master Switch",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "MASTER BATTERY SWITCH",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit/electrical/battery_on"
+          },
+          "how_to": "Push both halves of the master switch (BAT and ALT) to the OFF (down) position.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Below left side gauges"
+        },
+        {
+          "id": "walkaround",
+          "label": "Walkaround Inspection",
+          "expected": "COMPLETE",
+          "auto_detect": null,
+          "how_to": "Walk around the aircraft checking control surfaces, tires, propeller, oil, fuel drains, pitot tube, and antennas.",
+          "location": "Exterior \u00e2\u2020\u2019 Full aircraft walkaround"
+        }
+      ]
+    },
+    {
+      "id": "before-engine-start",
+      "name": "Before Engine Start",
+      "items": [
+        {
+          "id": "preflight-inspection",
+          "label": "Preflight Inspection",
+          "expected": "COMPLETE",
+          "auto_detect": null,
+          "how_to": "Confirm all preflight checklist items have been completed and the aircraft is airworthy.",
+          "location": "Cockpit \u00e2\u2020\u2019 Pilot seat"
+        },
+        {
+          "id": "seats-belts",
+          "label": "Seats, Belts, Harnesses",
+          "expected": "ADJUST & LOCK",
+          "auto_detect": null,
+          "how_to": "Adjust seat to reach full rudder pedal travel and lock the seat rail pin. Fasten seatbelt and shoulder harness.",
+          "location": "Cockpit \u00e2\u2020\u2019 Pilot and passenger seats"
+        },
+        {
+          "id": "brakes",
+          "label": "Parking Brake",
+          "expected": "SET",
+          "auto_detect": {
+            "var_name": "PARKING BRAKE",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit2/controls/parking_brake_ratio"
+          },
+          "how_to": "Pull the parking brake handle fully aft and push down to lock it in the set position.",
+          "location": "Lower instrument panel \u00e2\u2020\u2019 Below center, pull handle"
+        },
+        {
+          "id": "avionics-off",
+          "label": "Avionics Master",
+          "expected": "OFF",
+          "auto_detect": null,
+          "how_to": "Switch the avionics master toggle to the OFF (down) position to protect avionics during engine start.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, red toggle switch"
+        },
+        {
+          "id": "fuel-selector-both",
+          "label": "Fuel Selector",
+          "expected": "BOTH",
+          "auto_detect": {
+            "var_name": "FUEL TANK SELECTOR:1",
+            "var_type": "A",
+            "condition": "== 4",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_tank_selector"
+          },
+          "how_to": "Confirm the fuel selector valve handle is in the BOTH position.",
+          "location": "Cabin floor \u00e2\u2020\u2019 Between front seats"
+        },
+        {
+          "id": "circuit-breakers",
+          "label": "Circuit Breakers",
+          "expected": "CHECK IN",
+          "auto_detect": null,
+          "how_to": "Visually inspect all circuit breakers to confirm none are popped out.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Left side circuit breaker panel"
+        }
+      ]
+    },
+    {
+      "id": "engine-start",
+      "name": "Engine Start",
+      "items": [
+        {
+          "id": "master-on",
+          "label": "Master Switch",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "MASTER BATTERY SWITCH",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/battery_on"
+          },
+          "how_to": "Push both halves of the red master switch (BAT and ALT) to the ON (up) position.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Below left side gauges"
+        },
+        {
+          "id": "beacon",
+          "label": "Beacon Light",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT BEACON",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/beacon_lights_on"
+          },
+          "how_to": "Flip the beacon light switch to the ON position before starting the engine.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "mixture-rich",
+          "label": "Mixture",
+          "expected": "RICH",
+          "auto_detect": {
+            "var_name": "GENERAL ENG MIXTURE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 90",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/mixture_ratio[0]"
+          },
+          "how_to": "Push the red mixture knob fully forward to the RICH position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "carb-heat",
+          "label": "Carb Heat",
+          "expected": "COLD",
+          "auto_detect": null,
+          "how_to": "Push the carb heat knob fully in to the COLD (off) position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Center knob"
+        },
+        {
+          "id": "primer",
+          "label": "Primer",
+          "expected": "2-6 STROKES",
+          "auto_detect": null,
+          "how_to": "Unlock the primer by turning it, pull out and push in 2-6 strokes depending on temperature, then lock it.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Black knob with lock"
+        },
+        {
+          "id": "throttle-start",
+          "label": "Throttle",
+          "expected": "OPEN 1/4 INCH",
+          "auto_detect": {
+            "var_name": "GENERAL ENG THROTTLE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 5",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/throttle_ratio[0]"
+          },
+          "how_to": "Advance the black throttle knob approximately 1/4 inch from the idle position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Black knob, leftmost"
+        },
+        {
+          "id": "starter",
+          "label": "Ignition / Starter",
+          "expected": "START",
+          "auto_detect": {
+            "var_name": "GENERAL ENG RPM:1",
+            "var_type": "A",
+            "condition": "> 500",
+            "xplane_dataref": "sim/cockpit2/engine/indicators/engine_speed_rpm[0]"
+          },
+          "how_to": "Turn the ignition key past BOTH to the START position and release when the engine fires.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Key-operated ignition switch"
+        },
+        {
+          "id": "oil-pressure",
+          "label": "Oil Pressure",
+          "expected": "GREEN",
+          "auto_detect": {
+            "var_name": "GENERAL ENG OIL PRESSURE:1",
+            "var_type": "A",
+            "condition": "> 20",
+            "xplane_dataref": "sim/cockpit2/engine/indicators/oil_pressure_psi[0]"
+          },
+          "how_to": "Check that the oil pressure gauge needle moves into the green arc within 30 seconds of engine start.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Engine gauge cluster, left side"
+        }
+      ]
+    },
+    {
+      "id": "before-taxi",
+      "name": "Before Taxi",
+      "items": [
+        {
+          "id": "avionics-on",
+          "label": "Avionics Master",
+          "expected": "ON",
+          "auto_detect": null,
+          "how_to": "Switch the avionics master toggle to the ON (up) position after the engine is running smoothly.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, red toggle switch"
+        },
+        {
+          "id": "radios",
+          "label": "Radios / GPS",
+          "expected": "SET",
+          "auto_detect": null,
+          "how_to": "Set COM and NAV radio frequencies and configure GPS flight plan as needed.",
+          "location": "Avionics stack \u00e2\u2020\u2019 Center instrument panel"
+        },
+        {
+          "id": "altimeter",
+          "label": "Altimeter",
+          "expected": "SET",
+          "auto_detect": null,
+          "how_to": "Set the current local altimeter setting using the adjustment knob on the altimeter.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Flight instrument cluster, right of attitude indicator"
+        },
+        {
+          "id": "heading-indicator",
+          "label": "Heading Indicator",
+          "expected": "SET",
+          "auto_detect": null,
+          "how_to": "Align the heading indicator with the magnetic compass using the adjustment knob.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Flight instrument cluster, below attitude indicator"
+        },
+        {
+          "id": "nav-lights",
+          "label": "Navigation Lights",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT NAV",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/nav_lights_on"
+          },
+          "how_to": "Flip the navigation lights switch to ON.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "taxi-clearance",
+          "label": "Taxi Clearance",
+          "expected": "OBTAINED",
+          "auto_detect": null,
+          "how_to": "Contact ground control on the appropriate frequency and request taxi clearance to the active runway.",
+          "location": "Avionics stack \u00e2\u2020\u2019 COM1 or COM2 radio"
+        }
+      ]
+    },
+    {
+      "id": "taxi",
+      "name": "Taxi",
+      "items": [
+        {
+          "id": "parking-brake-release",
+          "label": "Parking Brake",
+          "expected": "RELEASE",
+          "auto_detect": {
+            "var_name": "PARKING BRAKE",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit2/controls/parking_brake_ratio"
+          },
+          "how_to": "Push the parking brake handle forward to release the brakes.",
+          "location": "Lower instrument panel \u00e2\u2020\u2019 Below center, push handle"
+        },
+        {
+          "id": "taxi-light",
+          "label": "Taxi Light",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT TAXI",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/taxi_light_on"
+          },
+          "how_to": "Flip the taxi light switch to ON before moving the aircraft.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "brakes-check",
+          "label": "Brakes",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "After beginning to roll, tap both toe brakes to confirm they are functioning properly.",
+          "location": "Rudder pedals \u00e2\u2020\u2019 Top of each pedal (toe brakes)"
+        },
+        {
+          "id": "gyro-instruments",
+          "label": "Gyroscopic Instruments",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Verify heading indicator, attitude indicator, and turn coordinator respond correctly during turns.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Flight instrument cluster"
+        }
+      ]
+    },
+    {
+      "id": "before-takeoff",
+      "name": "Before Takeoff",
+      "items": [
+        {
+          "id": "parking-brake-set",
+          "label": "Parking Brake",
+          "expected": "SET",
+          "auto_detect": {
+            "var_name": "PARKING BRAKE",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit2/controls/parking_brake_ratio"
+          },
+          "how_to": "Pull the parking brake handle aft and push down to lock before the runup.",
+          "location": "Lower instrument panel \u00e2\u2020\u2019 Below center, pull handle"
+        },
+        {
+          "id": "flight-controls",
+          "label": "Flight Controls",
+          "expected": "FREE & CORRECT",
+          "auto_detect": null,
+          "how_to": "Move the yoke full left, right, forward, and aft to verify ailerons and elevator move freely and correctly.",
+          "location": "Cockpit \u00e2\u2020\u2019 Yoke (control column)"
+        },
+        {
+          "id": "flight-instruments",
+          "label": "Flight Instruments",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Scan all six primary flight instruments to confirm proper indications.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Flight instrument cluster (six-pack)"
+        },
+        {
+          "id": "fuel-selector-takeoff",
+          "label": "Fuel Selector",
+          "expected": "BOTH",
+          "auto_detect": {
+            "var_name": "FUEL TANK SELECTOR:1",
+            "var_type": "A",
+            "condition": "== 4",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_tank_selector"
+          },
+          "how_to": "Confirm the fuel selector valve handle is in the BOTH position.",
+          "location": "Cabin floor \u00e2\u2020\u2019 Between front seats"
+        },
+        {
+          "id": "mixture-takeoff",
+          "label": "Mixture",
+          "expected": "RICH",
+          "auto_detect": {
+            "var_name": "GENERAL ENG MIXTURE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 90",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/mixture_ratio[0]"
+          },
+          "how_to": "Push the red mixture knob fully forward to the RICH position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "elevator-trim",
+          "label": "Elevator Trim",
+          "expected": "TAKEOFF",
+          "auto_detect": {
+            "var_name": "ELEVATOR TRIM POSITION",
+            "var_type": "A",
+            "condition": "> -5",
+            "xplane_dataref": "sim/cockpit2/controls/elevator_trim"
+          },
+          "how_to": "Set the trim wheel to the takeoff position, indicated by the takeoff range mark.",
+          "location": "Cockpit \u00e2\u2020\u2019 Trim wheel between pilot seats, or on center console"
+        },
+        {
+          "id": "throttle-check",
+          "label": "Throttle",
+          "expected": "1700 RPM",
+          "auto_detect": null,
+          "how_to": "Advance throttle to 1700 RPM, then check magnetos and carb heat during runup.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Black knob, leftmost"
+        },
+        {
+          "id": "magnetos",
+          "label": "Magnetos",
+          "expected": "CHECK L & R",
+          "auto_detect": null,
+          "how_to": "Turn the ignition key from BOTH to LEFT, note RPM drop, return to BOTH, then switch to RIGHT. Max 125 RPM drop, max 50 RPM differential.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Key-operated ignition switch"
+        },
+        {
+          "id": "carb-heat-check",
+          "label": "Carb Heat",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Pull carb heat knob out to HOT, observe slight RPM drop, then push back to COLD.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Center knob"
+        },
+        {
+          "id": "engine-gauges",
+          "label": "Engine Gauges",
+          "expected": "GREEN",
+          "auto_detect": null,
+          "how_to": "Check oil temperature and pressure are in the green arc, and RPM/fuel flow are normal.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Engine gauge cluster"
+        },
+        {
+          "id": "flaps-takeoff",
+          "label": "Flaps",
+          "expected": "0-10 DEG",
+          "auto_detect": {
+            "var_name": "FLAPS HANDLE INDEX",
+            "var_type": "A",
+            "condition": "< 2",
+            "xplane_dataref": "sim/cockpit2/controls/flap_ratio"
+          },
+          "how_to": "Set flaps to 0 or 10 degrees as appropriate using the flap lever.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, between pilot seats"
+        },
+        {
+          "id": "doors",
+          "label": "Doors & Windows",
+          "expected": "CLOSED & LOCKED",
+          "auto_detect": null,
+          "how_to": "Verify all doors and windows are fully closed and latched securely.",
+          "location": "Cockpit \u00e2\u2020\u2019 Left and right cabin doors, windows"
+        },
+        {
+          "id": "transponder",
+          "label": "Transponder",
+          "expected": "ALT",
+          "auto_detect": {
+            "var_name": "TRANSPONDER CODE:1",
+            "var_type": "A",
+            "condition": ">= 4",
+            "xplane_dataref": "sim/cockpit/radios/transponder_code"
+          },
+          "how_to": "Set transponder to ALT mode and enter the assigned squawk code.",
+          "location": "Avionics stack \u00e2\u2020\u2019 Transponder unit, lower panel"
+        },
+        {
+          "id": "landing-light-takeoff",
+          "label": "Landing Light",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT LANDING",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/landing_lights_on"
+          },
+          "how_to": "Flip the landing light switch to ON for visibility.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "strobe",
+          "label": "Strobe Lights",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT STROBE",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/strobe_lights_on"
+          },
+          "how_to": "Flip the strobe light switch to ON before entering the runway.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        }
+      ]
+    },
+    {
+      "id": "takeoff",
+      "name": "Takeoff",
+      "items": [
+        {
+          "id": "throttle-full",
+          "label": "Throttle",
+          "expected": "FULL",
+          "auto_detect": {
+            "var_name": "GENERAL ENG THROTTLE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 95",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/throttle_ratio[0]"
+          },
+          "how_to": "Smoothly advance the throttle knob to full power while maintaining directional control with rudder.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Black knob, leftmost"
+        },
+        {
+          "id": "engine-instruments-green",
+          "label": "Engine Instruments",
+          "expected": "GREEN",
+          "auto_detect": null,
+          "how_to": "Quickly scan engine gauges to confirm RPM, oil pressure, and oil temperature are in the green.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Engine gauge cluster"
+        },
+        {
+          "id": "rotate",
+          "label": "Rotate at Vr (55 KIAS)",
+          "expected": "ROTATE",
+          "auto_detect": {
+            "var_name": "AIRSPEED INDICATED",
+            "var_type": "A",
+            "condition": "> 55",
+            "xplane_dataref": "sim/cockpit2/gauges/indicators/airspeed_kts_pilot"
+          },
+          "how_to": "At 55 KIAS, apply gentle back pressure on the yoke to lift the nose and become airborne.",
+          "location": "Cockpit \u00e2\u2020\u2019 Yoke (control column)"
+        }
+      ]
+    },
+    {
+      "id": "climb",
+      "name": "Climb",
+      "items": [
+        {
+          "id": "airspeed-vy",
+          "label": "Airspeed",
+          "expected": "74 KIAS (Vy)",
+          "auto_detect": {
+            "var_name": "AIRSPEED INDICATED",
+            "var_type": "A",
+            "condition": "> 70",
+            "xplane_dataref": "sim/cockpit2/gauges/indicators/airspeed_kts_pilot"
+          },
+          "how_to": "Pitch to maintain best rate of climb speed (Vy) of 74 KIAS using the attitude indicator and airspeed indicator.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Airspeed indicator, top left of six-pack"
+        },
+        {
+          "id": "flaps-up",
+          "label": "Flaps",
+          "expected": "UP",
+          "auto_detect": {
+            "var_name": "FLAPS HANDLE INDEX",
+            "var_type": "A",
+            "condition": "< 1",
+            "xplane_dataref": "sim/cockpit2/controls/flap_ratio"
+          },
+          "how_to": "Retract flaps fully by moving the flap lever to the UP position once at a safe altitude and airspeed.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, between pilot seats"
+        },
+        {
+          "id": "mixture-climb",
+          "label": "Mixture",
+          "expected": "RICH (below 3000')",
+          "auto_detect": null,
+          "how_to": "Keep mixture full rich below 3000 feet. Above 3000 feet, lean as needed for smooth operation.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "engine-gauges-climb",
+          "label": "Engine Gauges",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Periodically check oil temperature, oil pressure, and RPM are in normal ranges during climb.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Engine gauge cluster"
+        }
+      ]
+    },
+    {
+      "id": "cruise",
+      "name": "Cruise",
+      "items": [
+        {
+          "id": "throttle-cruise",
+          "label": "Power",
+          "expected": "SET (2100-2500 RPM)",
+          "auto_detect": null,
+          "how_to": "Reduce throttle to the desired cruise RPM setting (typically 2100-2500 RPM).",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Black knob, leftmost"
+        },
+        {
+          "id": "mixture-lean",
+          "label": "Mixture",
+          "expected": "LEAN as required",
+          "auto_detect": null,
+          "how_to": "Slowly pull the mixture knob aft to lean until slight RPM rise, then lean slightly further for economy.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "elevator-trim-cruise",
+          "label": "Elevator Trim",
+          "expected": "ADJUST",
+          "auto_detect": null,
+          "how_to": "Roll the trim wheel to relieve control pressure and maintain level flight hands-off.",
+          "location": "Cockpit \u00e2\u2020\u2019 Trim wheel between pilot seats"
+        },
+        {
+          "id": "landing-light-off",
+          "label": "Landing Light",
+          "expected": "OFF (above 10000')",
+          "auto_detect": null,
+          "how_to": "Switch the landing light off above 10,000 feet to extend bulb life.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "fuel-check",
+          "label": "Fuel Quantity",
+          "expected": "MONITOR",
+          "auto_detect": null,
+          "how_to": "Monitor fuel gauges periodically and compare against flight plan fuel burn estimates.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower left cluster, fuel gauges"
+        },
+        {
+          "id": "engine-gauges-cruise",
+          "label": "Engine Gauges",
+          "expected": "CHECK",
+          "auto_detect": null,
+          "how_to": "Scan oil temperature, oil pressure, and fuel flow gauges for normal readings.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Engine gauge cluster"
+        }
+      ]
+    },
+    {
+      "id": "descent",
+      "name": "Descent",
+      "items": [
+        {
+          "id": "atis",
+          "label": "ATIS / Weather",
+          "expected": "OBTAINED",
+          "auto_detect": null,
+          "how_to": "Tune the destination ATIS frequency and listen for current weather, runway, and approach information.",
+          "location": "Avionics stack \u00e2\u2020\u2019 COM2 radio or ATIS frequency"
+        },
+        {
+          "id": "altimeter-descent",
+          "label": "Altimeter",
+          "expected": "SET",
+          "auto_detect": null,
+          "how_to": "Set the altimeter to the destination airport's current altimeter setting from ATIS.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Altimeter adjustment knob"
+        },
+        {
+          "id": "mixture-enrich",
+          "label": "Mixture",
+          "expected": "ENRICH as required",
+          "auto_detect": null,
+          "how_to": "Gradually push the mixture knob forward (richer) as you descend to lower altitudes.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "carb-heat-descent",
+          "label": "Carb Heat",
+          "expected": "AS REQUIRED",
+          "auto_detect": null,
+          "how_to": "Apply carb heat as needed when reducing power to prevent carburetor icing.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Center knob, pull out for HOT"
+        },
+        {
+          "id": "landing-light-descent",
+          "label": "Landing Light",
+          "expected": "ON",
+          "auto_detect": {
+            "var_name": "LIGHT LANDING",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit/electrical/landing_lights_on"
+          },
+          "how_to": "Switch the landing light on for increased visibility below 10,000 feet.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        }
+      ]
+    },
+    {
+      "id": "approach",
+      "name": "Approach",
+      "items": [
+        {
+          "id": "fuel-selector-approach",
+          "label": "Fuel Selector",
+          "expected": "BOTH",
+          "auto_detect": {
+            "var_name": "FUEL TANK SELECTOR:1",
+            "var_type": "A",
+            "condition": "== 4",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_tank_selector"
+          },
+          "how_to": "Confirm fuel selector is on BOTH for maximum fuel availability during approach.",
+          "location": "Cabin floor \u00e2\u2020\u2019 Between front seats"
+        },
+        {
+          "id": "mixture-rich-approach",
+          "label": "Mixture",
+          "expected": "RICH",
+          "auto_detect": {
+            "var_name": "GENERAL ENG MIXTURE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 90",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/mixture_ratio[0]"
+          },
+          "how_to": "Push the mixture knob fully forward to FULL RICH for the approach.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "carb-heat-approach",
+          "label": "Carb Heat",
+          "expected": "ON",
+          "auto_detect": null,
+          "how_to": "Pull the carb heat knob fully out to the HOT position for the approach.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Center knob"
+        },
+        {
+          "id": "airspeed-approach",
+          "label": "Airspeed",
+          "expected": "65-75 KIAS",
+          "auto_detect": null,
+          "how_to": "Manage pitch and power to maintain 65-75 KIAS on approach, depending on wind conditions.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Airspeed indicator"
+        }
+      ]
+    },
+    {
+      "id": "before-landing",
+      "name": "Before Landing",
+      "items": [
+        {
+          "id": "seats-belts-landing",
+          "label": "Seats, Belts, Harnesses",
+          "expected": "SECURE",
+          "auto_detect": null,
+          "how_to": "Confirm all occupants' seat belts and shoulder harnesses are securely fastened.",
+          "location": "Cockpit \u00e2\u2020\u2019 Pilot and passenger seats"
+        },
+        {
+          "id": "mixture-full-rich",
+          "label": "Mixture",
+          "expected": "FULL RICH",
+          "auto_detect": {
+            "var_name": "GENERAL ENG MIXTURE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "> 95",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/mixture_ratio[0]"
+          },
+          "how_to": "Push the mixture knob fully forward to FULL RICH position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "flaps-landing",
+          "label": "Flaps",
+          "expected": "FULL",
+          "auto_detect": {
+            "var_name": "FLAPS HANDLE INDEX",
+            "var_type": "A",
+            "condition": ">= 3",
+            "xplane_dataref": "sim/cockpit2/controls/flap_ratio"
+          },
+          "how_to": "Extend flaps to FULL (30 degrees) using the flap lever.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, between pilot seats"
+        },
+        {
+          "id": "airspeed-final",
+          "label": "Airspeed (Final)",
+          "expected": "60-65 KIAS",
+          "auto_detect": null,
+          "how_to": "Stabilize on final approach at 60-65 KIAS using pitch and power adjustments.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Airspeed indicator"
+        }
+      ]
+    },
+    {
+      "id": "landing",
+      "name": "Landing",
+      "items": [
+        {
+          "id": "touchdown",
+          "label": "Touchdown",
+          "expected": "MAIN GEAR FIRST",
+          "auto_detect": null,
+          "how_to": "Flare gently and touch down on the main wheels first, then lower the nose wheel.",
+          "location": "Runway \u00e2\u2020\u2019 Main landing gear contact point"
+        },
+        {
+          "id": "braking",
+          "label": "Braking",
+          "expected": "AS REQUIRED",
+          "auto_detect": null,
+          "how_to": "Apply smooth, progressive braking with the toe brakes after the nose wheel is on the ground.",
+          "location": "Rudder pedals \u00e2\u2020\u2019 Top of each pedal (toe brakes)"
+        }
+      ]
+    },
+    {
+      "id": "after-landing",
+      "name": "After Landing",
+      "items": [
+        {
+          "id": "flaps-retract",
+          "label": "Flaps",
+          "expected": "UP",
+          "auto_detect": {
+            "var_name": "FLAPS HANDLE INDEX",
+            "var_type": "A",
+            "condition": "< 1",
+            "xplane_dataref": "sim/cockpit2/controls/flap_ratio"
+          },
+          "how_to": "Move the flap lever fully up to retract flaps after clearing the runway.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, between pilot seats"
+        },
+        {
+          "id": "carb-heat-off",
+          "label": "Carb Heat",
+          "expected": "OFF",
+          "auto_detect": null,
+          "how_to": "Push the carb heat knob fully in to the COLD (off) position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Center knob"
+        },
+        {
+          "id": "landing-light-after",
+          "label": "Landing Light",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "LIGHT LANDING",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit/electrical/landing_lights_on"
+          },
+          "how_to": "Switch the landing light off after clearing the runway.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "strobe-off",
+          "label": "Strobe Lights",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "LIGHT STROBE",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit/electrical/strobe_lights_on"
+          },
+          "how_to": "Switch the strobe light off after clearing the active runway.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "transponder-stby",
+          "label": "Transponder",
+          "expected": "STANDBY",
+          "auto_detect": {
+            "var_name": "TRANSPONDER CODE:1",
+            "var_type": "A",
+            "condition": "< 4",
+            "xplane_dataref": "sim/cockpit/radios/transponder_code"
+          },
+          "how_to": "Set the transponder to STANDBY mode after clearing the runway.",
+          "location": "Avionics stack \u00e2\u2020\u2019 Transponder unit, lower panel"
+        }
+      ]
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "items": [
+        {
+          "id": "parking-brake-final",
+          "label": "Parking Brake",
+          "expected": "SET",
+          "auto_detect": {
+            "var_name": "PARKING BRAKE",
+            "var_type": "A",
+            "condition": "> 0",
+            "xplane_dataref": "sim/cockpit2/controls/parking_brake_ratio"
+          },
+          "how_to": "Pull the parking brake handle fully aft and push down to lock.",
+          "location": "Lower instrument panel \u00e2\u2020\u2019 Below center, pull handle"
+        },
+        {
+          "id": "throttle-idle",
+          "label": "Throttle",
+          "expected": "IDLE",
+          "auto_detect": {
+            "var_name": "GENERAL ENG THROTTLE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "< 5",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/throttle_ratio[0]"
+          },
+          "how_to": "Pull the throttle knob back to the full idle position.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Black knob, leftmost"
+        },
+        {
+          "id": "avionics-off-shutdown",
+          "label": "Avionics Master",
+          "expected": "OFF",
+          "auto_detect": null,
+          "how_to": "Switch the avionics master toggle OFF before turning off the master switch.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Lower center, red toggle switch"
+        },
+        {
+          "id": "mixture-cutoff",
+          "label": "Mixture",
+          "expected": "CUTOFF",
+          "auto_detect": {
+            "var_name": "GENERAL ENG MIXTURE LEVER POSITION:1",
+            "var_type": "A",
+            "condition": "< 5",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/mixture_ratio[0]"
+          },
+          "how_to": "Pull the red mixture knob fully aft to idle cutoff to shut down the engine.",
+          "location": "Throttle quadrant \u00e2\u2020\u2019 Red knob, right of throttle"
+        },
+        {
+          "id": "magnetos-off",
+          "label": "Magnetos",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "RECIP ENG LEFT MAGNETO:1",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit2/engine/actuators/ignition_key[0]"
+          },
+          "how_to": "Turn the ignition key to the OFF position after the engine stops.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Key-operated ignition switch"
+        },
+        {
+          "id": "master-off",
+          "label": "Master Switch",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "MASTER BATTERY SWITCH",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit/electrical/battery_on"
+          },
+          "how_to": "Push both halves of the master switch (BAT and ALT) to the OFF (down) position.",
+          "location": "Lower left instrument panel \u00e2\u2020\u2019 Below left side gauges"
+        },
+        {
+          "id": "lights-off",
+          "label": "All Lights",
+          "expected": "OFF",
+          "auto_detect": {
+            "var_name": "LIGHT NAV",
+            "var_type": "A",
+            "condition": "== 0",
+            "xplane_dataref": "sim/cockpit/electrical/nav_lights_on"
+          },
+          "how_to": "Turn off all exterior and interior light switches.",
+          "location": "Instrument panel \u00e2\u2020\u2019 Left side, light switch cluster"
+        },
+        {
+          "id": "fuel-selector-off",
+          "label": "Fuel Selector",
+          "expected": "LEFT or RIGHT",
+          "auto_detect": {
+            "var_name": "FUEL TANK SELECTOR:1",
+            "var_type": "A",
+            "condition": "== 4",
+            "xplane_dataref": "sim/cockpit2/fuel/fuel_tank_selector"
+          },
+          "how_to": "Turn the fuel selector to LEFT or RIGHT (not OFF) for overnight storage to prevent cross-feeding.",
+          "location": "Cabin floor \u00e2\u2020\u2019 Between front seats"
+        },
+        {
+          "id": "control-lock",
+          "label": "Control Lock",
+          "expected": "INSTALL",
+          "auto_detect": null,
+          "how_to": "Install the control lock over the yoke to prevent wind damage to control surfaces.",
+          "location": "Cockpit \u00e2\u2020\u2019 Over the yoke (control column)"
+        }
+      ]
+    }
+  ],
+  "simulator": "both"
+}

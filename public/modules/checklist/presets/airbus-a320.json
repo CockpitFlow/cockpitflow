@@ -1,0 +1,179 @@
+{
+  "id": "airbus-a320",
+  "name": "Airbus A320neo",
+  "author": "SkyFlow Community",
+  "version": "1.0",
+  "category": "Narrowbody",
+  "phases": [
+    {
+      "id": "cockpit-prep",
+      "name": "Cockpit Preparation",
+      "items": [
+        { "id": "batteries", "label": "BAT 1+2", "expected": "ON", "how_to": "Both battery switches ON on overhead panel." },
+        { "id": "ext-power", "label": "External Power", "expected": "ON", "how_to": "If available, connect and switch ON external power." },
+        { "id": "apu-master", "label": "APU Master", "expected": "ON", "how_to": "APU master switch ON." },
+        { "id": "apu-start", "label": "APU Start", "expected": "ON", "how_to": "APU start switch ON. Wait for AVAIL on ECAM." },
+        { "id": "apu-bleed", "label": "APU Bleed", "expected": "ON", "how_to": "APU bleed switch ON for air conditioning and engine start." },
+        { "id": "nav-lights", "label": "NAV Lights", "expected": "ON", "how_to": "Navigation lights ON." },
+        { "id": "adirs", "label": "ADIRS", "expected": "NAV", "how_to": "All three ADIRS selectors to NAV. Alignment ~7 minutes." },
+        { "id": "fuel-pumps", "label": "Fuel Pumps", "expected": "ON", "how_to": "All fuel pump switches ON." }
+      ]
+    },
+    {
+      "id": "fmgc-setup",
+      "name": "FMGC Setup",
+      "items": [
+        { "id": "from-to", "label": "FROM/TO", "expected": "SET", "how_to": "Enter departure and destination airports in MCDU INIT page." },
+        { "id": "flight-number", "label": "Flight Number", "expected": "SET", "how_to": "Enter flight number on INIT page." },
+        { "id": "cost-index", "label": "Cost Index", "expected": "SET", "how_to": "Enter cost index on INIT page." },
+        { "id": "cruise-fl", "label": "Cruise FL", "expected": "SET", "how_to": "Enter cruise flight level on INIT page." },
+        { "id": "route", "label": "Route", "expected": "SET", "how_to": "Enter or load flight plan route via F-PLN page." },
+        { "id": "perf", "label": "PERF", "expected": "SET", "how_to": "Enter V1, VR, V2, FLEX temp, and flap setting on PERF TAKEOFF page." },
+        { "id": "zfw", "label": "ZFW/CG", "expected": "SET", "how_to": "Enter zero fuel weight and center of gravity on INIT B page." }
+      ]
+    },
+    {
+      "id": "before-start",
+      "name": "Before Start",
+      "items": [
+        { "id": "signs", "label": "Signs", "expected": "ON/AUTO", "how_to": "Seatbelt signs ON, No smoking AUTO." },
+        { "id": "windows", "label": "Windows/Doors", "expected": "CLOSED", "how_to": "Verify all doors and windows closed on ECAM DOOR page." },
+        { "id": "beacon-on", "label": "Beacon", "expected": "ON", "how_to": "Beacon ON before requesting pushback." },
+        { "id": "parking-brake", "label": "Parking Brake", "expected": "SET", "how_to": "Parking brake ON." },
+        { "id": "thrust-levers", "label": "Thrust Levers", "expected": "IDLE", "how_to": "Both thrust levers at IDLE." },
+        { "id": "transponder", "label": "Transponder", "expected": "STBY", "how_to": "Transponder to STBY before pushback." }
+      ]
+    },
+    {
+      "id": "engine-start",
+      "name": "Engine Start",
+      "items": [
+        { "id": "engine-mode", "label": "ENG Mode Selector", "expected": "IGN/START", "how_to": "Engine mode selector to IGN/START." },
+        { "id": "engine-2-master", "label": "Engine 2 Master", "expected": "ON", "how_to": "Engine 2 master switch ON. Monitor N2 rising." },
+        { "id": "engine-1-master", "label": "Engine 1 Master", "expected": "ON", "how_to": "Engine 1 master switch ON." },
+        { "id": "engine-mode-norm", "label": "ENG Mode Selector", "expected": "NORM", "how_to": "Engine mode selector back to NORM after both engines started." },
+        { "id": "apu-bleed-off", "label": "APU Bleed", "expected": "OFF", "how_to": "APU bleed OFF (engines provide bleed air now)." }
+      ]
+    },
+    {
+      "id": "after-start",
+      "name": "After Start",
+      "items": [
+        { "id": "anti-ice", "label": "Anti Ice", "expected": "AS REQUIRED", "how_to": "Engine and wing anti-ice as required by conditions." },
+        { "id": "flight-controls", "label": "Flight Controls", "expected": "CHECK", "how_to": "Move sidestick full deflections, check ECAM F/CTL page." },
+        { "id": "flaps", "label": "Flaps", "expected": "SET", "how_to": "Set flaps to takeoff configuration (1+F, 2, or 3)." },
+        { "id": "ground-spoilers", "label": "Ground Spoilers", "expected": "ARMED", "how_to": "Ground spoilers ARMED." },
+        { "id": "auto-brake", "label": "Auto Brake", "expected": "MAX", "how_to": "Auto brake to MAX for rejected takeoff." },
+        { "id": "takeoff-trim", "label": "Pitch Trim", "expected": "SET", "how_to": "Verify pitch trim set per takeoff data." },
+        { "id": "ecam-status", "label": "ECAM Status", "expected": "CHECK", "how_to": "Review ECAM STATUS page — no unexpected messages." }
+      ]
+    },
+    {
+      "id": "taxi",
+      "name": "Taxi",
+      "items": [
+        { "id": "taxi-clearance", "label": "Taxi Clearance", "expected": "OBTAINED", "how_to": "Request and receive taxi clearance." },
+        { "id": "nose-steering", "label": "Nosewheel Steering", "expected": "CHECK", "how_to": "Verify nosewheel steering response." },
+        { "id": "brakes", "label": "Brakes", "expected": "CHECK", "how_to": "Test brakes during initial taxi." },
+        { "id": "runway-lights", "label": "Runway Turn Off Lights", "expected": "ON", "how_to": "Runway turn off lights ON for taxi." }
+      ]
+    },
+    {
+      "id": "before-takeoff",
+      "name": "Before Takeoff",
+      "items": [
+        { "id": "takeoff-briefing", "label": "Takeoff Briefing", "expected": "CONFIRMED", "how_to": "Confirm takeoff speeds, SID, engine failure procedure." },
+        { "id": "tcas", "label": "TCAS", "expected": "TA/RA", "how_to": "Transponder to TA/RA, verify squawk." },
+        { "id": "packs", "label": "Packs", "expected": "AS REQUIRED", "how_to": "Packs 1+2 ON (or OFF for short runway performance)." },
+        { "id": "strobe", "label": "Strobe Lights", "expected": "ON", "how_to": "Strobe lights ON." },
+        { "id": "landing-lights", "label": "Landing Lights", "expected": "ON", "how_to": "Both landing lights ON." },
+        { "id": "to-config", "label": "T.O Config", "expected": "TEST", "how_to": "Press T.O CONFIG button — verify no ECAM warnings." }
+      ]
+    },
+    {
+      "id": "takeoff",
+      "name": "Takeoff",
+      "items": [
+        { "id": "flex-toga", "label": "Thrust", "expected": "FLEX/TOGA", "how_to": "Advance thrust levers to FLX or TOGA detent. Verify SRS mode." },
+        { "id": "100kt", "label": "100 Knots", "expected": "CHECK", "how_to": "PNF calls '100 knots' — verify speed alive." },
+        { "id": "v1-call", "label": "V1", "expected": "CALL", "how_to": "PNF calls 'V1'." },
+        { "id": "rotate", "label": "Rotate", "expected": "VR", "how_to": "At VR, smoothly rotate to SRS pitch guidance." },
+        { "id": "positive-climb", "label": "Positive Climb", "expected": "GEAR UP", "how_to": "On positive climb, call 'Gear Up'." }
+      ]
+    },
+    {
+      "id": "climb",
+      "name": "Climb",
+      "items": [
+        { "id": "gear-up", "label": "Gear", "expected": "UP", "how_to": "Verify gear up." },
+        { "id": "autopilot", "label": "Autopilot", "expected": "ON", "how_to": "Engage AP1 above acceleration altitude." },
+        { "id": "flaps-retract", "label": "Flaps", "expected": "RETRACT", "how_to": "Retract flaps per speed schedule (S speed, then F speed, then green dot)." },
+        { "id": "climb-thrust", "label": "Thrust", "expected": "CLB", "how_to": "Thrust levers to CL detent for managed climb thrust." }
+      ]
+    },
+    {
+      "id": "cruise",
+      "name": "Cruise",
+      "items": [
+        { "id": "altitude-check", "label": "Cruise Altitude", "expected": "CHECK", "how_to": "Verify at planned cruise flight level." },
+        { "id": "fuel-pred", "label": "Fuel Prediction", "expected": "CHECK", "how_to": "Monitor MCDU FUEL PRED page." },
+        { "id": "ecam-cruise", "label": "ECAM", "expected": "MONITOR", "how_to": "Periodic scan of ECAM for any advisories." }
+      ]
+    },
+    {
+      "id": "descent",
+      "name": "Descent",
+      "items": [
+        { "id": "approach-brief", "label": "Approach Briefing", "expected": "COMPLETE", "how_to": "Brief approach type, minima, missed approach, runway." },
+        { "id": "landing-data", "label": "Landing Data", "expected": "SET", "how_to": "Enter landing data on MCDU PERF APPR page (QNH, wind, VAPP)." },
+        { "id": "auto-brake-desc", "label": "Auto Brake", "expected": "SET", "how_to": "Set auto brake (LO, MED, or as required)." },
+        { "id": "baro-set", "label": "Barometric Setting", "expected": "SET", "how_to": "Set QNH when below transition level." }
+      ]
+    },
+    {
+      "id": "approach",
+      "name": "Approach",
+      "items": [
+        { "id": "approach-mode", "label": "APPR Mode", "expected": "ARMED", "how_to": "Press APPR button on FCU — verify LOC and G/S armed." },
+        { "id": "gear-down-app", "label": "Gear", "expected": "DOWN", "how_to": "Landing gear DOWN, verify 3 green on ECAM." },
+        { "id": "flaps-full", "label": "Flaps", "expected": "FULL/CONF 3", "how_to": "Set flaps to landing configuration." },
+        { "id": "ground-spoilers-app", "label": "Ground Spoilers", "expected": "ARMED", "how_to": "Verify ground spoilers ARMED." },
+        { "id": "landing-lights-app", "label": "Landing Lights", "expected": "ON", "how_to": "Landing lights ON." }
+      ]
+    },
+    {
+      "id": "landing",
+      "name": "Landing",
+      "items": [
+        { "id": "at-minimums", "label": "Minimums", "expected": "CALL", "how_to": "At decision altitude/height: 'Continue' or 'Go Around'." },
+        { "id": "flare", "label": "Flare", "expected": "MANUAL", "how_to": "At 20ft RETARD callout — idle thrust, flare." },
+        { "id": "reversers", "label": "Reverse Thrust", "expected": "AS REQUIRED", "how_to": "Select reverse thrust if needed." },
+        { "id": "decel", "label": "Decelerate", "expected": "70 KTS", "how_to": "Cancel reverse by 70 knots. Verify autobrake." }
+      ]
+    },
+    {
+      "id": "after-landing",
+      "name": "After Landing",
+      "items": [
+        { "id": "spoilers-retract", "label": "Spoilers", "expected": "RETRACT", "how_to": "Ground spoilers retract." },
+        { "id": "flaps-up", "label": "Flaps", "expected": "RETRACT", "how_to": "Flaps retract." },
+        { "id": "strobe-off", "label": "Strobe", "expected": "OFF", "how_to": "Strobe lights OFF." },
+        { "id": "apu-after", "label": "APU", "expected": "START", "how_to": "Start APU for gate arrival." },
+        { "id": "transponder-stby", "label": "Transponder", "expected": "STBY", "how_to": "Transponder to STBY." }
+      ]
+    },
+    {
+      "id": "shutdown",
+      "name": "Parking / Shutdown",
+      "items": [
+        { "id": "parking-brake-final", "label": "Parking Brake", "expected": "SET", "how_to": "Parking brake SET at gate." },
+        { "id": "engines-off", "label": "Engines", "expected": "OFF", "how_to": "Both engine master switches OFF." },
+        { "id": "seatbelt-off", "label": "Seatbelt Signs", "expected": "OFF", "how_to": "Seatbelt signs OFF." },
+        { "id": "beacon-off", "label": "Beacon", "expected": "OFF", "how_to": "Beacon OFF." },
+        { "id": "ext-power-on", "label": "External Power", "expected": "ON", "how_to": "Switch to external power if available." },
+        { "id": "fuel-pumps-off", "label": "Fuel Pumps", "expected": "OFF", "how_to": "All fuel pump switches OFF." },
+        { "id": "apu-off", "label": "APU", "expected": "OFF", "how_to": "APU master switch OFF when external power connected." }
+      ]
+    }
+  ]
+}

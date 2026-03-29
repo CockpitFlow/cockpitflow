@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111317">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/pwa-icon-192.svg">
+<link rel="apple-touch-icon" href="/pwa-icon-192.svg">
+<title>SkyFlow Cockpit</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#111317;--panel:#1c1e22;--accent:#4a9eff;
+  --green:#44dd66;--amber:#ddaa44;--red:#ee4444;
+  --text:#c8ccd4;--dim:#5a5e66;--dark:#3a3d44;--border:#2a2d33;
+  --mono:'Share Tech Mono','Consolas',monospace;
+  --display:'Orbitron',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  height:100dvh;background:var(--bg);color:var(--text);
+  font-family:-apple-system,'Segoe UI',sans-serif;
+  overflow:hidden;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;
+}
+
+/* ═══ GRID ═══ */
+.cockpit{
+  display:grid;
+  height:100dvh;
+  gap:1px;
+  background:#0a0b0d;
+}
+.cell{
+  background:var(--panel);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  padding:4px;
+}
+/* subtle texture */
+.cell::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);
+}
+
+/* ═══ LEVER ═══ */
+.comp-lever{
+  flex-direction:column;align-items:center;gap:2px;
+}
+.lever-lbl{font-family:var(--display);font-size:7px;font-weight:700;color:var(--dim);letter-spacing:1px;z-index:1}
+.lever-track{
+  flex:1;width:100%;position:relative;touch-action:none;cursor:grab;z-index:1;
+}
+.lever-rail{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:10px;height:100%;
+  background:linear-gradient(180deg,#0a0b0d,#161820,#0a0b0d);
+  border:1px solid #1e2028;border-radius:5px;
+}
+.lever-fill{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:6px;bottom:0;height:0%;border-radius:3px;opacity:.5;
+}
+.lever-fill.c-default{background:var(--accent)}
+.lever-fill.c-red{background:var(--red)}
+.lever-fill.c-amber{background:var(--amber)}
+.lever-thumb{
+  position:absolute;left:50%;transform:translate(-50%,50%);
+  bottom:0;width:30px;height:14px;border-radius:3px;
+  border:1px solid;z-index:2;pointer-events:none;
+  box-shadow:0 2px 6px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.lever-thumb.c-default{background:linear-gradient(180deg,#3a3d44,#22242a);border-color:#4a4d55}
+.lever-thumb.c-red{background:linear-gradient(180deg,#cc3030,#771818);border-color:#dd4444}
+.lever-thumb.c-amber{background:linear-gradient(180deg,#ccaa22,#776610);border-color:#ddbb33}
+.lever-ticks{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:20px;height:100%;display:flex;flex-direction:column;
+  justify-content:space-between;padding:4px 0;pointer-events:none;
+}
+.lever-tick{width:100%;height:1px;background:rgba(255,255,255,.06)}
+.lever-val{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);z-index:1}
+
+/* ═══ TOGGLE ═══ */
+.comp-toggle{
+  flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+}
+.toggle-lbl{font-family:var(--display);font-size:6px;font-weight:500;color:var(--dark);letter-spacing:.5px}
+.toggle-pill{
+  width:26px;height:13px;border-radius:7px;
+  background:var(--panel);border:1px solid var(--border);
+  position:relative;transition:all .12s;
+}
+.toggle-pill::after{
+  content:'';position:absolute;width:9px;height:9px;border-radius:50%;
+  top:1px;left:1px;background:var(--dark);transition:all .12s;
+}
+.toggle-pill.on{background:rgba(74,158,255,.08);border-color:var(--accent)}
+.toggle-pill.on::after{left:14px;background:var(--accent);box-shadow:0 0 4px rgba(74,158,255,.3)}
+.toggle-pill.red.on{background:rgba(238,68,68,.08);border-color:var(--red)}
+.toggle-pill.red.on::after{background:var(--red);box-shadow:0 0 4px rgba(238,68,68,.3)}
+
+/* ═══ MAGNETO ═══ */
+.comp-magneto{align-items:center;justify-content:center;gap:3px}
+.mag-lbl{font-family:var(--display);font-size:6px;color:var(--dark);letter-spacing:1px}
+.mag-btn{
+  padding:3px 6px;background:var(--panel);border:1px solid var(--border);border-radius:2px;
+  font-family:var(--mono);font-size:7px;font-weight:700;color:var(--dark);cursor:pointer;transition:all .12s;
+}
+.mag-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(74,158,255,.06)}
+.mag-btn.spring{border-color:#422;color:#966}
+.mag-btn.spring:active{border-color:var(--red);color:var(--red)}
+
+/* ═══ YOKE ═══ */
+.comp-yoke{
+  flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.yoke-bar{display:flex;gap:5px;align-items:center;z-index:1}
+.yoke-btn{
+  padding:3px 10px;background:var(--bg);border:1px solid var(--border);border-radius:3px;
+  font-family:var(--display);font-size:7px;font-weight:500;color:var(--dark);
+  letter-spacing:1px;cursor:pointer;transition:all .12s;
+}
+.yoke-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(74,158,255,.05)}
+.yoke-btn.lk{border-color:var(--red);color:var(--red)}
+.yoke-pad{
+  width:min(42vw,calc(100dvh - 110px));height:min(42vw,calc(100dvh - 110px));
+  max-width:260px;max-height:260px;border-radius:50%;
+  background:radial-gradient(circle,#181a1f,#101216 60%,#0c0e12);
+  border:1.5px solid var(--border);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.4),0 0 20px rgba(0,0,0,.3);
+  position:relative;touch-action:none;z-index:1;
+}
+.yoke-pad::before{
+  content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent 49.6%,rgba(255,255,255,.03) 49.6%,rgba(255,255,255,.03) 50.4%,transparent 50.4%),
+    linear-gradient(0deg,transparent 49.6%,rgba(255,255,255,.03) 49.6%,rgba(255,255,255,.03) 50.4%,transparent 50.4%);
+}
+.yoke-pad::after{
+  content:'';position:absolute;width:8px;height:8px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.06);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+}
+.yoke-dot{
+  position:absolute;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#6abfff,#2a8aee);
+  box-shadow:0 0 10px rgba(74,170,255,.3),inset 0 1px 0 rgba(255,255,255,.15);
+  transform:translate(-50%,-50%);top:50%;left:50%;pointer-events:none;z-index:2;
+}
+.yoke-dot.smooth{transition:top .08s,left .08s}
+.yoke-rd{display:flex;gap:14px;z-index:1}
+.yoke-rv{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent)}
+.yoke-rv small{color:var(--dark);font-size:7px;margin-right:3px}
+.yoke-set{display:flex;gap:5px;align-items:center;z-index:1}
+.yoke-set label{font-size:6px;color:var(--dark);font-weight:600}
+.yoke-sld{
+  width:40px;height:3px;-webkit-appearance:none;appearance:none;
+  background:var(--bg);border-radius:2px;
+}
+.yoke-sld::-webkit-slider-thumb{
+  -webkit-appearance:none;width:10px;height:10px;border-radius:50%;
+  background:var(--border);border:1px solid #444;cursor:pointer;
+}
+.yoke-msg{position:absolute;bottom:3px;font-size:7px;color:var(--dark);z-index:1}
+
+/* ═══ GAUGE ═══ */
+.comp-gauge{align-items:center;padding:2px 8px;gap:4px}
+.gauge-lbl{font-family:var(--display);font-size:7px;font-weight:500;color:var(--dark);letter-spacing:1px;width:26px}
+.gauge-val{
+  font-family:var(--mono);font-size:19px;font-weight:700;color:var(--green);
+  text-align:right;flex:1;text-shadow:0 0 8px rgba(68,221,102,.1);
+}
+.gauge-unit{font-size:7px;color:var(--dark);width:22px;margin-left:3px}
+.gauge-val.warn{color:var(--amber);text-shadow:0 0 8px rgba(221,170,68,.1)}
+.gauge-val.danger{color:var(--red);text-shadow:0 0 8px rgba(238,68,68,.15)}
+
+/* ═══ FLAPS ═══ */
+.comp-flaps{flex-direction:column;align-items:center;gap:2px}
+.flaps-lbl{font-family:var(--display);font-size:7px;font-weight:700;color:var(--dim);letter-spacing:1px;z-index:1}
+.flaps-btns{display:flex;flex-direction:column;gap:3px;flex:1;justify-content:space-evenly;width:100%;z-index:1}
+.flap-btn{
+  padding:4px 2px;background:var(--bg);border:1px solid #1e2028;border-radius:3px;
+  font-family:var(--mono);font-size:8px;font-weight:700;color:var(--dark);
+  cursor:pointer;text-align:center;transition:all .12s;
+}
+.flap-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(74,158,255,.06);box-shadow:0 0 6px rgba(74,158,255,.08)}
+
+/* ═══ TRIM ═══ */
+.comp-trim{flex-direction:column;align-items:center;gap:2px}
+.trim-lbl{font-family:var(--display);font-size:7px;font-weight:700;color:var(--dim);letter-spacing:1px;z-index:1}
+.trim-btn{
+  flex:1;width:100%;background:var(--bg);border:1px solid #1e2028;border-radius:3px;
+  color:var(--dim);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;z-index:1;transition:all .1s;
+}
+.trim-btn:active{background:var(--panel);border-color:var(--border)}
+.trim-val{font-family:var(--mono);font-size:9px;color:var(--accent);z-index:1}
+
+/* ═══ FUEL SELECTOR ═══ */
+.comp-fuel{align-items:center;justify-content:center;gap:6px;padding:2px 8px}
+.fuel-lbl{font-family:var(--display);font-size:7px;color:var(--dark);letter-spacing:.5px}
+.fuel-btns{display:flex;gap:2px}
+.fuel-btn{
+  padding:3px 7px;background:var(--bg);border:1px solid #1e2028;border-radius:2px;
+  font-family:var(--mono);font-size:8px;font-weight:700;color:var(--dark);cursor:pointer;transition:all .12s;
+}
+.fuel-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(74,158,255,.06)}
+
+/* ═══ RADIO ═══ */
+.comp-radio{align-items:center;gap:6px;padding:2px 8px}
+.radio-lbl{font-family:var(--display);font-size:7px;color:var(--dark);letter-spacing:.5px;width:30px}
+.radio-freq{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)}
+
+/* ═══ STATUS (auto-added) ═══ */
+.status-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;align-items:center;gap:6px;
+  padding:2px 10px;
+  background:var(--bg);border-top:1px solid rgba(255,255,255,.04);
+  font-size:7px;color:var(--dark);z-index:100;
+}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--red)}
+.status-dot.on{background:var(--green);box-shadow:0 0 4px var(--green)}
+.status-name{flex:1;text-align:right;font-family:var(--display);font-size:6px;letter-spacing:3px;color:#1e2028}
+
+/* ═══ PORTRAIT ═══ */
+@media(orientation:portrait){
+  .cockpit{height:auto;min-height:100dvh}
+  .comp-yoke .yoke-pad{width:min(60vw,240px);height:min(60vw,240px)}
+}
+</style>
+</head>
+<body>
+
+<div class="cockpit" id="cockpit"></div>
+<div class="status-bar">
+  <span class="status-dot" id="sDot"></span>
+  <span id="sTxt">CONNECTING</span>
+  <span class="status-name">SKYFLOW</span>
+</div>
+
+<script>
+// API base: use ?api= param if provided, otherwise same origin
+const _params = new URLSearchParams(window.location.search);
+const API = _params.get('api') || window.location.origin;
+const state = { components: {}, preset: null };
+
+async function send(cmd, val) {
+  try { await fetch(API + '/api/command', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, value: val }) }); } catch {}
+}
+
+/* ══════════════════════════════════════════
+   COMPONENT RENDERERS
+   Each returns { el, init?, update?, destroy? }
+   ══════════════════════════════════════════ */
+
+const renderers = {
+
+  lever(comp) {
+    const el = document.createElement('div');
+    const c = comp.color || 'default';
+    el.innerHTML = `
+      <span class="lever-lbl">${comp.label}</span>
+      <div class="lever-track">
+        <div class="lever-rail"></div>
+        <div class="lever-fill c-${c}"></div>
+        <div class="lever-ticks">${'<div class="lever-tick"></div>'.repeat(5)}</div>
+        <div class="lever-thumb c-${c}"></div>
+      </div>
+      <span class="lever-val">${Math.round((comp.default||0)*100)}%</span>`;
+
+    const track = el.querySelector('.lever-track');
+    const thumb = el.querySelector('.lever-thumb');
+    const fill = el.querySelector('.lever-fill');
+    const valEl = el.querySelector('.lever-val');
+    let val = comp.default || 0;
+    let dragging = false;
+
+    function setVal(v) {
+      val = Math.max(0, Math.min(1, v));
+      thumb.style.bottom = (val * 100) + '%';
+      fill.style.height = (val * 100) + '%';
+      valEl.textContent = Math.round(val * 100) + '%';
+    }
+
+    track.addEventListener('pointerdown', e => { e.preventDefault(); dragging = true; track.setPointerCapture(e.pointerId); move(e); });
+    track.addEventListener('pointermove', e => { if (dragging) move(e); });
+    track.addEventListener('pointerup', () => dragging = false);
+    track.addEventListener('pointercancel', () => dragging = false);
+
+    function move(e) {
+      const r = track.getBoundingClientRect();
+      setVal(1 - (e.clientY - r.top) / r.height);
+      send(comp.cmd, val);
+    }
+
+    setVal(val);
+    return { el, update(v) { setVal(v); } };
+  },
+
+  toggle(comp) {
+    const el = document.createElement('div');
+    const cls = comp.style === 'red' ? 'red' : '';
+    el.innerHTML = `<span class="toggle-lbl">${comp.label}</span><div class="toggle-pill ${cls}"></div>`;
+    const pill = el.querySelector('.toggle-pill');
+
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      const on = pill.classList.toggle('on');
+      send(comp.cmd, on ? 1 : 0);
+    });
+
+    return { el, update(v) { pill.classList.toggle('on', v > 0.5); } };
+  },
+
+  magneto(comp) {
+    const el = document.createElement('div');
+    let html = `<span class="mag-lbl">${comp.label}</span>`;
+    comp.positions.forEach((p, i) => {
+      const spring = comp.spring_back && i === comp.spring_back.from;
+      html += `<button class="mag-btn${i === (comp.default||0) ? ' on' : ''}${spring ? ' spring' : ''}" data-pos="${i}">${p}</button>`;
+    });
+    el.innerHTML = html;
+
+    let cur = comp.default || 0;
+    const btns = el.querySelectorAll('.mag-btn');
+
+    btns.forEach(btn => {
+      const pos = parseInt(btn.dataset.pos);
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault(); cur = pos; send(comp.cmd, pos);
+        btns.forEach(b => b.classList.toggle('on', parseInt(b.dataset.pos) === pos));
+      });
+      if (comp.spring_back && pos === comp.spring_back.from) {
+        const release = () => {
+          cur = comp.spring_back.to;
+          send(comp.cmd, cur);
+          btns.forEach(b => b.classList.toggle('on', parseInt(b.dataset.pos) === cur));
+        };
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointerleave', () => { if (cur === pos) release(); });
+      }
+    });
+
+    return { el, update(v) { cur = Math.round(v); btns.forEach(b => b.classList.toggle('on', parseInt(b.dataset.pos) === cur)); } };
+  },
+
+  yoke(comp) {
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div class="yoke-bar">
+        ${(comp.modes||['touch']).map((m,i) => `<button class="yoke-btn${i===0?' on':''}" data-ym="${m}">${m.toUpperCase().slice(0,3)}</button>`).join('')}
+        <button class="yoke-btn" id="ykCtr">CTR</button>
+        <button class="yoke-btn" id="ykLck">LOCK</button>
+      </div>
+      <div class="yoke-pad" id="ykPad"><div class="yoke-dot" id="ykDot"></div></div>
+      <div class="yoke-rd">
+        <span class="yoke-rv"><small>AIL</small><span id="rdA">+0.00</span></span>
+        <span class="yoke-rv"><small>ELV</small><span id="rdE">+0.00</span></span>
+      </div>
+      <div class="yoke-set">
+        <label>SENS</label><input type="range" class="yoke-sld" id="ykS" min=".3" max="2" step=".1" value="${comp.sensitivity||1}">
+        <label>DEAD</label><input type="range" class="yoke-sld" id="ykD" min="0" max=".15" step=".01" value="${comp.deadzone||.05}">
+      </div>
+      <span class="yoke-msg" id="ykMsg"></span>`;
+
+    const pad = el.querySelector('#ykPad'), dot = el.querySelector('#ykDot');
+    const rdA = el.querySelector('#rdA'), rdE = el.querySelector('#rdE');
+    const sS = el.querySelector('#ykS'), sD = el.querySelector('#ykD');
+    const msg = el.querySelector('#ykMsg');
+    let mode = (comp.modes||['touch'])[0], locked = false;
+    let ail = 0, elv = 0, touching = false, gyroOk = false, gBC = 0, gGC = 0, sT = null;
+
+    function dz(v) { const d = +sD.value; if (Math.abs(v) < d) return 0; return (v > 0 ? 1 : -1) * (Math.abs(v) - d) / (1 - d); }
+    function setY(a, e) {
+      if (locked) return;
+      const s = +sS.value;
+      ail = Math.max(-1, Math.min(1, dz(a * s)));
+      elv = Math.max(-1, Math.min(1, dz(e * s)));
+      dot.style.left = (50 + ail * 44) + '%';
+      dot.style.top = (50 + elv * 44) + '%';
+      rdA.textContent = (ail >= 0 ? '+' : '') + ail.toFixed(2);
+      rdE.textContent = (elv >= 0 ? '+' : '') + elv.toFixed(2);
+      if (!sT) sT = setTimeout(() => { sT = null; send(comp.cmd_ail || 'AILERON', ail); send(comp.cmd_elv || 'ELEVATOR', elv); }, 33);
+    }
+    function reset() { ail = 0; elv = 0; dot.style.left = '50%'; dot.style.top = '50%'; rdA.textContent = '+0.00'; rdE.textContent = '+0.00'; send(comp.cmd_ail || 'AILERON', 0); send(comp.cmd_elv || 'ELEVATOR', 0); }
+
+    /* Touch */
+    pad.addEventListener('pointerdown', e => { if (mode !== 'touch' || locked) return; e.preventDefault(); touching = true; pad.setPointerCapture(e.pointerId); dot.classList.remove('smooth'); tm(e); });
+    pad.addEventListener('pointermove', e => { if (touching) tm(e); });
+    pad.addEventListener('pointerup', () => { if (!touching) return; touching = false; dot.classList.add('smooth'); reset(); });
+    pad.addEventListener('pointercancel', () => { touching = false; dot.classList.add('smooth'); reset(); });
+    function tm(e) {
+      const r = pad.getBoundingClientRect();
+      let x = (e.clientX - r.left - r.width / 2) / (r.width / 2);
+      let y = (e.clientY - r.top - r.height / 2) / (r.height / 2);
+      const d = Math.sqrt(x * x + y * y); if (d > 1) { x /= d; y /= d; }
+      setY(x, y);
+    }
+
+    /* Gyro */
+    function oriA() { return screen.orientation?.angle ?? window.orientation ?? 0; }
+    function startGyro() {
+      window.addEventListener('deviceorientation', e => {
+        if (mode !== 'gyro' || locked || (e.beta === null && e.gamma === null)) return;
+        const rb = e.beta || 0, rg = e.gamma || 0, a = oriA();
+        let b, g;
+        if (a === 90) { b = -rg; g = rb; } else if (a === -90 || a === 270) { b = rg; g = -rb; } else if (a === 180) { b = -rb; g = -rg; } else { b = rb; g = rg; }
+        if (!gyroOk) { gBC = b; gGC = g; gyroOk = true; msg.textContent = 'Gyroscope active'; msg.style.color = 'var(--green)'; }
+        setY((g - gGC) / 45, (b - gBC) / 35);
+      });
+      if (screen.orientation) screen.orientation.addEventListener('change', () => { gyroOk = false; msg.textContent = 'Re-calibrating...'; msg.style.color = 'var(--amber)'; });
+    }
+    async function reqGyro() {
+      if (!window.isSecureContext) { msg.textContent = 'Requires HTTPS — use port 8443'; msg.style.color = 'var(--amber)'; return; }
+      if (typeof DeviceOrientationEvent === 'undefined') { msg.textContent = 'Gyro unavailable'; msg.style.color = 'var(--red)'; return; }
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        msg.textContent = 'Requesting...'; msg.style.color = 'var(--amber)';
+        try { const p = await DeviceOrientationEvent.requestPermission(); if (p === 'granted') startGyro(); else { msg.textContent = 'Denied'; msg.style.color = 'var(--red)'; } }
+        catch (er) { msg.textContent = er.message; msg.style.color = 'var(--red)'; }
+      } else { startGyro(); msg.textContent = 'Waiting...'; msg.style.color = 'var(--amber)'; setTimeout(() => { if (!gyroOk) { msg.textContent = 'No gyro detected'; msg.style.color = 'var(--amber)'; } }, 1500); }
+    }
+
+    el.querySelectorAll('[data-ym]').forEach(b => {
+      b.addEventListener('click', async e => {
+        e.preventDefault(); mode = b.dataset.ym;
+        el.querySelectorAll('[data-ym]').forEach(x => x.classList.toggle('on', x === b));
+        reset(); dot.classList.toggle('smooth', mode === 'gyro');
+        if (mode === 'gyro' && !gyroOk) await reqGyro();
+        else if (mode === 'gyro') { msg.textContent = 'Gyroscope active'; msg.style.color = 'var(--green)'; }
+        else msg.textContent = '';
+      });
+    });
+    el.querySelector('#ykCtr').addEventListener('pointerdown', e => { e.preventDefault(); reset(); if (mode === 'gyro') { gyroOk = false; msg.textContent = 'Re-calibrating...'; msg.style.color = 'var(--amber)'; } });
+    el.querySelector('#ykLck').addEventListener('pointerdown', e => { e.preventDefault(); locked = !locked; e.target.classList.toggle('lk', locked); e.target.textContent = locked ? 'UNLK' : 'LOCK'; });
+
+    return { el };
+  },
+
+  gauge(comp) {
+    const el = document.createElement('div');
+    el.innerHTML = `<span class="gauge-lbl">${comp.label}</span><span class="gauge-val" id="g_${comp.id}">---</span><span class="gauge-unit">${comp.unit||''}</span>`;
+    const valEl = el.querySelector('.gauge-val');
+
+    return {
+      el,
+      update(raw) {
+        let v, cls = 'gauge-val';
+        if (comp.format === 'heading') v = String(Math.round(raw)).padStart(3, '0');
+        else if (comp.format === 'signed') { const n = Math.round(raw); v = (n >= 0 ? '+' : '') + n; }
+        else v = Math.round(raw);
+        valEl.textContent = v;
+        for (const t of (comp.thresholds || [])) { if (raw < t.below) { cls += t.color === 'red' ? ' danger' : ' warn'; break; } }
+        valEl.className = cls;
+      }
+    };
+  },
+
+  flaps(comp) {
+    const el = document.createElement('div');
+    let html = `<span class="flaps-lbl">${comp.label}</span><div class="flaps-btns">`;
+    comp.detents.forEach((d, i) => { html += `<button class="flap-btn${i === 0 ? ' on' : ''}" data-fv="${d.value}">${d.label}</button>`; });
+    html += '</div>';
+    el.innerHTML = html;
+
+    el.querySelectorAll('.flap-btn').forEach(btn => {
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        send(comp.cmd, parseFloat(btn.dataset.fv));
+        el.querySelectorAll('.flap-btn').forEach(b => b.classList.toggle('on', b === btn));
+      });
+    });
+    return { el };
+  },
+
+  trim(comp) {
+    const el = document.createElement('div');
+    el.innerHTML = `<span class="trim-lbl">${comp.label}</span><button class="trim-btn" data-dir="-1">&#9652;</button><span class="trim-val">0</span><button class="trim-btn" data-dir="1">&#9662;</button>`;
+    const valEl = el.querySelector('.trim-val');
+    let val = 0, timer = null;
+    const step = comp.step || 0.03;
+
+    function nudge(dir) { val = Math.max(-1, Math.min(1, val + dir * step)); send(comp.cmd, val); valEl.textContent = Math.round(val * 100); }
+
+    el.querySelectorAll('.trim-btn').forEach(btn => {
+      const dir = parseInt(btn.dataset.dir);
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); nudge(dir); timer = setInterval(() => nudge(dir), 100); });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, () => clearInterval(timer)));
+    });
+    return { el };
+  },
+
+  'fuel-selector'(comp) {
+    const el = document.createElement('div');
+    let html = `<span class="fuel-lbl">${comp.label}</span><div class="fuel-btns">`;
+    comp.positions.forEach(p => { html += `<button class="fuel-btn${p.value === (comp.default||0) ? ' on' : ''}" data-fv="${p.value}">${p.label}</button>`; });
+    html += '</div>';
+    el.innerHTML = html;
+
+    el.querySelectorAll('.fuel-btn').forEach(btn => {
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        send(comp.cmd, parseInt(btn.dataset.fv));
+        el.querySelectorAll('.fuel-btn').forEach(b => b.classList.toggle('on', b === btn));
+      });
+    });
+    return { el };
+  },
+
+  radio(comp) {
+    const el = document.createElement('div');
+    el.innerHTML = `<span class="radio-lbl">${comp.label}</span><span class="radio-freq">${comp.default_freq || '---'}</span>`;
+    return { el };
+  }
+};
+
+/* ══════════════════════════════════════════
+   BUILD COCKPIT FROM PRESET
+   ══════════════════════════════════════════ */
+
+function buildCockpit(preset) {
+  state.preset = preset;
+  const root = document.getElementById('cockpit');
+  root.innerHTML = '';
+
+  // Apply theme
+  const t = preset.theme || {};
+  if (t.bg) document.documentElement.style.setProperty('--bg', t.bg);
+  if (t.panel) document.documentElement.style.setProperty('--panel', t.panel);
+  if (t.accent) document.documentElement.style.setProperty('--accent', t.accent);
+  if (t.green) document.documentElement.style.setProperty('--green', t.green);
+  if (t.amber) document.documentElement.style.setProperty('--amber', t.amber);
+  if (t.red) document.documentElement.style.setProperty('--red', t.red);
+
+  // Build grid
+  const g = preset.grid || { cols: 12, rows: 8 };
+  root.style.gridTemplateColumns = `repeat(${g.cols}, 1fr)`;
+  root.style.gridTemplateRows = `repeat(${g.rows}, 1fr)`;
+
+  // Render components
+  preset.components.forEach(comp => {
+    const renderer = renderers[comp.type];
+    if (!renderer) { console.warn('Unknown component type:', comp.type); return; }
+
+    const result = renderer(comp);
+    const cell = result.el;
+    cell.classList.add('cell', `comp-${comp.type}`);
+    cell.style.gridColumn = `${comp.col} / span ${comp.w || 1}`;
+    cell.style.gridRow = `${comp.row} / span ${comp.h || 1}`;
+    cell.dataset.compId = comp.id;
+
+    root.appendChild(cell);
+    state.components[comp.id] = { comp, result };
+  });
+}
+
+/* ══════════════════════════════════════════
+   POLL SIM STATE
+   ══════════════════════════════════════════ */
+
+async function poll() {
+  try {
+    const resp = await fetch(API + '/api/sim-state');
+    const data = await resp.json();
+    const v = data.values || {};
+
+    document.getElementById('sDot').className = 'status-dot' + (data.connected ? ' on' : '');
+    document.getElementById('sTxt').textContent = data.connected ? 'CONNECTED' : 'OFFLINE';
+
+    // Update each component
+    for (const [id, entry] of Object.entries(state.components)) {
+      const { comp, result } = entry;
+      if (!result.update) continue;
+
+      if (comp.type === 'gauge' && comp.dataref && v[comp.dataref] !== undefined) {
+        result.update(v[comp.dataref]);
+      } else if (comp.type === 'toggle' && comp.cmd && v[comp.cmd] !== undefined) {
+        result.update(v[comp.cmd]);
+      } else if (comp.type === 'lever' && comp.cmd && v[comp.cmd] !== undefined) {
+        result.update(v[comp.cmd]);
+      } else if (comp.type === 'magneto' && comp.cmd && v[comp.cmd] !== undefined) {
+        result.update(v[comp.cmd]);
+      }
+    }
+  } catch {}
+  setTimeout(poll, 500);
+}
+
+/* ══════════════════════════════════════════
+   LOAD PRESET & START
+   ══════════════════════════════════════════ */
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const presetName = params.get('preset') || 'cessna-172';
+
+  try {
+    // Try module API first, then legacy API, then static
+    let resp = await fetch(API + `/api/module/cockpit/preset/${presetName}`);
+    if (!resp.ok) resp = await fetch(API + `/api/preset/${presetName}`);
+    if (!resp.ok) resp = await fetch(`presets/${presetName}.json`);
+    if (!resp.ok) throw new Error('Preset not found');
+    const preset = await resp.json();
+    buildCockpit(preset);
+  } catch (e) {
+      document.getElementById('cockpit').innerHTML = `<div style="padding:20px;color:var(--red)">Failed to load preset "${presetName}": ${e.message}</div>`;
+    }
+  }
+  poll();
+}
+
+init();
+
+// PWA — register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

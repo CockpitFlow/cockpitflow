@@ -1,0 +1,142 @@
+{
+  "id": "boeing-747",
+  "name": "Boeing 747-400",
+  "author": "SkyFlow Community",
+  "version": "1.0",
+  "category": "Heavy",
+  "phases": [
+    {
+      "id": "preflight",
+      "name": "Pre-Flight",
+      "items": [
+        { "id": "documents", "label": "Documents & Manuals", "expected": "CHECK", "how_to": "Verify MEL, flight plan, NOTAMs, and aircraft technical log." },
+        { "id": "circuit-breakers", "label": "Circuit Breakers", "expected": "CHECK", "how_to": "All circuit breakers checked in and no tripped breakers." },
+        { "id": "oxygen", "label": "Oxygen", "expected": "CHECK/TEST", "how_to": "Check crew oxygen pressure and test masks." },
+        { "id": "battery", "label": "Battery Switch", "expected": "ON", "how_to": "Battery switch to ON position on overhead panel." },
+        { "id": "ext-power", "label": "External Power", "expected": "CONNECTED", "how_to": "Verify external power connected and available." },
+        { "id": "fuel-quantity", "label": "Fuel Quantity", "expected": "CHECK", "how_to": "Verify fuel quantity matches fuel order and flight plan requirements." },
+        { "id": "irs", "label": "IRS", "expected": "NAV", "how_to": "Set all three IRS selectors to NAV. Alignment takes ~10 minutes." },
+        { "id": "emergency-lights", "label": "Emergency Lights", "expected": "ARMED", "how_to": "Emergency exit lights switch to ARMED." }
+      ]
+    },
+    {
+      "id": "before-start",
+      "name": "Before Start",
+      "items": [
+        { "id": "parking-brake", "label": "Parking Brake", "expected": "SET", "how_to": "Verify parking brake is set." },
+        { "id": "fuel-control", "label": "Fuel Control Switches", "expected": "CUTOFF", "how_to": "All four fuel control switches to CUTOFF." },
+        { "id": "beacon", "label": "Beacon", "expected": "ON", "how_to": "Anti-collision beacon light ON before engine start." },
+        { "id": "hydraulic-demand", "label": "Hydraulic Demand Pumps", "expected": "AUTO", "how_to": "All hydraulic demand pump switches to AUTO." },
+        { "id": "doors", "label": "Doors", "expected": "CLOSED", "how_to": "Verify all doors closed on EICAS door display." },
+        { "id": "pushback", "label": "Pushback Clearance", "expected": "OBTAINED", "how_to": "Request and receive pushback clearance from ground." }
+      ]
+    },
+    {
+      "id": "engine-start",
+      "name": "Engine Start",
+      "items": [
+        { "id": "engine-start-4", "label": "Start Engine 4", "expected": "START", "how_to": "Move engine 4 start switch to START. Monitor N2, EGT, and fuel flow." },
+        { "id": "engine-start-3", "label": "Start Engine 3", "expected": "START", "how_to": "Move engine 3 start switch to START." },
+        { "id": "engine-start-2", "label": "Start Engine 2", "expected": "START", "how_to": "Move engine 2 start switch to START." },
+        { "id": "engine-start-1", "label": "Start Engine 1", "expected": "START", "how_to": "Move engine 1 start switch to START." },
+        { "id": "engine-parameters", "label": "Engine Parameters", "expected": "CHECK", "how_to": "Verify all engines stable: N1, N2, EGT, fuel flow, oil pressure normal." },
+        { "id": "generators", "label": "Generators", "expected": "ON", "how_to": "All four generator switches ON, verify on bus." }
+      ]
+    },
+    {
+      "id": "before-taxi",
+      "name": "Before Taxi",
+      "items": [
+        { "id": "flaps", "label": "Flaps", "expected": "SET", "how_to": "Set flaps to takeoff position (10 or 20 per performance calculation)." },
+        { "id": "trim", "label": "Stabilizer Trim", "expected": "SET", "how_to": "Set stabilizer trim to computed takeoff trim." },
+        { "id": "flight-controls", "label": "Flight Controls", "expected": "CHECK", "how_to": "Full deflection check of ailerons, elevator, and rudder." },
+        { "id": "nosewheel-steering", "label": "Nosewheel Steering", "expected": "ON", "how_to": "Nosewheel steering switch to ON." },
+        { "id": "taxi-clearance", "label": "Taxi Clearance", "expected": "OBTAINED", "how_to": "Request and receive taxi clearance from ground." },
+        { "id": "transponder", "label": "Transponder", "expected": "TA/RA", "how_to": "Set transponder to TA/RA and verify correct squawk code." }
+      ]
+    },
+    {
+      "id": "before-takeoff",
+      "name": "Before Takeoff",
+      "items": [
+        { "id": "takeoff-briefing", "label": "Takeoff Briefing", "expected": "COMPLETE", "how_to": "Review takeoff speeds (V1, VR, V2), departure procedure, and emergency actions." },
+        { "id": "autobrake", "label": "Autobrake", "expected": "RTO", "how_to": "Autobrake selector to RTO." },
+        { "id": "strobe-lights", "label": "Strobe Lights", "expected": "ON", "how_to": "Strobe lights ON." },
+        { "id": "landing-lights", "label": "Landing Lights", "expected": "ON", "how_to": "All landing lights ON." },
+        { "id": "tcas", "label": "TCAS", "expected": "TA/RA", "how_to": "Verify TCAS in TA/RA mode." },
+        { "id": "packs", "label": "Air Conditioning Packs", "expected": "AS REQUIRED", "how_to": "Packs OFF for maximum takeoff performance or ON if runway length permits." }
+      ]
+    },
+    {
+      "id": "takeoff",
+      "name": "Takeoff",
+      "items": [
+        { "id": "thrust", "label": "Thrust Levers", "expected": "TOGA/FLX", "how_to": "Advance thrust levers to TOGA or FLX detent." },
+        { "id": "v1", "label": "V1", "expected": "CALL", "how_to": "PNF calls V1 — commit to takeoff." },
+        { "id": "rotate", "label": "Rotate", "expected": "VR", "how_to": "At VR, smoothly rotate to 10° pitch up." },
+        { "id": "positive-rate", "label": "Positive Rate", "expected": "GEAR UP", "how_to": "On positive rate of climb, call 'Gear Up'." }
+      ]
+    },
+    {
+      "id": "climb",
+      "name": "Climb",
+      "items": [
+        { "id": "gear", "label": "Gear", "expected": "UP", "how_to": "Verify gear up and locked." },
+        { "id": "flaps-retract", "label": "Flaps", "expected": "RETRACT", "how_to": "Retract flaps on schedule." },
+        { "id": "packs-on", "label": "Packs", "expected": "ON", "how_to": "If packs were OFF for takeoff, turn ON." },
+        { "id": "altimeter", "label": "Altimeter", "expected": "SET", "how_to": "Set altimeter to transition altitude/level as required." }
+      ]
+    },
+    {
+      "id": "cruise",
+      "name": "Cruise",
+      "items": [
+        { "id": "altitude", "label": "Cruise Altitude", "expected": "CHECK", "how_to": "Verify at planned cruise altitude." },
+        { "id": "fuel-balance", "label": "Fuel Balance", "expected": "CHECK", "how_to": "Monitor fuel balance between tanks." },
+        { "id": "systems", "label": "Systems", "expected": "MONITOR", "how_to": "Periodic scan of EICAS for any warnings." }
+      ]
+    },
+    {
+      "id": "descent",
+      "name": "Descent",
+      "items": [
+        { "id": "approach-briefing", "label": "Approach Briefing", "expected": "COMPLETE", "how_to": "Brief approach, missed approach, landing runway, weather, and NOTAMs." },
+        { "id": "altimeters", "label": "Altimeters", "expected": "SET", "how_to": "Set QNH when below transition level." },
+        { "id": "landing-data", "label": "Landing Data", "expected": "SET", "how_to": "Enter VREF and landing flap setting in FMC." }
+      ]
+    },
+    {
+      "id": "approach",
+      "name": "Approach",
+      "items": [
+        { "id": "autobrake-land", "label": "Autobrake", "expected": "SET", "how_to": "Set autobrake to desired setting (2, 3, or MAX)." },
+        { "id": "speedbrake", "label": "Speedbrake", "expected": "ARMED", "how_to": "Speedbrake lever to ARMED." },
+        { "id": "gear-down", "label": "Gear", "expected": "DOWN", "how_to": "Landing gear DOWN, three green." },
+        { "id": "flaps-landing", "label": "Flaps", "expected": "SET", "how_to": "Set flaps to landing position (25 or 30)." },
+        { "id": "landing-lights-app", "label": "Landing Lights", "expected": "ON", "how_to": "All landing lights ON." }
+      ]
+    },
+    {
+      "id": "landing",
+      "name": "Landing",
+      "items": [
+        { "id": "touchdown", "label": "Touchdown", "expected": "COMPLETE", "how_to": "Flare and touchdown." },
+        { "id": "reversers", "label": "Thrust Reversers", "expected": "DEPLOY", "how_to": "Deploy thrust reversers after main gear touchdown." },
+        { "id": "spoilers", "label": "Spoilers", "expected": "VERIFY", "how_to": "Verify speedbrakes deployed." },
+        { "id": "reverse-cancel", "label": "Reverse Thrust", "expected": "CANCEL", "how_to": "Cancel reverse thrust at 60 knots." }
+      ]
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "items": [
+        { "id": "parking-brake-set", "label": "Parking Brake", "expected": "SET", "how_to": "Set parking brake." },
+        { "id": "fuel-control-off", "label": "Fuel Control", "expected": "CUTOFF", "how_to": "All four fuel control switches to CUTOFF." },
+        { "id": "beacon-off", "label": "Beacon", "expected": "OFF", "how_to": "Anti-collision beacon OFF." },
+        { "id": "seatbelt-sign", "label": "Seatbelt Sign", "expected": "OFF", "how_to": "Turn off seatbelt sign." },
+        { "id": "apu", "label": "APU", "expected": "AS REQUIRED", "how_to": "Start APU if needed for ground power." },
+        { "id": "ext-power-shut", "label": "External Power", "expected": "CONNECT", "how_to": "Connect external power when available." }
+      ]
+    }
+  ]
+}

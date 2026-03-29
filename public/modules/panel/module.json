@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Live flight instruments — airspeed, altimeter, attitude, heading, VSI, tachometer.",
+  "desktop_only": true,
+  "enabled": false,
+  "icon": "gauge",
+  "id": "panel",
+  "name": "Panel",
+  "order": 1,
+  "version": "1.0.0"
+}

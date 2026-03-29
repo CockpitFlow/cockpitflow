@@ -1,0 +1,11 @@
+{
+  "author": "SkyFlow",
+  "description": "Debug console — sim data, command log, connection status.",
+  "desktop_only": true,
+  "enabled": false,
+  "icon": "terminal",
+  "id": "console",
+  "name": "Console",
+  "order": 8,
+  "version": "1.0.0"
+}

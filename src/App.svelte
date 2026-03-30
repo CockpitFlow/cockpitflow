@@ -267,6 +267,7 @@
   }
   let clPresets = $state<string[]>([]);
   let clActivePreset = $state('cessna-172');
+  let clPresetNames = $state<Record<string, string>>({});
   let clInfo = $state<{ name: string; author: string; version: string; category: string; phases: number; items: number } | null>(null);
 
   async function loadChecklistPresets() {
@@ -279,6 +280,23 @@
           clPresets = cl.presets || [];
           clActivePreset = cl.default_preset || 'cessna-172';
         }
+      }
+    } catch {}
+  }
+
+  async function loadAllPresetNames() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const names: Record<string, string> = {};
+        for (const id of clPresets) {
+          try {
+            const json = await invoke('load_module_preset', { moduleId: 'checklist', presetId: id }) as string;
+            const data = JSON.parse(json);
+            names[id] = data.name || id;
+          } catch { names[id] = id; }
+        }
+        clPresetNames = names;
       }
     } catch {}
   }
@@ -861,7 +879,7 @@
 
   onMount(() => {
     loadDiskModules();
-    loadChecklistPresets().then(() => loadChecklistInfo());
+    loadChecklistPresets().then(() => { loadAllPresetNames(); loadChecklistInfo(); });
     checkUpdates();
     setTimeout(() => generateQR(`http://${lanIp}:8080/checklist`), 2000);
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
@@ -1060,7 +1078,7 @@
               <div class="efb-heading">AIRCRAFT</div>
               <select class="cl-preset-select" style="width:100%;margin-bottom:6px" value={clActivePreset} onchange={(e) => setChecklistPreset((e.target as HTMLSelectElement).value)}>
                 {#each clPresets as p}
-                  <option value={p}>{p}</option>
+                  <option value={p}>{clPresetNames[p] || p}</option>
                 {/each}
               </select>
               {#if clInfo}
@@ -1078,6 +1096,7 @@
                 <button class="cl-mode-btn" class:on={clMode==='strict'} onclick={() => { clMode='strict'; syncSettings(); }}>Strict</button>
                 <button class="cl-mode-btn" class:on={clMode==='smart'} onclick={() => { clMode='smart'; syncSettings(); }}>Smart</button>
               </div>
+              <p class="cl-card-desc">{clMode === 'strict' ? 'Items must be checked in order. Current item highlighted, rest locked until completed.' : 'Check items in any order. More flexible for experienced pilots who know the flow.'}</p>
             </div>
             <div class="cl-card">
               <div class="efb-heading">AUTO-DETECT</div>
@@ -1097,6 +1116,7 @@
                   </div>
                 </div>
               </div>
+              <p class="cl-card-desc">Auto Check marks items when the sim confirms correct state. Feedback shows green/red dots for each item with sim detection.</p>
             </div>
           </div>
 
@@ -2607,6 +2627,7 @@
     cursor: pointer; text-align: center; font-family: inherit; transition: all .1s;
   }
   .cl-mode-btn.on { border-color: var(--color-accent); color: var(--color-accent); background: rgba(74,158,255,.06); }
+  .cl-card-desc { font-size: 10px; color: var(--color-dim); line-height: 1.4; margin-top: 8px; }
   .cl-toggles { display: flex; flex-direction: column; gap: 6px; }
 
   .cl-companion {

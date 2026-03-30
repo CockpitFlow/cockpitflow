@@ -1073,12 +1073,18 @@
               </div>
 
               <div class="efb-heading" style="margin-top:16px">COMPANION APP</div>
-              <p class="cl-hint" style="margin-bottom:6px">Use the CockpitFlow mobile app or open this URL to access the checklist on your phone/tablet.</p>
-              <div class="lan-url-row">
-                <span class="lan-url">http://{lanIp}:8080</span>
-                <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
-                  {lanCopied ? 'COPIED' : 'COPY'}
-                </button>
+              <p class="cl-hint" style="margin-bottom:6px">Scan QR code or open URL on your phone/tablet.</p>
+              <div class="lan-qr-section">
+                <img class="lan-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&bgcolor=0a0e14&color=4a9eff&data={encodeURIComponent(`http://${lanIp}:8080`)}" alt="QR">
+                <div>
+                  <div class="lan-url-row">
+                    <span class="lan-url">http://{lanIp}:8080</span>
+                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
+                      {lanCopied ? 'COPIED' : 'COPY'}
+                    </button>
+                  </div>
+                  <p class="cl-hint" style="margin-top:6px">Same WiFi network required</p>
+                </div>
               </div>
             </div>
           </div>
@@ -2527,8 +2533,10 @@
   .lan-left { flex: 1; display: flex; flex-direction: column; gap: 12px; }
   .lan-right { flex-shrink: 0; display: flex; align-items: flex-start; }
   .lan-desc { font-size: 12px; color: var(--color-dim); line-height: 1.5; margin: 0; }
+  .lan-qr-section { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+  .lan-qr { width: 100px; height: 100px; border-radius: 6px; border: 1px solid var(--color-border); }
   .lan-url-row { display: flex; align-items: center; gap: 8px; }
-  .lan-url { font-family: 'Cascadia Code', monospace; font-size: 16px; font-weight: 700; color: var(--color-accent); }
+  .lan-url { font-family: 'Cascadia Code', monospace; font-size: 14px; font-weight: 700; color: var(--color-accent); }
   .lan-copy { padding: 4px 12px; background: none; border: 1px solid var(--color-border); color: var(--color-dim); border-radius: 3px; font-family: 'Cascadia Code', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .1s; }
   .lan-copy:hover { border-color: var(--color-accent); color: var(--color-accent); }
   .lan-info { display: flex; flex-direction: column; gap: 4px; }

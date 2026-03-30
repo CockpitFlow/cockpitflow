@@ -293,8 +293,10 @@
           try {
             const json = await invoke('load_module_preset', { moduleId: 'checklist', presetId: id }) as string;
             const data = JSON.parse(json);
-            const author = data.author && data.author !== 'CockpitFlow' ? ` — ${data.author}` : '';
-            names[id] = (data.name || id) + author;
+            const name = data.name || id;
+            const author = data.author || 'Unknown';
+            const ver = data.version || '1.0';
+            names[id] = `${name} (${author} v${ver})`;
           } catch { names[id] = id; }
         }
         clPresetNames = names;

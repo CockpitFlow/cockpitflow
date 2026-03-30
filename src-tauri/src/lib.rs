@@ -37,6 +37,7 @@ struct CaptureData(String);
 struct OverlayData(String);
 type CaptureState = Arc<Mutex<CaptureData>>;
 type OverlayState = Arc<Mutex<OverlayData>>;
+type ChecklistProgress = Arc<Mutex<HashMap<String, bool>>>; // item_id → checked
 
 #[derive(Serialize, Deserialize, Clone)]
 struct GaugeData {
@@ -577,6 +578,7 @@ fn handle_request(
     settings: &SettingsState,
     capture: &CaptureState,
     overlay: &OverlayState,
+    checklist_progress: &ChecklistProgress,
     dist_dir: &std::path::Path,
 ) -> tiny_http::ResponseBox {
     let url = request.url().to_string();
@@ -823,6 +825,57 @@ fn handle_request(
                     .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
                     .boxed()
             }
+        },
+        "/api/checklist-progress" => {
+            if *request.method() == tiny_http::Method::Get {
+                let progress = checklist_progress.lock().unwrap();
+                let json = serde_json::json!(&*progress);
+                tiny_http::Response::from_string(json.to_string())
+                    .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                    .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
+                    .boxed()
+            } else if *request.method() == tiny_http::Method::Post {
+                let mut body = String::new();
+                request.as_reader().read_to_string(&mut body).ok();
+                if let Ok(data) = serde_json::from_str::<HashMap<String, bool>>(&body) {
+                    let mut progress = checklist_progress.lock().unwrap();
+                    *progress = data;
+                }
+                tiny_http::Response::from_string("{\"ok\":true}")
+                    .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                    .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
+                    .boxed()
+            } else {
+                tiny_http::Response::from_string("{}")
+                    .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                    .boxed()
+            }
+        },
+        "/api/checklist-check" => {
+            // Single item check/uncheck: POST {"id":"master-switch","checked":true}
+            let mut body = String::new();
+            request.as_reader().read_to_string(&mut body).ok();
+            if let Ok(data) = serde_json::from_str::<serde_json::Value>(&body) {
+                let id = data["id"].as_str().unwrap_or("").to_string();
+                let is_checked = data["checked"].as_bool().unwrap_or(false);
+                let mut progress = checklist_progress.lock().unwrap();
+                if is_checked {
+                    progress.insert(id, true);
+                } else {
+                    progress.remove(&id);
+                }
+            }
+            tiny_http::Response::from_string("{\"ok\":true}")
+                .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
+                .boxed()
+        },
+        "/api/checklist-reset" => {
+            checklist_progress.lock().unwrap().clear();
+            tiny_http::Response::from_string("{\"ok\":true}")
+                .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
+                .boxed()
         },
         "/api/active-checklist" => {
             let s = settings.lock().unwrap();
@@ -1148,29 +1201,33 @@ fn serve_loop(
     settings: SettingsState,
     capture: CaptureState,
     overlay: OverlayState,
+    checklist_progress: ChecklistProgress,
     dist_dir: std::path::PathBuf,
 ) {
     for mut request in server.incoming_requests() {
         let response = handle_request(
-            &mut request, &sim_state, &settings, &capture, &overlay, &dist_dir,
+            &mut request, &sim_state, &settings, &capture, &overlay, &checklist_progress, &dist_dir,
         );
         let _ = request.respond(response);
     }
 }
 
 fn start_http_server(sim_state: SimState, settings: SettingsState, capture: CaptureState, overlay: OverlayState, dist_dir: std::path::PathBuf) {
+    let cl_progress: ChecklistProgress = Arc::new(Mutex::new(HashMap::new()));
+
     // HTTP on port 8080
-    let (sim1, set1, cap1, ov1, dir1) = (sim_state.clone(), settings.clone(), capture.clone(), overlay.clone(), dist_dir.clone());
+    let (sim1, set1, cap1, ov1, cl1, dir1) = (sim_state.clone(), settings.clone(), capture.clone(), overlay.clone(), cl_progress.clone(), dist_dir.clone());
     std::thread::spawn(move || {
         let server = match tiny_http::Server::http("0.0.0.0:8080") {
             Ok(s) => s,
             Err(e) => { eprintln!("[HTTP] Failed to start: {}", e); return; }
         };
         eprintln!("[HTTP] Serving on port 8080");
-        serve_loop(server, sim1, set1, cap1, ov1, dir1);
+        serve_loop(server, sim1, set1, cap1, ov1, cl1, dir1);
     });
 
     // HTTPS on port 8443 (for gyroscope access from mobile devices)
+    let cl2 = cl_progress.clone();
     std::thread::spawn(move || {
         let (cert_pem, key_pem) = generate_self_signed_cert();
         let ssl_config = tiny_http::SslConfig {
@@ -1182,7 +1239,7 @@ fn start_http_server(sim_state: SimState, settings: SettingsState, capture: Capt
             Err(e) => { eprintln!("[HTTPS] Failed to start: {}", e); return; }
         };
         eprintln!("[HTTPS] Serving on port 8443 (accept cert warning on phone for gyro)");
-        serve_loop(server, sim_state, settings, capture, overlay, dist_dir);
+        serve_loop(server, sim_state, settings, capture, overlay, cl2, dist_dir);
     });
 }
 

@@ -100,8 +100,27 @@ let phaseTimers = {}; // {phaseId: startTime}
 let voiceEnabled = false;
 let lastPhaseDone = {};
 
-function saveChecked(id) { localStorage.setItem('cockpitflow_cl_' + id, JSON.stringify(checked)); }
-function loadChecked(id) { try { checked = JSON.parse(localStorage.getItem('cockpitflow_cl_' + id) || '{}'); } catch { checked = {}; } }
+function saveChecked(id) {
+  localStorage.setItem('cockpitflow_cl_' + id, JSON.stringify(checked));
+  // Sync to server for multi-crew
+  fetch(API + '/api/checklist-progress', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(checked),
+  }).catch(() => {});
+}
+function loadChecked(id) {
+  try { checked = JSON.parse(localStorage.getItem('cockpitflow_cl_' + id) || '{}'); } catch { checked = {}; }
+  // Also load from server (other crew may have checked items)
+  fetch(API + '/api/checklist-progress').then(r => r.json()).then(server => {
+    if (server && typeof server === 'object') {
+      let changed = false;
+      for (const [k, v] of Object.entries(server)) {
+        if (v && !checked[k]) { checked[k] = true; changed = true; }
+      }
+      if (changed) { localStorage.setItem('cockpitflow_cl_' + id, JSON.stringify(checked)); renderChecklist(); }
+    }
+  }).catch(() => {});
+}
 
 // ═══ SOUNDS ═══
 function playSound(type) {
@@ -325,7 +344,12 @@ function renderChecklist() {
 
   const nb = document.getElementById('nextPhase');
   if (nb) nb.addEventListener('click', () => { currentPhase++; phaseChanged = true; renderChecklist(); });
-  document.getElementById('resetBtn')?.addEventListener('click', () => { checked = {}; undoStack = []; phaseTimers = {}; lastPhaseDone = {}; saveChecked(checklist._id); renderChecklist(); });
+  document.getElementById('resetBtn')?.addEventListener('click', () => {
+    checked = {}; undoStack = []; phaseTimers = {}; lastPhaseDone = {};
+    saveChecked(checklist._id);
+    fetch(API + '/api/checklist-reset', { method: 'POST' }).catch(() => {});
+    renderChecklist();
+  });
   document.getElementById('undoBtn')?.addEventListener('click', () => {
     const last = undoStack.pop();
     if (last) {
@@ -392,7 +416,27 @@ function startPoll() {
       });
     } catch {}
 
+    // Sync checklist progress from server (multi-crew)
     settingsSyncCount++;
+    if (settingsSyncCount % 2 === 0) {
+      try {
+        const r = await fetch(API + '/api/checklist-progress');
+        if (r.ok) {
+          const server = await r.json();
+          let changed = false;
+          for (const [k, v] of Object.entries(server)) {
+            if (v && !checked[k]) { checked[k] = true; changed = true; }
+          }
+          // Also detect unchecks from other crew
+          for (const k of Object.keys(checked)) {
+            if (checked[k] && server[k] === undefined) { delete checked[k]; changed = true; }
+          }
+          if (changed) { localStorage.setItem('cockpitflow_cl_' + checklist._id, JSON.stringify(checked)); renderChecklist(); }
+        }
+      } catch {}
+    }
+
+    // Sync settings from desktop
     if (settingsSyncCount % 3 === 0) {
       try {
         const r = await fetch(API + '/api/settings');

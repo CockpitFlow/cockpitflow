@@ -13,6 +13,7 @@
   import AircraftSilhouette from './lib/gauges/AircraftSilhouette.svelte';
   import Toast from './lib/gauges/Toast.svelte';
   import Marketplace from './lib/Marketplace.svelte';
+  import QRCode from 'qrcode';
   import {
     Home, Gauge, ClipboardList, Target, BarChart3, Navigation,
     Cpu, Terminal, BookOpen, Settings, Users, ExternalLink, Menu,
@@ -237,6 +238,17 @@
   let clMode = $state<'strict' | 'smart'>('smart');
   let clAutoCheck = $state<'on' | 'off'>('on');
   let clFeedback = $state<'on' | 'off'>('on');
+
+  let qrDataUrl = $state('');
+  async function generateQR(url: string) {
+    try {
+      qrDataUrl = await QRCode.toDataURL(url, {
+        width: 140,
+        margin: 1,
+        color: { dark: '#4a9eff', light: '#0a0e14' },
+      });
+    } catch {}
+  }
 
   async function syncSettings() {
     try {
@@ -829,6 +841,7 @@
     loadDiskModules();
     loadChecklistPresets();
     checkUpdates();
+    setTimeout(() => generateQR(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`), 2000);
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
     const ci = setInterval(tick, 1000);
     const poll = setInterval(async () => {
@@ -1075,7 +1088,11 @@
               <div class="efb-heading" style="margin-top:16px">OPEN ON PHONE / TABLET</div>
 
               <div class="lan-qr-section">
-                <img class="lan-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&bgcolor=0a0e14&color=4a9eff&data={encodeURIComponent(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`)}" alt="QR">
+                {#if qrDataUrl}
+                  <img class="lan-qr" src={qrDataUrl} alt="QR Code">
+                {:else}
+                  <div class="lan-qr" style="display:flex;align-items:center;justify-content:center;color:var(--color-dim);font-size:10px">QR</div>
+                {/if}
                 <div>
                   <div class="cl-hint" style="margin-bottom:6px"><strong style="color:var(--color-fg)">Browser / Web</strong> — scan or open:</div>
                   <div class="lan-url-row">

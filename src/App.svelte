@@ -51,8 +51,6 @@
     { id: 'debrief', name: 'Debrief', icon: 'chart', enabled: true, order: 5 },
     { id: 'nav', name: 'Nav', icon: 'navigation', enabled: true, order: 6 },
     { id: 'hardware', name: 'Hardware', icon: 'cpu', enabled: true, order: 7 },
-    { id: 'console', name: 'Console', icon: 'terminal', enabled: true, order: 8 },
-    { id: 'logbook', name: 'Logbook', icon: 'book', enabled: true, order: 9 },
     { id: 'flight', name: 'Flight', icon: 'route', enabled: true, order: 10 },
     { id: 'community', name: 'Community', icon: 'users', enabled: true, order: 11 },
   ];
@@ -233,9 +231,20 @@
   let allLandings = $state(loadAllLandings());
   $effect(() => { try { localStorage.setItem('sf-landings', JSON.stringify(allLandings)); } catch {} });
 
+  // Landing grade based on vertical speed
+  function landingGrade(rate: number): { grade: string; color: string } {
+    const abs = Math.abs(rate);
+    if (abs <= 60) return { grade: 'BUTTER', color: 'var(--color-green)' };
+    if (abs <= 120) return { grade: 'SMOOTH', color: 'var(--color-green)' };
+    if (abs <= 200) return { grade: 'GOOD', color: 'var(--color-accent)' };
+    if (abs <= 300) return { grade: 'FIRM', color: 'var(--color-yellow)' };
+    if (abs <= 500) return { grade: 'HARD', color: 'var(--color-red)' };
+    return { grade: 'CRASH', color: 'var(--color-red)' };
+  }
+
   // Save touchdown to persistent history
-  function saveTouchdown(td: { rate: number; speed: number; time: string }) {
-    allLandings = [...allLandings, { ...td, date: new Date().toISOString().slice(0, 10) }];
+  function saveTouchdown(td: any) {
+    allLandings = [...allLandings, td];
   }
   let lanIp = $state('...');
   let lanCopied = $state(false);
@@ -998,7 +1007,18 @@
           if (ias > 0 && ias < 45) stallWarnings++;
           // Touchdown detection
           if (lastOnGround === false && onGround === true && Math.abs(vs) > 10) {
-            const td = { rate: vs, speed: ias, time: new Date().toISOString().slice(11, 19) };
+            const td = {
+              rate: vs,
+              speed: ias,
+              gforce: gforce,
+              heading: d?.heading ?? 0,
+              altitude: alt,
+              bank: bank,
+              wind: d?.wind_speed ?? 0,
+              time: new Date().toISOString().slice(11, 19),
+              date: new Date().toISOString().slice(0, 10),
+              aircraft: navActivePreset || clActivePreset || 'unknown',
+            };
             touchdowns = [...touchdowns, td];
             saveTouchdown(td);
             landingRate = vs;
@@ -1375,7 +1395,7 @@
       {:else if active === 'debrief'}
         <div class="efb-panel">
           <div class="efb-tabs">
-            {#each [['summary','Summary'],['landing','Landing'],['envelope','Envelope'],['score','Score']] as [id,label]}
+            {#each [['summary','Summary'],['landing','Landing'],['envelope','Envelope'],['score','Score'],['history','History']] as [id,label]}
               <button class="efb-tab" class:efb-tab-on={debriefTab===id} onclick={() => debriefTab=id}>{label}</button>
             {/each}
             <div class="efb-tab-spacer"></div>
@@ -1889,15 +1909,6 @@
             {/if}
           </div>
         </div>
-
-      {:else if active === 'console'}
-        <div class="card console-card"><div class="console-grid">{#each Object.entries(simData||{}).filter(([k])=>k!=='connected') as [k,v]}<div class="con-row"><span class="con-key">{k}</span><span class="con-val" class:con-live={v!==0&&v!==''}>{typeof v==='number'?(v as number).toFixed(4):v}</span></div>{/each}
-          {#if Object.keys(simData||{}).length<=1}<div class="v-center" style="grid-column:1/-1;padding:40px 0"><Terminal size={28} strokeWidth={1} /><p>Connect simulator for data</p></div>{/if}
-        </div></div>
-
-      {:else if active === 'logbook'}
-        {#if logEntries.length===0}<div class="v-center"><BookOpen size={32} strokeWidth={1} /><p>No flights recorded yet</p></div>
-        {:else}<div class="card flex-1"><table class="tbl"><thead><tr><th>#</th><th>DATE</th><th>DURATION</th><th>ALT</th></tr></thead><tbody>{#each logEntries as e,i}<tr><td class="td-accent">{i+1}</td><td>{new Date(e.start).toLocaleDateString()}</td><td>{e.duration}m</td><td>{e.maxAlt?.toFixed(0)??'--'}ft</td></tr>{/each}</tbody></table></div>{/if}
 
       {:else if active === 'flight'}
         <div class="efb-panel">

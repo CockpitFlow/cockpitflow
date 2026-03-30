@@ -462,7 +462,12 @@
 
   async function setNavPreset(preset: string) {
     navActivePreset = preset;
-    await invoke('update_module', { moduleId: 'nav', field: 'default_preset', value: preset });
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('update_module', { moduleId: 'nav', field: 'default_preset', value: preset });
+      }
+    } catch {}
     loadNavData();
   }
 
@@ -1534,7 +1539,7 @@
           <!-- Aircraft selector -->
           <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--color-border)">
             <span class="efb-heading" style="margin:0">AIRCRAFT</span>
-            <select class="cl-preset-select" style="min-width:200px" value={navActivePreset} onchange={(e) => { navActivePreset = (e.target as HTMLSelectElement).value; loadNavData(); }}>
+            <select class="cl-preset-select" style="min-width:200px" value={navActivePreset} onchange={(e) => setNavPreset((e.target as HTMLSelectElement).value)}>
               {#each navPresets as p}
                 <option value={p}>{navPresetNames[p] || p}</option>
               {/each}

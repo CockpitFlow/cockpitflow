@@ -1,5 +1,5 @@
 {
-  "author": "SkyFlow",
+  "author": "CockpitFlow",
   "description": "Live flight instruments — airspeed, altimeter, attitude, heading, VSI, tachometer.",
   "desktop_only": true,
   "enabled": false,

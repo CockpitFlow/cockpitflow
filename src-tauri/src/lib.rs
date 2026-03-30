@@ -362,6 +362,91 @@ fn save_preset(name: String, data: String) -> Result<(), String> {
     Err("No presets directory found".into())
 }
 
+#[tauri::command]
+async fn check_for_updates() -> Result<serde_json::Value, String> {
+    let current = env!("CARGO_PKG_VERSION");
+
+    // Fetch latest release from GitHub
+    let url = "https://api.github.com/repos/CockpitFlow/cockpitflow/releases/latest";
+
+    let client = std::thread::spawn(move || -> Result<String, String> {
+        let resp = ureq_minimal_get(url)?;
+        Ok(resp)
+    });
+
+    match client.join() {
+        Ok(Ok(body)) => {
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&body) {
+                let latest = json["tag_name"].as_str().unwrap_or("").trim_start_matches('v');
+                let update_available = version_newer(latest, current);
+                let download_url = json["html_url"].as_str().unwrap_or("").to_string();
+                let changelog = json["body"].as_str().unwrap_or("").to_string();
+
+                Ok(serde_json::json!({
+                    "current": current,
+                    "latest": latest,
+                    "update_available": update_available,
+                    "download_url": download_url,
+                    "changelog": changelog,
+                }))
+            } else {
+                Ok(serde_json::json!({
+                    "current": current,
+                    "latest": current,
+                    "update_available": false,
+                }))
+            }
+        }
+        _ => Ok(serde_json::json!({
+            "current": current,
+            "latest": current,
+            "update_available": false,
+        }))
+    }
+}
+
+/// Simple HTTP GET without external deps (uses std::net)
+fn ureq_minimal_get(url: &str) -> Result<String, String> {
+    use std::io::{Read, Write};
+    use std::net::TcpStream;
+
+    // Parse URL
+    let url = url.strip_prefix("https://").ok_or("Not HTTPS")?;
+    let (host, path) = url.split_once('/').ok_or("Bad URL")?;
+
+    // Connect with TLS via native-tls or rustls — but we don't have those deps.
+    // Simpler: shell out to curl/powershell
+    let output = std::process::Command::new("powershell")
+        .args(["-Command", &format!(
+            "(Invoke-WebRequest -Uri 'https://{}' -UseBasicParsing -Headers @{{'User-Agent'='CockpitFlow'}}).Content",
+            format!("{}/{}", host, path)
+        )])
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        String::from_utf8(output.stdout).map_err(|e| e.to_string())
+    } else {
+        Err("HTTP request failed".into())
+    }
+}
+
+/// Compare semver: is `latest` newer than `current`?
+fn version_newer(latest: &str, current: &str) -> bool {
+    let parse = |v: &str| -> Vec<u32> {
+        v.split('.').filter_map(|s| s.parse().ok()).collect()
+    };
+    let l = parse(latest);
+    let c = parse(current);
+    for i in 0..3 {
+        let lv = l.get(i).copied().unwrap_or(0);
+        let cv = c.get(i).copied().unwrap_or(0);
+        if lv > cv { return true; }
+        if lv < cv { return false; }
+    }
+    false
+}
+
 fn module_base_dirs() -> Vec<std::path::PathBuf> {
     let cwd = std::env::current_dir().unwrap_or_default();
     let exe_dir = std::env::current_exe().ok()
@@ -565,7 +650,7 @@ fn handle_request(
                 if !modules.is_empty() { break; }
             }
             let json = serde_json::json!({
-                "app": "SkyFlow",
+                "app": "CockpitFlow",
                 "version": "1.0.0",
                 "modules": modules
             });
@@ -1414,7 +1499,7 @@ pub fn run() {
         .manage(settings)
         .manage(capture)
         .manage(overlay)
-        .invoke_handler(tauri::generate_handler![get_gauge_data, send_command, get_local_ip, get_settings, set_settings, list_sim_windows, capture_window, capture_screen_region, store_capture, store_overlay, list_presets, load_preset, save_preset, list_modules, update_module, load_module_preset, save_module_preset, delete_module_preset])
+        .invoke_handler(tauri::generate_handler![get_gauge_data, send_command, get_local_ip, get_settings, set_settings, list_sim_windows, capture_window, capture_screen_region, store_capture, store_overlay, list_presets, load_preset, save_preset, list_modules, update_module, load_module_preset, save_module_preset, delete_module_preset, check_for_updates])
         .setup(move |app| {
             start_xplane(sim_clone, app.handle().clone());
             start_arduino_reader(app.handle().clone());

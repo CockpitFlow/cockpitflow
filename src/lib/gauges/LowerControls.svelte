@@ -271,7 +271,7 @@
   </defs>
 
   <!-- Branding -->
-  <text x="690" y="192" fill="#333" font-size="6" text-anchor="end" font-style="italic">SkyFlow</text>
+  <text x="690" y="192" fill="#333" font-size="6" text-anchor="end" font-style="italic">CockpitFlow</text>
 </svg>
 
 <style>

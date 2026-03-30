@@ -12,10 +12,11 @@
   import LiveMonitor from './lib/gauges/LiveMonitor.svelte';
   import AircraftSilhouette from './lib/gauges/AircraftSilhouette.svelte';
   import Toast from './lib/gauges/Toast.svelte';
+  import Marketplace from './lib/Marketplace.svelte';
   import {
     Home, Gauge, ClipboardList, Target, BarChart3, Navigation,
     Cpu, Terminal, BookOpen, Settings, Users, ExternalLink, Menu,
-    PanelLeftClose, PanelLeft, Route, Smartphone, Crosshair, Package
+    PanelLeftClose, PanelLeft, Route, Smartphone, Crosshair, Package, ShoppingBag
   } from 'lucide-svelte';
   import logo from './assets/logo.png';
   import CockpitBuilder from './lib/CockpitBuilder.svelte';
@@ -26,7 +27,7 @@
     home: Home, gauge: Gauge, clipboard: ClipboardList, target: Target,
     chart: BarChart3, navigation: Navigation, cpu: Cpu, terminal: Terminal,
     book: BookOpen, route: Route, users: Users, smartphone: Smartphone,
-    crosshair: Crosshair, package: Package,
+    crosshair: Crosshair, package: Package, store: ShoppingBag,
   };
 
   interface ModuleInfo {
@@ -56,6 +57,7 @@
     { id: 'logbook', name: 'Logbook', icon: 'book', enabled: true, order: 9 },
     { id: 'flight', name: 'Flight', icon: 'route', enabled: true, order: 10 },
     { id: 'community', name: 'Community', icon: 'users', enabled: true, order: 11 },
+    { id: 'marketplace', name: 'Marketplace', icon: 'store', enabled: true, order: 12 },
   ];
 
   // Combined sidebar: home + enabled modules (from disk or fallback) + module manager
@@ -74,6 +76,19 @@
   let active = $state('home');
   let collapsed = $state(false);
   let panelTab = $state('gauges');
+
+  // Update check
+  let updateInfo = $state<{ update_available: boolean; current: string; latest: string; download_url: string; changelog: string } | null>(null);
+  let updateDismissed = $state(false);
+
+  async function checkUpdates() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        updateInfo = await invoke('check_for_updates') as any;
+      }
+    } catch {}
+  }
 
   // Load modules from disk via Tauri invoke
   async function loadDiskModules() {
@@ -797,6 +812,7 @@
   onMount(() => {
     loadDiskModules();
     loadChecklistPresets();
+    checkUpdates();
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
     const ci = setInterval(tick, 1000);
     const poll = setInterval(async () => {
@@ -895,6 +911,15 @@
 </script>
 
 <Toast />
+
+{#if updateInfo?.update_available && !updateDismissed}
+  <div class="update-banner">
+    <span>CockpitFlow <strong>v{updateInfo.latest}</strong> is available (you have v{updateInfo.current})</span>
+    <a href={updateInfo.download_url} target="_blank" class="update-btn">Download</a>
+    <button class="update-dismiss" onclick={() => updateDismissed = true}>&times;</button>
+  </div>
+{/if}
+
 <div class="shell">
   <!-- SIDEBAR -->
   <nav class="sidebar" class:collapsed>
@@ -952,7 +977,7 @@
             </div>
             <div class="sep"></div>
             <div class="label">LINKS</div>
-            <a href="https://discord.gg/skyflow" target="_blank" class="link-btn discord">
+            <a href="https://discord.gg/cockpitflow" target="_blank" class="link-btn discord">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.8 19.8 0 00-4.885-1.515.07.07 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.3 18.3 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.08.08 0 00-.079-.037A19.7 19.7 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 00.031.057 19.9 19.9 0 005.993 3.03.08.08 0 00.084-.028 14.1 14.1 0 001.226-1.994.08.08 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.08.08 0 01-.008-.128c.125-.094.25-.192.372-.292a.07.07 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.07.07 0 01.078.01c.12.1.246.198.373.292a.08.08 0 01-.006.127c-.598.35-1.22.645-1.873.892a.08.08 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.08.08 0 00.084.028 19.8 19.8 0 006.002-3.03.08.08 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 00-.031-.03z"/></svg>
               <span>Discord</span><ExternalLink size={11} />
             </a>
@@ -1954,8 +1979,8 @@
               <div class="efb-2col">
                 <div class="efb-section">
                   <div class="efb-heading">LINKS</div>
-                  <a href="https://discord.gg/skyflow" target="_blank" class="link-btn discord"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.8 19.8 0 00-4.885-1.515.07.07 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.3 18.3 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.08.08 0 00-.079-.037A19.7 19.7 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 00.031.057 19.9 19.9 0 005.993 3.03.08.08 0 00.084-.028 14.1 14.1 0 001.226-1.994.08.08 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.08.08 0 01-.008-.128c.125-.094.25-.192.372-.292a.07.07 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.07.07 0 01.078.01c.12.1.246.198.373.292a.08.08 0 01-.006.127c-.598.35-1.22.645-1.873.892a.08.08 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.08.08 0 00.084.028 19.8 19.8 0 006.002-3.03.08.08 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 00-.031-.03z"/></svg><span>Discord Server</span><ExternalLink size={12} /></a>
-                  <a href="https://github.com/skyflow" target="_blank" class="link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.6 9.6 0 0112 6.844a9.6 9.6 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg><span>GitHub</span><ExternalLink size={12} /></a>
+                  <a href="https://discord.gg/cockpitflow" target="_blank" class="link-btn discord"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.8 19.8 0 00-4.885-1.515.07.07 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.3 18.3 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.08.08 0 00-.079-.037A19.7 19.7 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 00.031.057 19.9 19.9 0 005.993 3.03.08.08 0 00.084-.028 14.1 14.1 0 001.226-1.994.08.08 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.08.08 0 01-.008-.128c.125-.094.25-.192.372-.292a.07.07 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.07.07 0 01.078.01c.12.1.246.198.373.292a.08.08 0 01-.006.127c-.598.35-1.22.645-1.873.892a.08.08 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.08.08 0 00.084.028 19.8 19.8 0 006.002-3.03.08.08 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 00-.031-.03z"/></svg><span>Discord Server</span><ExternalLink size={12} /></a>
+                  <a href="https://github.com/cockpitflow" target="_blank" class="link-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.6 9.6 0 0112 6.844a9.6 9.6 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg><span>GitHub</span><ExternalLink size={12} /></a>
                 </div>
                 <div class="efb-section">
                   <div class="efb-heading">WEBHOOK</div>
@@ -1985,12 +2010,15 @@
                 <div class="efb-section">
                   <div class="efb-heading">EXPORT</div>
                   <button class="btn-action" onclick={() => { navigator.clipboard.writeText(`CockpitFlow Stats | ${pilotCallsign}\nLandings: ${allLandings.length}\nBest: ${allLandings.length ? Math.min(...allLandings.map(l => Math.abs(l.rate))).toFixed(0) : '—'} fpm\nButter rate: ${allLandings.length ? Math.round(allLandings.filter(l => Math.abs(l.rate) < 60).length / allLandings.length * 100) : 0}%`); }}>COPY STATS TO CLIPBOARD</button>
-                  <button class="btn-action" style="margin-top:6px;background:none;border:1px solid var(--color-border);color:var(--color-fg)" onclick={() => { const csv = 'Rate,Speed,Time,Date\n' + allLandings.map(l => `${l.rate},${l.speed},${l.time},${l.date}`).join('\n'); const blob = new Blob([csv],{type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'skyflow-landings.csv'; a.click(); }}>EXPORT LANDINGS CSV</button>
+                  <button class="btn-action" style="margin-top:6px;background:none;border:1px solid var(--color-border);color:var(--color-fg)" onclick={() => { const csv = 'Rate,Speed,Time,Date\n' + allLandings.map(l => `${l.rate},${l.speed},${l.time},${l.date}`).join('\n'); const blob = new Blob([csv],{type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cockpitflow-landings.csv'; a.click(); }}>EXPORT LANDINGS CSV</button>
                 </div>
               </div>
             {/if}
           </div>
         </div>
+
+      {:else if active === 'marketplace'}
+        <Marketplace />
 
       {:else if active === '_modules'}
         <ModuleManager {lanIp} onRefresh={loadDiskModules} />
@@ -2009,6 +2037,27 @@
 
 <style>
   /* LAYOUT */
+  /* Update banner */
+  .update-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; background: rgba(74,158,255,.1);
+    border-bottom: 1px solid rgba(74,158,255,.2);
+    font-size: 12px; color: var(--color-fg);
+  }
+  .update-banner strong { color: var(--color-accent); }
+  .update-btn {
+    padding: 4px 12px; background: var(--color-accent); color: #fff;
+    border-radius: 4px; font-size: 11px; font-weight: 600;
+    text-decoration: none;
+  }
+  .update-dismiss {
+    margin-left: auto; background: none; border: none;
+    color: var(--color-dim); font-size: 16px; cursor: pointer;
+    padding: 2px 6px;
+  }
+  .update-dismiss:hover { color: var(--color-fg); }
+
   .shell { display: flex; width: 100%; height: 100%; overflow: hidden; }
   .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
   .view { flex: 1; overflow: hidden; padding: 8px; display: flex; }

@@ -254,7 +254,7 @@
   {/each}
 
   <!-- Branding -->
-  <text x="905" y="200" fill="#333" font-size="6" text-anchor="end" font-style="italic">SkyFlow</text>
+  <text x="905" y="200" fill="#333" font-size="6" text-anchor="end" font-style="italic">CockpitFlow</text>
 </svg>
 
 <style>

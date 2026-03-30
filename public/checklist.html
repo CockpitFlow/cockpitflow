@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>SkyFlow Checklist</title>
+<title>CockpitFlow Checklist</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap');
 :root {
@@ -227,8 +227,8 @@ let checklist = null, currentPhase = 0, checked = {};
 let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on' };
 let simValues = {}, defaultChecklist = 'cessna-172';
 
-function saveChecked(id) { localStorage.setItem('skyflow_cl_' + id, JSON.stringify(checked)); }
-function loadChecked(id) { try { checked = JSON.parse(localStorage.getItem('skyflow_cl_' + id) || '{}'); } catch { checked = {}; } }
+function saveChecked(id) { localStorage.setItem('cockpitflow_cl_' + id, JSON.stringify(checked)); }
+function loadChecked(id) { try { checked = JSON.parse(localStorage.getItem('cockpitflow_cl_' + id) || '{}'); } catch { checked = {}; } }
 
 /* ═══ SCREENS ═══ */
 function showScreen(id) {

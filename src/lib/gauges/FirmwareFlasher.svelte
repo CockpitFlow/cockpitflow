@@ -124,7 +124,7 @@
 <div class="card">
   <h3>Firmware Installer</h3>
   <p style="font-size: 12px; color: var(--text-secondary); margin-top: -8px; margin-bottom: 16px;">
-    Flash SkyFlow firmware, configure WiFi, and set a custom device name.
+    Flash CockpitFlow firmware, configure WiFi, and set a custom device name.
   </p>
 
   <!-- Step 1: Port -->

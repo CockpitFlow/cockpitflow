@@ -1,6 +1,6 @@
 {
-  "name": "SkyFlow Cockpit",
-  "short_name": "SkyFlow",
+  "name": "CockpitFlow Cockpit",
+  "short_name": "CockpitFlow",
   "description": "Flight simulator cockpit companion",
   "id": "/cockpit2.html",
   "start_url": "/cockpit2.html",

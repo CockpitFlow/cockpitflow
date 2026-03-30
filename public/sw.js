@@ -1,4 +1,4 @@
-const CACHE = 'skyflow-v1';
+const CACHE = 'cockpitflow-v1';
 const PRECACHE = [
   '/cockpit2.html',
   '/manifest.json',

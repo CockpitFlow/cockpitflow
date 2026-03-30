@@ -6,5 +6,5 @@
   <line x1="256" y1="270" x2="256" y2="310" stroke="#4a9eff" stroke-width="3" opacity=".5"/>
   <line x1="156" y1="210" x2="196" y2="210" stroke="#4a9eff" stroke-width="3" opacity=".5"/>
   <line x1="316" y1="210" x2="356" y2="210" stroke="#4a9eff" stroke-width="3" opacity=".5"/>
-  <text x="256" y="410" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="700" letter-spacing="8" fill="#4a9eff">SKYFLOW</text>
+  <text x="256" y="410" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="700" letter-spacing="8" fill="#4a9eff">COCKPITFLOW</text>
 </svg>

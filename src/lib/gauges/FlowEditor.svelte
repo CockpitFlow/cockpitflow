@@ -238,13 +238,13 @@
   // ── Persistence ────────────────────────────────────────────────────
   function saveFlow() {
     const flow: Flow = { nodes: $state.snapshot(nodes), wires: $state.snapshot(wires) };
-    localStorage.setItem('skyflow-flows', JSON.stringify(flow));
+    localStorage.setItem('cockpitflow-flows', JSON.stringify(flow));
     onSave(flow);
   }
 
   function loadFlow() {
     try {
-      const raw = localStorage.getItem('skyflow-flows');
+      const raw = localStorage.getItem('cockpitflow-flows');
       if (raw) {
         const flow: Flow = JSON.parse(raw);
         nodes = flow.nodes || [];

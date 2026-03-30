@@ -1,0 +1,381 @@
+/*
+ * CockpitFlow Theme — Single source of truth
+ * Used by: desktop app, mobile app, cockpit renderer, checklist renderer, website
+ *
+ * Include: <link rel="stylesheet" href="/cf-theme.css">
+ * Or:      @import url('/cf-theme.css');
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════ TOKENS ═══════════════════ */
+:root {
+  /* Colors */
+  --cf-bg: #0a0e14;
+  --cf-surface: #0f1319;
+  --cf-surface2: #141a22;
+  --cf-border: #1e2736;
+  --cf-text: #b8c4d0;
+  --cf-text-bright: #e2e8f0;
+  --cf-dim: #4e5c6e;
+  --cf-dark: #3a3d44;
+  --cf-accent: #4a9eff;
+  --cf-green: #34d058;
+  --cf-red: #ea4a5a;
+  --cf-amber: #e3b341;
+
+  /* Fonts */
+  --cf-font-body: 'Inter', -apple-system, system-ui, sans-serif;
+  --cf-font-display: 'Orbitron', sans-serif;
+  --cf-font-mono: 'Share Tech Mono', 'Consolas', monospace;
+
+  /* Spacing */
+  --cf-radius-sm: 4px;
+  --cf-radius-md: 6px;
+  --cf-radius-lg: 8px;
+  --cf-radius-xl: 10px;
+  --cf-radius-2xl: 12px;
+
+  /* Sizes */
+  --cf-nav-height: 49px;
+  --cf-checkbox: 24px;
+  --cf-item-min-h: 54px;
+  --cf-item-padding: 14px;
+  --cf-touch-target: 44px;
+}
+
+/* ═══════════════════ RESET ═══════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--cf-bg);
+  color: var(--cf-text);
+  font-family: var(--cf-font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════ TYPOGRAPHY ═══════════════════ */
+.cf-display {
+  font-family: var(--cf-font-display);
+  letter-spacing: 2px;
+}
+.cf-mono {
+  font-family: var(--cf-font-mono);
+}
+.cf-label {
+  font-family: var(--cf-font-display);
+  font-size: 7px;
+  font-weight: 700;
+  color: var(--cf-dim);
+  letter-spacing: 1px;
+}
+.cf-heading {
+  font-family: var(--cf-font-display);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--cf-accent);
+  letter-spacing: 3px;
+}
+.cf-value {
+  font-family: var(--cf-font-mono);
+  font-weight: 700;
+  color: var(--cf-accent);
+}
+
+/* ═══════════════════ BUTTONS ═══════════════════ */
+.cf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-md);
+  color: var(--cf-dim);
+  font-family: var(--cf-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s;
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cf-btn:hover { border-color: var(--cf-dim); color: var(--cf-text); }
+.cf-btn:active { background: var(--cf-surface2); }
+
+.cf-btn-primary {
+  background: rgba(74,158,255,.08);
+  border-color: rgba(74,158,255,.3);
+  color: var(--cf-accent);
+}
+.cf-btn-primary:hover { background: rgba(74,158,255,.15); }
+
+.cf-btn-danger { color: var(--cf-red); }
+.cf-btn-danger:hover { border-color: var(--cf-red); }
+
+.cf-btn-sm { padding: 4px 10px; font-size: 10px; }
+.cf-btn-lg { padding: 12px 28px; font-size: 14px; border-radius: var(--cf-radius-lg); }
+
+/* ═══════════════════ CARDS ═══════════════════ */
+.cf-card {
+  padding: 16px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-xl);
+  transition: border-color .15s;
+}
+.cf-card:hover { border-color: rgba(74,158,255,.15); }
+
+/* ═══════════════════ TOGGLE SWITCH ═══════════════════ */
+.cf-switch {
+  width: 32px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--cf-surface2);
+  border: 1px solid var(--cf-border);
+  position: relative;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.cf-switch::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  background: var(--cf-dim);
+  transition: all .15s;
+}
+.cf-switch.on {
+  background: rgba(52,208,88,.1);
+  border-color: var(--cf-green);
+}
+.cf-switch.on::after {
+  left: 17px;
+  background: var(--cf-green);
+}
+.cf-switch.red.on {
+  background: rgba(234,74,90,.08);
+  border-color: var(--cf-red);
+}
+.cf-switch.red.on::after { background: var(--cf-red); }
+
+/* ═══════════════════ CHECKBOX ═══════════════════ */
+.cf-check {
+  width: var(--cf-checkbox);
+  height: var(--cf-checkbox);
+  border-radius: var(--cf-radius-md);
+  border: 2px solid var(--cf-border);
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  transition: all .12s;
+}
+.cf-check.checked {
+  background: var(--cf-green);
+  border-color: var(--cf-green);
+}
+.cf-check.checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+
+/* ═══════════════════ CHECKLIST ITEMS ═══════════════════ */
+.cf-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--cf-item-padding);
+  margin-bottom: 4px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-lg);
+  min-height: var(--cf-item-min-h);
+  cursor: pointer;
+  transition: all .12s;
+}
+.cf-item:hover { border-color: rgba(74,158,255,.1); }
+.cf-item:active { background: var(--cf-surface2); }
+.cf-item.checked { border-color: rgba(52,208,88,.15); }
+.cf-item.checked .cf-item-label { text-decoration: line-through; color: var(--cf-dim); }
+.cf-item.current { border-color: var(--cf-accent); background: rgba(74,158,255,.03); }
+.cf-item.locked { opacity: .3; pointer-events: none; }
+
+.cf-item-body { flex: 1; min-width: 0; }
+.cf-item-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cf-item-label { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.cf-item-expected {
+  font-family: var(--cf-font-mono);
+  font-size: 12px;
+  color: var(--cf-accent);
+  font-weight: 700;
+  padding: 2px 8px;
+  background: rgba(74,158,255,.06);
+  border-radius: var(--cf-radius-sm);
+}
+.cf-item-how {
+  font-size: 12px;
+  color: var(--cf-dim);
+  margin-top: 6px;
+  line-height: 1.4;
+  display: none;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,.03);
+}
+.cf-item.expanded .cf-item-how { display: block; }
+.cf-item-location {
+  font-family: var(--cf-font-mono);
+  font-size: 10px;
+  color: var(--cf-dim);
+  opacity: .6;
+  margin-top: 3px;
+}
+
+/* Status dot (auto-detect feedback) */
+.cf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.cf-dot.ok { background: var(--cf-green); box-shadow: 0 0 4px var(--cf-green); }
+.cf-dot.fail { background: var(--cf-red); box-shadow: 0 0 4px var(--cf-red); }
+.cf-dot.unknown { background: var(--cf-dim); }
+
+/* ═══════════════════ PHASE TABS ═══════════════════ */
+.cf-tabs {
+  display: flex;
+  overflow-x: auto;
+  background: var(--cf-surface);
+  border-bottom: 1px solid var(--cf-border);
+  padding: 0 4px;
+  gap: 2px;
+}
+.cf-tabs::-webkit-scrollbar { height: 0; }
+.cf-tab {
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: var(--cf-dim);
+  font-family: var(--cf-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  flex-shrink: 0;
+  transition: all .1s;
+}
+.cf-tab.on { color: var(--cf-accent); border-bottom-color: var(--cf-accent); }
+.cf-tab.done { color: var(--cf-green); }
+.cf-tab-count {
+  font-size: 9px;
+  color: var(--cf-dim);
+  margin-left: 4px;
+  opacity: .6;
+}
+
+/* ═══════════════════ MODE BADGE ═══════════════════ */
+.cf-mode-badge {
+  font-family: var(--cf-font-mono);
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: var(--cf-radius-sm);
+  border: 1px solid var(--cf-border);
+  color: var(--cf-dim);
+}
+.cf-mode-badge.strict { border-color: var(--cf-amber); color: var(--cf-amber); }
+.cf-mode-badge.smart { border-color: var(--cf-accent); color: var(--cf-accent); }
+
+/* ═══════════════════ PROGRESS BAR ═══════════════════ */
+.cf-progress-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--cf-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cf-progress-fill {
+  height: 100%;
+  background: var(--cf-green);
+  border-radius: 2px;
+  transition: width .2s;
+}
+
+/* ═══════════════════ GAUGE VALUE ═══════════════════ */
+.cf-gauge {
+  font-family: var(--cf-font-mono);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--cf-green);
+  text-shadow: 0 0 8px rgba(68,221,102,.1);
+}
+.cf-gauge.warn { color: var(--cf-amber); text-shadow: 0 0 8px rgba(221,170,68,.1); }
+.cf-gauge.danger { color: var(--cf-red); text-shadow: 0 0 8px rgba(238,68,68,.15); }
+
+/* ═══════════════════ STATUS DOT (connection) ═══════════════════ */
+.cf-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cf-red);
+  display: inline-block;
+}
+.cf-status-dot.on {
+  background: var(--cf-green);
+  box-shadow: 0 0 4px var(--cf-green);
+}
+
+/* ═══════════════════ FORM FIELDS ═══════════════════ */
+.cf-input {
+  padding: 7px 10px;
+  background: var(--cf-surface2);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  color: var(--cf-text);
+  font-family: var(--cf-font-body);
+  font-size: 13px;
+  outline: none;
+}
+.cf-input:focus { border-color: var(--cf-accent); }
+
+.cf-select {
+  padding: 7px 10px;
+  background: var(--cf-surface2);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  color: var(--cf-text);
+  font-family: var(--cf-font-mono);
+  font-size: 12px;
+  outline: none;
+}
+.cf-select:focus { border-color: var(--cf-accent); }
+
+/* ═══════════════════ SCROLLBAR ═══════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cf-border); border-radius: 3px; }
+
+/* ═══════════════════ UTILITIES ═══════════════════ */
+.cf-flex { display: flex; }
+.cf-col { flex-direction: column; }
+.cf-center { align-items: center; justify-content: center; }
+.cf-gap-sm { gap: 4px; }
+.cf-gap-md { gap: 8px; }
+.cf-gap-lg { gap: 16px; }
+.cf-text-center { text-align: center; }

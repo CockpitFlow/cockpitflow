@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>SkyFlow Panel</title>
+<title>CockpitFlow Panel</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #000; overflow: hidden; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: monospace; touch-action: manipulation; }
@@ -24,12 +24,12 @@
 </head>
 <body>
 
-<div id="status">SkyFlow Panel</div>
+<div id="status">CockpitFlow Panel</div>
 
 <div id="container">
   <img id="panel-img" src="" alt="Panel" />
   <div id="overlay"></div>
-  <div id="no-signal"><span>NO SIGNAL</span><span style="font-size:10px;color:#222">Start capture in SkyFlow desktop</span></div>
+  <div id="no-signal"><span>NO SIGNAL</span><span style="font-size:10px;color:#222">Start capture in CockpitFlow desktop</span></div>
 </div>
 
 <script>
@@ -117,13 +117,13 @@ async function poll() {
     if (data.image && data.image.length > 50) {
       img.src = data.image;
       if (!hasSignal) { hasSignal = true; noSignal.style.display = 'none'; }
-      status.textContent = 'SkyFlow Panel - LIVE';
+      status.textContent = 'CockpitFlow Panel - LIVE';
     } else {
       if (hasSignal) { hasSignal = false; noSignal.style.display = 'flex'; }
-      status.textContent = 'SkyFlow Panel - NO CAPTURE';
+      status.textContent = 'CockpitFlow Panel - NO CAPTURE';
     }
   } catch {
-    status.textContent = 'SkyFlow Panel - OFFLINE';
+    status.textContent = 'CockpitFlow Panel - OFFLINE';
   }
   setTimeout(poll, 100);
 }

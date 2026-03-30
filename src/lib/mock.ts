@@ -76,7 +76,7 @@ function mockSimState() {
 const mockDeviceProfiles = [
   {
     version: 1, id: 'arduino-mega-cockpit', name: 'Arduino Mega 2560 — Full Cockpit Panel',
-    author: 'SkyFlow', description: '54 digital I/O + 16 analog inputs.',
+    author: 'CockpitFlow', description: '54 digital I/O + 16 analog inputs.',
     board: 'arduino-mega', transport: 'serial',
     pins: [
       { pin: 2, type: 'button', label: 'Master Battery' },
@@ -95,7 +95,7 @@ const mockDeviceProfiles = [
   },
   {
     version: 1, id: 'esp32-radio-panel', name: 'ESP32 — Radio & AP Panel (WiFi)',
-    author: 'SkyFlow', description: 'Encoders + 7-segment displays for radio tuning.',
+    author: 'CockpitFlow', description: 'Encoders + 7-segment displays for radio tuning.',
     board: 'esp32', transport: 'udp',
     pins: [
       { pin: 13, type: 'encoder', label: 'COM1 MHz', options: { pin_b: 14, steps_per_detent: 4 } },
@@ -109,7 +109,7 @@ const mockDeviceProfiles = [
 const mockAircraftProfiles = [
   {
     version: 1, id: 'cessna-172-skyhawk', name: 'Cessna 172 Skyhawk',
-    author: 'SkyFlow', description: 'Standard Cessna 172 with steam gauges.',
+    author: 'CockpitFlow', description: 'Standard Cessna 172 with steam gauges.',
     category: 'GA', simulator: 'both',
     variables: [
       { name: 'INDICATED ALTITUDE', unit: 'feet', writable: false, category: 'flight', label: 'Altitude' },
@@ -135,7 +135,7 @@ const mockAircraftProfiles = [
   },
   {
     version: 1, id: 'boeing-737-800', name: 'Boeing 737-800',
-    author: 'SkyFlow', description: 'Standard 737 cockpit with MCP and overhead.',
+    author: 'CockpitFlow', description: 'Standard 737 cockpit with MCP and overhead.',
     category: 'airliner', simulator: 'both',
     variables: [
       { name: 'INDICATED ALTITUDE', unit: 'feet', writable: false, category: 'flight', label: 'Altitude' },
@@ -156,7 +156,7 @@ const mockAircraftProfiles = [
   },
   {
     version: 1, id: 'airbus-a320neo', name: 'Airbus A320neo',
-    author: 'SkyFlow', description: 'A320neo with FCU, overhead, and pedestal.',
+    author: 'CockpitFlow', description: 'A320neo with FCU, overhead, and pedestal.',
     category: 'airliner', simulator: 'both',
     variables: [
       { name: 'INDICATED ALTITUDE', unit: 'feet', writable: false, category: 'flight', label: 'Altitude' },
@@ -178,7 +178,7 @@ const mockAircraftProfiles = [
 const mockMappingProfiles = [
   {
     version: 1, id: 'mega-cessna172-full', name: 'Arduino Mega → Cessna 172 (Full Setup)',
-    author: 'SkyFlow', description: 'Complete mapping for a Cessna 172 cockpit.',
+    author: 'CockpitFlow', description: 'Complete mapping for a Cessna 172 cockpit.',
     device_profile: 'arduino-mega-cockpit', aircraft_profile: 'cessna-172-skyhawk',
     mappings: [
       { pin: 2, action: 'event', target: 'TOGGLE_MASTER_BATTERY' },
@@ -191,7 +191,7 @@ const mockMappingProfiles = [
   },
   {
     version: 1, id: 'esp32-radio-cessna172', name: 'ESP32 Radio Panel → Cessna 172',
-    author: 'SkyFlow', description: 'WiFi radio panel mapping.',
+    author: 'CockpitFlow', description: 'WiFi radio panel mapping.',
     device_profile: 'esp32-radio-panel', aircraft_profile: 'cessna-172-skyhawk',
     mappings: [
       { pin: 13, action: 'event', target: 'COM_RADIO_WHOLE_INC', options: { event_dec: 'COM_RADIO_WHOLE_DEC' } },
@@ -244,7 +244,7 @@ const mockHandlers: Record<string, (...args: any[]) => any> = {
   load_checklist: (args: any) => {
     const mockChecklist: Record<string, any> = {
       'cessna-172': {
-        id: 'cessna-172', name: 'Cessna 172 Skyhawk', category: 'GA', author: 'SkyFlow', version: '1.0',
+        id: 'cessna-172', name: 'Cessna 172 Skyhawk', category: 'GA', author: 'CockpitFlow', version: '1.0',
         phases: [
           { id: 'preflight', name: 'Pre-Flight', items: [
             { id: 'documents', label: 'Documents (ARROW)', expected: 'CHECK', auto_detect: null, how_to: 'Verify ARROW documents are on board.', location: 'Glove compartment' },

@@ -1,6 +1,6 @@
 {
   "name": "Cessna 172S Skyhawk",
-  "author": "SkyFlow",
+  "author": "CockpitFlow",
   "aircraft": "C172S",
   "version": 2,
   "grid": { "cols": 12, "rows": 8 },

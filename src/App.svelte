@@ -251,7 +251,6 @@
   let clSound = $state<'on' | 'off'>('on');
   let clCheckMethod = $state<'tap' | 'swipe'>('tap');
   let clAutoAdvance = $state<'on' | 'off'>('on');
-  let clVoice = $state<'on' | 'off'>('off');
 
   let qrDataUrl = $state('');
   async function generateQR(url: string) {
@@ -276,7 +275,6 @@
           sound: clSound,
           check_method: clCheckMethod,
           auto_advance: clAutoAdvance,
-          voice: clVoice,
           data_mode: 'live',
           web_theme: 'dark',
           active_checklist: clActivePreset,
@@ -1177,8 +1175,6 @@
                 <div class="cl-toggle-row">
                   <span>Voice (TTS)</span>
                   <div class="cl-toggle-group">
-                    <button class="cl-tgl" class:cl-tgl-on={clVoice==='on'} onclick={() => { clVoice='on'; syncSettings(); }}>ON</button>
-                    <button class="cl-tgl" class:cl-tgl-on={clVoice==='off'} onclick={() => { clVoice='off'; syncSettings(); }}>OFF</button>
                   </div>
                 </div>
                 <div class="cl-toggle-row">

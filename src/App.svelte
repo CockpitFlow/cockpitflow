@@ -418,10 +418,19 @@
   let paxWeight = $state(170);
   let baggageWeight = $state(30);
   let fuelGallons = $state(40);
-  const EW = 1680, ECG = 40.5, FA = 48, PA = 37, BA = 95;
-  let tw = $derived(EW + paxWeight + baggageWeight + fuelGallons * 6);
-  let cg = $derived((EW * ECG + paxWeight * PA + baggageWeight * BA + fuelGallons * 6 * FA) / tw);
-  let ok = $derived(tw <= 2550 && cg >= 35 && cg <= 47.3);
+  let EW = $derived(navData?.weight?.empty_weight_lbs || 1680);
+  let ECG = $derived(navData?.weight?.arm_front_seats || 40.5);
+  let FA = $derived(navData?.weight?.arm_fuel || 48);
+  let PA = $derived(navData?.weight?.arm_front_seats || 37);
+  let BA = $derived(navData?.weight?.arm_baggage || 95);
+  let maxTakeoff = $derived(navData?.weight?.max_takeoff_lbs || 2550);
+  let cgFwd = $derived(navData?.weight?.cg_range_fwd || 35);
+  let cgAft = $derived(navData?.weight?.cg_range_aft || 47.3);
+  let fuelPerGal = $derived(navData?.fuel?.fuel_weight_lbs_per_gal || 6);
+  let maxFuelGal = $derived(navData?.fuel?.usable_fuel_gal || navData?.fuel?.total_capacity_gal || 56);
+  let tw = $derived(EW + paxWeight + baggageWeight + fuelGallons * fuelPerGal);
+  let cg = $derived((EW * ECG + paxWeight * PA + baggageWeight * BA + fuelGallons * fuelPerGal * FA) / tw);
+  let ok = $derived(tw <= maxTakeoff && cg >= cgFwd && cg <= cgAft);
   let navTab = $state('wb');
   let navPresets = $state<string[]>([]);
   let navActivePreset = $state('cessna-172');
@@ -493,6 +502,13 @@
   let cruiseSpeed = $state(110);
   let fuelBurn = $state(8.5);
   let reserveMin = $state(45);
+  // Update fuel defaults when aircraft changes
+  $effect(() => {
+    if (navData) {
+      cruiseSpeed = navData.performance?.cruise_speed_ktas || 110;
+      fuelBurn = navData.fuel?.burn_rate_gph_cruise || 8.5;
+    }
+  });
   let tripTime = $derived(tripDist / cruiseSpeed * 60);
   let tripFuel = $derived(tripDist / cruiseSpeed * fuelBurn);
   let reserveFuel = $derived(reserveMin / 60 * fuelBurn);
@@ -1568,8 +1584,8 @@
                     <tbody>
                       <tr><td>Empty Aircraft</td><td class="mono">{EW}</td><td class="mono">{ECG}</td><td class="mono">{(EW*ECG).toFixed(0)}</td></tr>
                       <tr><td>Pilot + Passengers</td><td><input type="number" onwheel={onWheel} class="efb-input" value={paxWeight} min="0" max="800" oninput={(e: Event) => paxWeight=+(e.target as HTMLInputElement).value} /></td><td class="mono">{PA}</td><td class="mono">{(paxWeight*PA).toFixed(0)}</td></tr>
-                      <tr><td>Baggage</td><td><input type="number" onwheel={onWheel} class="efb-input" value={baggageWeight} min="0" max="120" oninput={(e: Event) => baggageWeight=+(e.target as HTMLInputElement).value} /></td><td class="mono">{BA}</td><td class="mono">{(baggageWeight*BA).toFixed(0)}</td></tr>
-                      <tr><td>Fuel ({fuelGallons} gal)</td><td><input type="number" onwheel={onWheel} class="efb-input" value={fuelGallons} min="0" max="56" oninput={(e: Event) => fuelGallons=+(e.target as HTMLInputElement).value} /></td><td class="mono">{FA}</td><td class="mono">{(fuelGallons*6*FA).toFixed(0)}</td></tr>
+                      <tr><td>Baggage</td><td><input type="number" onwheel={onWheel} class="efb-input" value={baggageWeight} min="0" max="{navData?.weight?.max_baggage_lbs || 120}" oninput={(e: Event) => baggageWeight=+(e.target as HTMLInputElement).value} /></td><td class="mono">{BA}</td><td class="mono">{(baggageWeight*BA).toFixed(0)}</td></tr>
+                      <tr><td>Fuel ({fuelGallons} gal)</td><td><input type="number" onwheel={onWheel} class="efb-input" value={fuelGallons} min="0" max="{maxFuelGal}" oninput={(e: Event) => fuelGallons=+(e.target as HTMLInputElement).value} /></td><td class="mono">{FA}</td><td class="mono">{(fuelGallons*6*FA).toFixed(0)}</td></tr>
                       <tr class="efb-total"><td>TOTAL</td><td class="mono">{tw}</td><td class="mono">{cg.toFixed(1)}</td><td class="mono">{(tw*cg).toFixed(0)}</td></tr>
                     </tbody>
                   </table>
@@ -1577,8 +1593,8 @@
                 <div class="efb-section">
                   <div class="efb-heading">RESULT</div>
                   <div class="efb-readout-grid">
-                    <div class="efb-readout"><span class="efb-ro-label">GROSS WEIGHT</span><span class="efb-ro-val">{tw} <small>lbs</small></span><span class="efb-ro-limit">max 2550</span></div>
-                    <div class="efb-readout"><span class="efb-ro-label">CG POSITION</span><span class="efb-ro-val">{cg.toFixed(1)}<small>"</small></span><span class="efb-ro-limit">35.0 — 47.3</span></div>
+                    <div class="efb-readout"><span class="efb-ro-label">GROSS WEIGHT</span><span class="efb-ro-val">{tw} <small>lbs</small></span><span class="efb-ro-limit">max {maxTakeoff}</span></div>
+                    <div class="efb-readout"><span class="efb-ro-label">CG POSITION</span><span class="efb-ro-val">{cg.toFixed(1)}<small>"</small></span><span class="efb-ro-limit">{cgFwd} — {cgAft}</span></div>
                   </div>
                   <div class="efb-verdict" class:efb-ok={ok} class:efb-warn={!ok}>{ok ? 'WITHIN ENVELOPE' : 'OUT OF LIMITS'}</div>
                 </div>

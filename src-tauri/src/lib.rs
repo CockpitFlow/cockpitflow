@@ -252,7 +252,7 @@ fn set_settings(settings: tauri::State<SettingsState>, new_settings: AppSettings
 #[tauri::command]
 fn capture_screen_region(x: i32, y: i32, w: i32, h: i32) -> Result<String, String> {
     use winapi::um::winuser::GetDC;
-    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, BitBlt, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
+    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
 
     if w <= 0 || h <= 0 { return Err("Invalid region".into()); }
 
@@ -414,12 +414,8 @@ async fn check_for_updates() -> Result<serde_json::Value, String> {
     }
 }
 
-/// Simple HTTP GET without external deps (uses std::net)
+/// Simple HTTP GET without external deps
 fn ureq_minimal_get(url: &str) -> Result<String, String> {
-    use std::io::{Read, Write};
-    use std::net::TcpStream;
-
-    // Parse URL
     let url = url.strip_prefix("https://").ok_or("Not HTTPS")?;
     let (host, path) = url.split_once('/').ok_or("Bad URL")?;
 
@@ -959,34 +955,6 @@ fn handle_request(
                 .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
                 .boxed()
         },
-        "/cockpit2.html" => {
-            let candidates = vec![
-                dist_dir.join("cockpit2.html"),
-                dist_dir.join("../public/cockpit2.html"),
-                std::path::PathBuf::from("../public/cockpit2.html"),
-                std::path::PathBuf::from("public/cockpit2.html"),
-            ];
-            let content = candidates.iter()
-                .find_map(|p| std::fs::read(p).ok())
-                .unwrap_or_else(|| b"<h1>cockpit2.html not found</h1>".to_vec());
-            tiny_http::Response::from_data(content)
-                .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
-                .boxed()
-        },
-        "/cockpit" | "/cockpit.html" => {
-            let candidates = vec![
-                dist_dir.join("cockpit.html"),
-                dist_dir.join("../public/cockpit.html"),
-                std::path::PathBuf::from("../public/cockpit.html"),
-                std::path::PathBuf::from("public/cockpit.html"),
-            ];
-            let content = candidates.iter()
-                .find_map(|p| std::fs::read(p).ok())
-                .unwrap_or_else(|| b"<h1>cockpit.html not found</h1>".to_vec());
-            tiny_http::Response::from_data(content)
-                .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
-                .boxed()
-        },
         "/panel" | "/panel.html" => {
             let candidates = vec![
                 dist_dir.join("panel.html"),
@@ -1285,7 +1253,7 @@ fn list_sim_windows() -> Vec<(String, i64)> {
 #[tauri::command]
 fn capture_window(hwnd_val: i64) -> Result<String, String> {
     use winapi::um::winuser::{GetClientRect, GetDC, ReleaseDC};
-    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, BitBlt, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
+    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
     use winapi::shared::windef::{HWND, RECT, HDC, HBITMAP};
 
     let hwnd = hwnd_val as HWND;
@@ -1426,7 +1394,7 @@ fn start_xplane(sim_state: SimState, app: tauri::AppHandle) {
             }
 
             let mut buf = [0u8; 4096];
-            let mut connected = false;
+            let mut #[allow(unused)] connected = false;
 
             loop {
                 match sock.recv_from(&mut buf) {
@@ -1452,7 +1420,7 @@ fn start_xplane(sim_state: SimState, app: tauri::AppHandle) {
                     Ok(_) => {}
                     Err(_) => {
                         if connected {
-                            connected = false;
+                            #[allow(unused)] connected = false;
                             let mut s = sim_state.lock().unwrap();
                             s.insert("_CONNECTED".into(), 0.0);
                             let _ = app.emit("sim-connected", false);

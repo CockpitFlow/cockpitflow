@@ -1,0 +1,47 @@
+{
+  "id": "boeing-747",
+  "name": "Boeing 747-400",
+  "author": "CockpitFlow Community",
+  "version": "1.0",
+  "category": "Heavy",
+
+  "vspeeds": {
+    "V1": { "value": 155, "unit": "KIAS", "desc": "Decision speed (varies with weight)" },
+    "Vr": { "value": 170, "unit": "KIAS", "desc": "Rotation speed (varies with weight)" },
+    "V2": { "value": 185, "unit": "KIAS", "desc": "Takeoff safety speed" },
+    "Vref": { "value": 145, "unit": "KIAS", "desc": "Landing reference (Flaps 30, typical)" },
+    "Vmo": { "value": 365, "unit": "KIAS", "desc": "Max operating speed" },
+    "Mmo": { "value": 0.92, "unit": "Mach", "desc": "Max operating Mach" }
+  },
+
+  "weight": {
+    "empty_weight_lbs": 404600,
+    "max_takeoff_lbs": 875000,
+    "max_landing_lbs": 652000,
+    "max_zero_fuel_lbs": 542500,
+    "max_fuel_lbs": 387000
+  },
+
+  "fuel": {
+    "total_capacity_gal": 57285,
+    "fuel_type": "Jet-A",
+    "burn_rate_gph_cruise": 2600,
+    "fuel_weight_lbs_per_gal": 6.76
+  },
+
+  "performance": {
+    "cruise_speed_ktas": 490,
+    "max_speed_ktas": 507,
+    "service_ceiling_ft": 45100,
+    "rate_of_climb_fpm": 1800,
+    "takeoff_ground_roll_ft": 10700,
+    "range_nm": 7260,
+    "endurance_hr": 14
+  },
+
+  "engine": {
+    "type": "4x PW4062 or CF6-80C2",
+    "thrust_lbs": 63300,
+    "count": 4
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "cessna-172",
+  "name": "Cessna 172S Skyhawk",
+  "author": "CockpitFlow",
+  "version": "1.0",
+  "category": "GA",
+
+  "vspeeds": {
+    "Vs0": { "value": 40, "unit": "KIAS", "desc": "Stall speed (landing config)" },
+    "Vs1": { "value": 48, "unit": "KIAS", "desc": "Stall speed (clean)" },
+    "Vr": { "value": 55, "unit": "KIAS", "desc": "Rotation speed" },
+    "Vx": { "value": 62, "unit": "KIAS", "desc": "Best angle of climb" },
+    "Vy": { "value": 74, "unit": "KIAS", "desc": "Best rate of climb" },
+    "Vfe": { "value": 85, "unit": "KIAS", "desc": "Max flap extended" },
+    "Va": { "value": 99, "unit": "KIAS", "desc": "Maneuvering speed (at max weight)" },
+    "Vno": { "value": 129, "unit": "KIAS", "desc": "Max structural cruising" },
+    "Vne": { "value": 163, "unit": "KIAS", "desc": "Never exceed" },
+    "Vglide": { "value": 68, "unit": "KIAS", "desc": "Best glide speed" }
+  },
+
+  "weight": {
+    "empty_weight_lbs": 1680,
+    "max_takeoff_lbs": 2550,
+    "max_landing_lbs": 2550,
+    "max_baggage_lbs": 120,
+    "cg_range_fwd": 35.0,
+    "cg_range_aft": 47.3,
+    "arm_front_seats": 37.0,
+    "arm_rear_seats": 73.0,
+    "arm_baggage": 95.0,
+    "arm_fuel": 48.0
+  },
+
+  "fuel": {
+    "total_capacity_gal": 53,
+    "usable_fuel_gal": 50,
+    "fuel_type": "100LL",
+    "burn_rate_gph_cruise": 8.5,
+    "burn_rate_gph_climb": 10.5,
+    "fuel_weight_lbs_per_gal": 6.0
+  },
+
+  "performance": {
+    "cruise_speed_ktas": 124,
+    "max_speed_ktas": 163,
+    "service_ceiling_ft": 14000,
+    "rate_of_climb_fpm": 730,
+    "takeoff_ground_roll_ft": 960,
+    "takeoff_over_50ft": 1630,
+    "landing_ground_roll_ft": 575,
+    "landing_over_50ft": 1335,
+    "range_nm": 640,
+    "endurance_hr": 5.8
+  },
+
+  "engine": {
+    "type": "Lycoming IO-360-L2A",
+    "horsepower": 180,
+    "max_rpm": 2700,
+    "propeller": "2-blade fixed pitch"
+  }
+}

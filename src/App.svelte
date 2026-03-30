@@ -423,6 +423,48 @@
   let cg = $derived((EW * ECG + paxWeight * PA + baggageWeight * BA + fuelGallons * 6 * FA) / tw);
   let ok = $derived(tw <= 2550 && cg >= 35 && cg <= 47.3);
   let navTab = $state('wb');
+  let navPresets = $state<string[]>([]);
+  let navActivePreset = $state('cessna-172');
+  let navPresetNames = $state<Record<string, string>>({});
+  let navData = $state<any>(null);
+
+  async function loadNavPresets() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const modules = await invoke('list_modules') as any[];
+        const nav = modules.find((m: any) => m.id === 'nav');
+        navPresets = nav?.presets || ['cessna-172'];
+        // Load names
+        const names: Record<string, string> = {};
+        for (const id of navPresets) {
+          try {
+            const json = await invoke('load_module_preset', { moduleId: 'nav', presetId: id }) as string;
+            const data = JSON.parse(json);
+            names[id] = `${data.name || id} (${data.author || 'Unknown'} v${data.version || '1.0'})`;
+          } catch { names[id] = id; }
+        }
+        navPresetNames = names;
+        loadNavData();
+      }
+    } catch {}
+  }
+
+  async function loadNavData() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const json = await invoke('load_module_preset', { moduleId: 'nav', presetId: navActivePreset }) as string;
+        navData = JSON.parse(json);
+      }
+    } catch { navData = null; }
+  }
+
+  async function setNavPreset(preset: string) {
+    navActivePreset = preset;
+    await invoke('update_module', { moduleId: 'nav', field: 'default_preset', value: preset });
+    loadNavData();
+  }
 
   // Crosswind calculator
   let rwyHeading = $state(360);
@@ -896,6 +938,7 @@
   onMount(() => {
     loadDiskModules();
     loadChecklistPresets().then(() => { loadAllPresetNames(); loadChecklistInfo(); });
+    loadNavPresets();
     checkUpdates();
     setTimeout(() => generateQR(`http://${lanIp}:8080/checklist`), 2000);
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
@@ -1488,6 +1531,18 @@
 
       {:else if active === 'nav'}
         <div class="efb-panel">
+          <!-- Aircraft selector -->
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--color-border)">
+            <span class="efb-heading" style="margin:0">AIRCRAFT</span>
+            <select class="cl-preset-select" style="min-width:200px" value={navActivePreset} onchange={(e) => { navActivePreset = (e.target as HTMLSelectElement).value; loadNavData(); }}>
+              {#each navPresets as p}
+                <option value={p}>{navPresetNames[p] || p}</option>
+              {/each}
+            </select>
+            {#if navData}
+              <span style="font-size:10px;color:var(--color-dim)">{navData.category || ''} · {navData.engine?.type || ''}</span>
+            {/if}
+          </div>
           <!-- Sub-tabs -->
           <div class="efb-tabs">
             {#each [['wb','W&B'],['wind','Wind'],['fuel','Fuel'],['perf','Performance'],['ref','Reference']] as [id, label]}
@@ -1592,18 +1647,43 @@
               </div>
 
             {:else if navTab === 'ref'}
-              <div class="efb-section" style="max-width:500px">
-                <div class="efb-heading">V-SPEEDS — C172S</div>
-                <table class="efb-tbl">
-                  <thead><tr><th>SPEED</th><th>KIAS</th><th>DESCRIPTION</th></tr></thead>
-                  <tbody>
-                    {#each vspeeds as [name, val, desc]}
-                      <tr><td class="td-accent mono">{name}</td><td class="mono efb-speed-val">{val}</td><td class="efb-speed-desc">{desc}</td></tr>
-                    {/each}
-                  </tbody>
-                </table>
-                <div class="efb-note">Values from C172S POH. Va varies with weight.</div>
-              </div>
+              {#if navData}
+                <div class="efb-2col">
+                  <div class="efb-section">
+                    <div class="efb-heading">V-SPEEDS — {navData.name || navActivePreset}</div>
+                    <table class="efb-tbl">
+                      <thead><tr><th>SPEED</th><th>VALUE</th><th>DESCRIPTION</th></tr></thead>
+                      <tbody>
+                        {#each Object.entries(navData.vspeeds || {}) as [name, info]}
+                          <tr><td class="td-accent mono">{name}</td><td class="mono efb-speed-val">{info.value} {info.unit || ''}</td><td class="efb-speed-desc">{info.desc || ''}</td></tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="efb-section">
+                    <div class="efb-heading">PERFORMANCE</div>
+                    <table class="efb-tbl">
+                      <tbody>
+                        {#each Object.entries(navData.performance || {}) as [key, val]}
+                          <tr><td>{key.replace(/_/g, ' ')}</td><td class="mono">{val}</td></tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                    {#if navData.engine}
+                      <div class="efb-heading" style="margin-top:12px">ENGINE</div>
+                      <table class="efb-tbl">
+                        <tbody>
+                          {#each Object.entries(navData.engine || {}) as [key, val]}
+                            <tr><td>{key.replace(/_/g, ' ')}</td><td class="mono">{val}</td></tr>
+                          {/each}
+                        </tbody>
+                      </table>
+                    {/if}
+                  </div>
+                </div>
+              {:else}
+                <div class="v-center" style="padding:40px"><p>Select an aircraft above to view reference data.</p></div>
+              {/if}
             {/if}
           </div>
         </div>

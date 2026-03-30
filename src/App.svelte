@@ -1089,6 +1089,9 @@
           </div>
         </div>
 
+      {:else if active === 'cockpit'}
+        <CockpitBuilder {lanIp} />
+
       {:else if active === 'panel'}
         <div class="v-row"><div class="flex-1 overflow-y-auto"><ElectricalPanel {simData} /></div><div class="flex-1 overflow-y-auto"><LowerControls {simData} /></div></div>
 

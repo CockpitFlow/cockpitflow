@@ -2,7 +2,7 @@
   "author": "CockpitFlow",
   "description": "Navigation tools — weight & balance, crosswind, density altitude, fuel planner, V-speeds.",
   "desktop_only": true,
-  "enabled": false,
+  "enabled": true,
   "icon": "navigation",
   "id": "nav",
   "name": "Nav",

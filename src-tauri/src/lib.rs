@@ -252,7 +252,7 @@ fn set_settings(settings: tauri::State<SettingsState>, new_settings: AppSettings
 #[tauri::command]
 fn capture_screen_region(x: i32, y: i32, w: i32, h: i32) -> Result<String, String> {
     use winapi::um::winuser::GetDC;
-    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
+    use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, BitBlt, GetDIBits, DeleteDC, DeleteObject, SRCCOPY, BITMAPINFOHEADER, BI_RGB, BITMAPINFO, DIB_RGB_COLORS};
 
     if w <= 0 || h <= 0 { return Err("Invalid region".into()); }
 
@@ -1334,6 +1334,7 @@ fn capture_window(hwnd_val: i64) -> Result<String, String> {
     }
 }
 
+#[allow(unused_assignments)]
 fn start_xplane(sim_state: SimState, app: tauri::AppHandle) {
     std::thread::spawn(move || {
         let datarefs: Vec<(&str, &str)> = vec![
@@ -1394,7 +1395,7 @@ fn start_xplane(sim_state: SimState, app: tauri::AppHandle) {
             }
 
             let mut buf = [0u8; 4096];
-            let mut #[allow(unused)] connected = false;
+            let mut connected = false;
 
             loop {
                 match sock.recv_from(&mut buf) {
@@ -1420,7 +1421,7 @@ fn start_xplane(sim_state: SimState, app: tauri::AppHandle) {
                     Ok(_) => {}
                     Err(_) => {
                         if connected {
-                            #[allow(unused)] connected = false;
+                            connected = false;
                             let mut s = sim_state.lock().unwrap();
                             s.insert("_CONNECTED".into(), 0.0);
                             let _ = app.emit("sim-connected", false);

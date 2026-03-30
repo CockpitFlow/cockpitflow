@@ -1173,8 +1173,6 @@
                   </div>
                   </div>
                 </div>
-              </div>
-              <p class="cl-card-desc">Tap/Swipe = how to check items. Auto-advance = next phase when complete. Multi-crew = shared progress.</p>
             </div>
           </div>
 

@@ -133,7 +133,18 @@ function loadChecked(id) {
 
 // ═══ HAPTIC ═══
 function vibrate(pattern) {
-  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {}
+  try {
+    // Try own navigator first
+    if (navigator.vibrate) { navigator.vibrate(pattern); return; }
+    // Try parent (if in iframe)
+    if (window.parent && window.parent.navigator && window.parent.navigator.vibrate) {
+      window.parent.navigator.vibrate(pattern); return;
+    }
+    // Try top
+    if (window.top && window.top.navigator && window.top.navigator.vibrate) {
+      window.top.navigator.vibrate(pattern);
+    }
+  } catch {}
 }
 
 // ═══ SOUNDS ═══
@@ -352,9 +363,14 @@ function renderChecklist() {
         if (voiceEnabled) speak(`${phase.name} complete`);
       }
 
-      // Check if ALL phases complete
+      // Check if ALL phases complete (delay so phase sound finishes first)
       const allDone = checklist.phases.every(p => p.items.every(it => checked[it.id]));
-      if (allDone) { if (settings.sound === 'on') playSound('complete'); if (settings.haptic === 'on') vibrate([30, 50, 30, 50, 60]); }
+      if (allDone) {
+        setTimeout(() => {
+          if (settings.sound === 'on') playSound('complete');
+          if (settings.haptic === 'on') vibrate([30, 50, 30, 50, 60]);
+        }, 500);
+      }
 
       // Auto-advance to next phase when current is complete
       if (settings.auto_advance === 'on') {

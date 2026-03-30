@@ -1031,85 +1031,80 @@
         <div class="v-row"><div class="flex-1 overflow-y-auto"><ElectricalPanel {simData} /></div><div class="flex-1 overflow-y-auto"><LowerControls {simData} /></div></div>
 
       {:else if active === 'checklist'}
-        <div class="cl-settings" style="padding:14px;max-width:600px">
-          <div class="efb-2col">
-            <div class="efb-section">
-              <div class="efb-heading">AIRCRAFT CHECKLIST</div>
+        <div class="cl-page">
+          <!-- Row 1: Preset + Mode + Toggles -->
+          <div class="cl-row">
+            <div class="cl-card">
+              <div class="efb-heading">AIRCRAFT</div>
               <div class="cl-preset-row">
                 <select class="cl-preset-select" value={clActivePreset} onchange={(e) => setChecklistPreset((e.target as HTMLSelectElement).value)}>
                   {#each clPresets as p}
                     <option value={p}>{p}</option>
                   {/each}
                 </select>
-                <button class="btn-action" style="padding:6px 12px;font-size:10px" onclick={importChecklistPreset}>Import</button>
+                <button class="btn-action" style="padding:6px 10px;font-size:10px" onclick={importChecklistPreset}>Import</button>
               </div>
-
-              <div class="efb-heading" style="margin-top:16px">CHECKLIST MODE</div>
-              <div class="cl-option-group">
-                <button class="cl-opt" class:cl-opt-on={clMode==='strict'} onclick={() => { clMode='strict'; syncSettings(); }}>
-                  <strong>Strict</strong>
-                  <span>Items must be checked in order. Current item highlighted, rest locked.</span>
-                </button>
-                <button class="cl-opt" class:cl-opt-on={clMode==='smart'} onclick={() => { clMode='smart'; syncSettings(); }}>
-                  <strong>Smart</strong>
-                  <span>Check items in any order. More flexible for experienced pilots.</span>
-                </button>
-              </div>
-
-              <div class="efb-heading" style="margin-top:16px">AUTO-DETECT</div>
-              <div class="cl-toggle-row">
-                <span>Auto Check</span>
-                <div class="cl-toggle-group">
-                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='on'} onclick={() => { clAutoCheck='on'; syncSettings(); }}>ON</button>
-                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='off'} onclick={() => { clAutoCheck='off'; syncSettings(); }}>OFF</button>
-                </div>
-              </div>
-              <p class="cl-hint">Automatically check items when sim detects correct state</p>
-
-              <div class="cl-toggle-row">
-                <span>Feedback Dots</span>
-                <div class="cl-toggle-group">
-                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='on'} onclick={() => { clFeedback='on'; syncSettings(); }}>ON</button>
-                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='off'} onclick={() => { clFeedback='off'; syncSettings(); }}>OFF</button>
-                </div>
-              </div>
-              <p class="cl-hint">Show green/red dots indicating sim variable state</p>
             </div>
-
-            <div class="efb-section">
-              <div class="efb-heading">INFO</div>
-              <div class="cl-info-grid">
-                <div class="cl-info-item"><span class="cl-info-label">ACTIVE</span><span>{clActivePreset}</span></div>
-                <div class="cl-info-item"><span class="cl-info-label">PRESETS</span><span>{clPresets.length} available</span></div>
-                <div class="cl-info-item"><span class="cl-info-label">AUTO-DETECT</span><span>{connected ? 'Active' : 'Waiting for sim'}</span></div>
-                <div class="cl-info-item"><span class="cl-info-label">MODE</span><span>{clMode === 'strict' ? 'Strict (ordered)' : 'Smart (flexible)'}</span></div>
+            <div class="cl-card">
+              <div class="efb-heading">MODE</div>
+              <div class="cl-mode-row">
+                <button class="cl-mode-btn" class:on={clMode==='strict'} onclick={() => { clMode='strict'; syncSettings(); }}>Strict</button>
+                <button class="cl-mode-btn" class:on={clMode==='smart'} onclick={() => { clMode='smart'; syncSettings(); }}>Smart</button>
               </div>
+            </div>
+            <div class="cl-card">
+              <div class="efb-heading">AUTO-DETECT</div>
+              <div class="cl-toggles">
+                <div class="cl-toggle-row">
+                  <span>Auto Check</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='on'} onclick={() => { clAutoCheck='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='off'} onclick={() => { clAutoCheck='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+                <div class="cl-toggle-row">
+                  <span>Feedback</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clFeedback==='on'} onclick={() => { clFeedback='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clFeedback==='off'} onclick={() => { clFeedback='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <div class="efb-heading" style="margin-top:16px">OPEN ON PHONE / TABLET</div>
-
-              <div class="lan-qr-section">
-                {#if qrDataUrl}
-                  <img class="lan-qr" src={qrDataUrl} alt="QR Code">
-                {:else}
-                  <div class="lan-qr" style="display:flex;align-items:center;justify-content:center;color:var(--color-dim);font-size:10px">QR</div>
-                {/if}
-                <div>
-                  <div class="cl-hint" style="margin-bottom:6px"><strong style="color:var(--color-fg)">Browser / Web</strong> — scan QR or open:</div>
+          <!-- Row 2: QR + URLs -->
+          <div class="cl-companion">
+            <div class="efb-heading">OPEN ON PHONE / TABLET</div>
+            <div class="cl-companion-body">
+              {#if qrDataUrl}
+                <img class="lan-qr" src={qrDataUrl} alt="QR">
+              {:else}
+                <div class="lan-qr" style="display:flex;align-items:center;justify-content:center;color:var(--color-dim);font-size:9px">QR</div>
+              {/if}
+              <div class="cl-urls">
+                <div class="cl-url-group">
+                  <span class="cl-url-label">Browser</span>
                   <div class="lan-url-row">
                     <span class="lan-url">http://{lanIp}:8080/checklist</span>
-                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080/checklist`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
-                      {lanCopied ? 'COPIED' : 'COPY'}
-                    </button>
+                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080/checklist`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>{lanCopied ? 'COPIED' : 'COPY'}</button>
                   </div>
-                  <div class="cl-hint" style="margin-top:10px"><strong style="color:var(--color-fg)">CockpitFlow App</strong> — connect to:</div>
+                </div>
+                <div class="cl-url-group">
+                  <span class="cl-url-label">App</span>
                   <div class="lan-url-row">
                     <span class="lan-url">http://{lanIp}:8080</span>
-                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
-                      {lanCopied ? 'COPIED' : 'COPY'}
-                    </button>
+                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>{lanCopied ? 'COPIED' : 'COPY'}</button>
                   </div>
-                  <p class="cl-hint" style="margin-top:8px;opacity:.6">Same WiFi network required. Preset controlled from this app.</p>
                 </div>
+              </div>
+              <div class="cl-info-compact">
+                <span class="dot" class:on={connected}></span>
+                <span>{connected ? 'Sim connected' : 'Waiting for sim'}</span>
+                <span class="cl-info-sep">|</span>
+                <span>{clActivePreset}</span>
+                <span class="cl-info-sep">|</span>
+                <span>{clMode}</span>
               </div>
             </div>
           </div>
@@ -2558,10 +2553,40 @@
   .lan-left { flex: 1; display: flex; flex-direction: column; gap: 12px; }
   .lan-right { flex-shrink: 0; display: flex; align-items: flex-start; }
   .lan-desc { font-size: 12px; color: var(--color-dim); line-height: 1.5; margin: 0; }
-  .lan-qr-section { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
-  .lan-qr { width: 100px; height: 100px; border-radius: 6px; border: 1px solid var(--color-border); }
-  .lan-url-row { display: flex; align-items: center; gap: 8px; }
-  .lan-url { font-family: 'Cascadia Code', monospace; font-size: 14px; font-weight: 700; color: var(--color-accent); }
+  /* Checklist page layout */
+  .cl-page { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .cl-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cl-card {
+    flex: 1; min-width: 180px; padding: 12px;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: 5px;
+  }
+  .cl-mode-row { display: flex; gap: 4px; }
+  .cl-mode-btn {
+    flex: 1; padding: 8px; background: var(--color-bg);
+    border: 1px solid var(--color-border); border-radius: 4px;
+    color: var(--color-dim); font-size: 11px; font-weight: 600;
+    cursor: pointer; text-align: center; font-family: inherit; transition: all .1s;
+  }
+  .cl-mode-btn.on { border-color: var(--color-accent); color: var(--color-accent); background: rgba(74,158,255,.06); }
+  .cl-toggles { display: flex; flex-direction: column; gap: 6px; }
+
+  .cl-companion {
+    padding: 12px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 5px;
+  }
+  .cl-companion-body { display: flex; align-items: center; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+  .lan-qr { width: 90px; height: 90px; border-radius: 6px; border: 1px solid var(--color-border); flex-shrink: 0; }
+  .cl-urls { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+  .cl-url-group { display: flex; align-items: center; gap: 8px; }
+  .cl-url-label { font-size: 9px; font-weight: 700; color: var(--color-dim); letter-spacing: .5px; width: 50px; flex-shrink: 0; }
+  .lan-url-row { display: flex; align-items: center; gap: 6px; }
+  .lan-url { font-family: 'Cascadia Code', monospace; font-size: 12px; font-weight: 600; color: var(--color-accent); }
+  .cl-info-compact {
+    display: flex; align-items: center; gap: 6px; flex-basis: 100%;
+    font-size: 10px; color: var(--color-dim); margin-top: 4px;
+  }
+  .cl-info-sep { opacity: .3; }
   .lan-copy { padding: 4px 12px; background: none; border: 1px solid var(--color-border); color: var(--color-dim); border-radius: 3px; font-family: 'Cascadia Code', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .1s; }
   .lan-copy:hover { border-color: var(--color-accent); color: var(--color-accent); }
   .lan-info { display: flex; flex-direction: column; gap: 4px; }

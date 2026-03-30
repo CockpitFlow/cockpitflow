@@ -92,7 +92,7 @@ const _p = new URLSearchParams(window.location.search);
 const API = _p.get('api') || window.location.origin;
 
 let checklist = null, currentPhase = 0, checked = {}, phaseChanged = true;
-let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on' };
+let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on', haptic: 'on', sound: 'on' };
 let simValues = {};
 let searchQuery = '';
 let undoStack = []; // [{itemId, phaseIdx}]
@@ -120,6 +120,11 @@ function loadChecked(id) {
       if (changed) { localStorage.setItem('cockpitflow_cl_' + id, JSON.stringify(checked)); renderChecklist(); }
     }
   }).catch(() => {});
+}
+
+// ═══ HAPTIC ═══
+function vibrate(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {}
 }
 
 // ═══ SOUNDS ═══
@@ -273,7 +278,8 @@ function renderChecklist() {
       if (checked[item.id]) {
         undoStack.push({ itemId: item.id, phaseIdx: currentPhase });
         if (undoStack.length > 20) undoStack.shift();
-        playSound('check');
+        if (settings.haptic === 'on') vibrate(30);
+        if (settings.sound === 'on') playSound('check');
         // Voice: read next unchecked item
         if (voiceEnabled) {
           const nextIdx = phase.items.findIndex((it, i) => i > idx && !checked[it.id]);
@@ -287,13 +293,14 @@ function renderChecklist() {
       const phaseDone = phase.items.every(it => checked[it.id]);
       if (phaseDone && !lastPhaseDone[phase.id]) {
         lastPhaseDone[phase.id] = true;
-        playSound('phase');
+        if (settings.haptic === 'on') vibrate([30, 50, 30]);
+        if (settings.sound === 'on') playSound('phase');
         if (voiceEnabled) speak(`${phase.name} complete`);
       }
 
       // Check if ALL phases complete
       const allDone = checklist.phases.every(p => p.items.every(it => checked[it.id]));
-      if (allDone) playSound('complete');
+      if (allDone) { if (settings.sound === 'on') playSound('complete'); if (settings.haptic === 'on') vibrate([30, 50, 30, 50, 60]); }
 
       renderChecklist();
     });
@@ -446,6 +453,8 @@ function startPoll() {
           if (s.mode && s.mode !== settings.mode) { settings.mode = s.mode; changed = true; }
           if (s.auto_check && s.auto_check !== settings.auto_check) { settings.auto_check = s.auto_check; changed = true; }
           if (s.check_feedback && s.check_feedback !== settings.check_feedback) { settings.check_feedback = s.check_feedback; changed = true; }
+          if (s.haptic) settings.haptic = s.haptic;
+          if (s.sound) settings.sound = s.sound;
           if (changed) renderChecklist();
         }
       } catch {}

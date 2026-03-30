@@ -247,6 +247,8 @@
   let clMode = $state<'strict' | 'smart'>('smart');
   let clAutoCheck = $state<'on' | 'off'>('on');
   let clFeedback = $state<'on' | 'off'>('on');
+  let clHaptic = $state<'on' | 'off'>('on');
+  let clSound = $state<'on' | 'off'>('on');
 
   let qrDataUrl = $state('');
   async function generateQR(url: string) {
@@ -267,6 +269,8 @@
           mode: clMode,
           auto_check: clAutoCheck,
           check_feedback: clFeedback,
+          haptic: clHaptic,
+          sound: clSound,
           data_mode: 'live',
           web_theme: 'dark',
           active_checklist: clActivePreset,
@@ -1128,7 +1132,22 @@
                   </div>
                 </div>
               </div>
-              <p class="cl-card-desc">Auto Check marks items when the sim confirms correct state. Feedback shows green/red dots for each item with sim detection.</p>
+                <div class="cl-toggle-row">
+                  <span>Haptic</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clHaptic==='on'} onclick={() => { clHaptic='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clHaptic==='off'} onclick={() => { clHaptic='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+                <div class="cl-toggle-row">
+                  <span>Sounds</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clSound==='on'} onclick={() => { clSound='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clSound==='off'} onclick={() => { clSound='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+              </div>
+              <p class="cl-card-desc">Auto Check from sim. Feedback dots. Haptic vibration on check. Sounds on check/phase complete.</p>
             </div>
             <div class="cl-card">
               <div class="efb-heading">MULTI-CREW</div>

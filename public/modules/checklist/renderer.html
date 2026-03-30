@@ -351,6 +351,8 @@ function getAutoState(item) {
 
 /* ═══ POLL ═══ */
 let pollTimer = null;
+let settingsSyncCount = 0;
+
 function startPoll() {
   if (pollTimer) clearTimeout(pollTimer);
   async function poll() {
@@ -358,6 +360,8 @@ function startPoll() {
       const r = await fetch(API + '/api/sim-state');
       const d = await r.json();
       simValues = d.values || {};
+
+      // Auto-check items from sim
       if (settings.auto_check === 'on' && checklist) {
         let changed = false;
         checklist.phases.forEach(phase => {
@@ -369,7 +373,8 @@ function startPoll() {
         });
         if (changed) { saveChecked(checklist._id); renderChecklist(); }
       }
-      // Update dots
+
+      // Update feedback dots without full re-render
       document.querySelectorAll('.item').forEach((el, idx) => {
         const phase = checklist?.phases[currentPhase];
         if (!phase?.items[idx]) return;
@@ -377,6 +382,23 @@ function startPoll() {
         if (dot) dot.className = 'i-dot ' + getAutoState(phase.items[idx]);
       });
     } catch {}
+
+    // Sync settings from desktop every ~3s
+    settingsSyncCount++;
+    if (settingsSyncCount % 3 === 0) {
+      try {
+        const r = await fetch(API + '/api/settings');
+        if (r.ok) {
+          const s = await r.json();
+          let changed = false;
+          if (s.mode && s.mode !== settings.mode) { settings.mode = s.mode; changed = true; }
+          if (s.auto_check && s.auto_check !== settings.auto_check) { settings.auto_check = s.auto_check; changed = true; }
+          if (s.check_feedback && s.check_feedback !== settings.check_feedback) { settings.check_feedback = s.check_feedback; changed = true; }
+          if (changed) renderChecklist();
+        }
+      } catch {}
+    }
+
     pollTimer = setTimeout(poll, 1000);
   }
   poll();

@@ -1,6 +1,6 @@
 {
   "author": "CockpitFlow",
-  "default_preset": "cessna-172",
+  "default_preset": "boeing-747",
   "description": "Navigation tools — weight & balance, crosswind, density altitude, fuel planner, V-speeds.",
   "desktop_only": true,
   "enabled": true,

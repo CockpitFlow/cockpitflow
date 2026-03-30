@@ -450,14 +450,15 @@
     } catch {}
   }
 
-  async function loadNavData() {
+  async function loadNavData(presetId?: string) {
+    const id = presetId || navActivePreset;
     try {
       if ('__TAURI_INTERNALS__' in window) {
         const { invoke } = await import('@tauri-apps/api/core');
-        const json = await invoke('load_module_preset', { moduleId: 'nav', presetId: navActivePreset }) as string;
+        const json = await invoke('load_module_preset', { moduleId: 'nav', presetId: id }) as string;
         navData = JSON.parse(json);
       }
-    } catch { navData = null; }
+    } catch (e) { console.error('loadNavData failed:', e); navData = null; }
   }
 
   async function setNavPreset(preset: string) {
@@ -466,9 +467,10 @@
       if ('__TAURI_INTERNALS__' in window) {
         const { invoke } = await import('@tauri-apps/api/core');
         await invoke('update_module', { moduleId: 'nav', field: 'default_preset', value: preset });
+        const json = await invoke('load_module_preset', { moduleId: 'nav', presetId: preset }) as string;
+        navData = JSON.parse(json);
       }
-    } catch {}
-    loadNavData();
+    } catch (e) { console.error('setNavPreset failed:', e); }
   }
 
   // Crosswind calculator

@@ -267,6 +267,7 @@
   }
   let clPresets = $state<string[]>([]);
   let clActivePreset = $state('cessna-172');
+  let clInfo = $state<{ name: string; author: string; version: string; category: string; phases: number; items: number } | null>(null);
 
   async function loadChecklistPresets() {
     try {
@@ -282,12 +283,33 @@
     } catch {}
   }
 
+  async function loadChecklistInfo() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const json = await invoke('load_module_preset', { moduleId: 'checklist', presetId: clActivePreset }) as string;
+        const data = JSON.parse(json);
+        const items = (data.phases || []).reduce((s: number, p: any) => s + (p.items?.length || 0), 0);
+        clInfo = {
+          name: data.name || clActivePreset,
+          author: data.author || 'Unknown',
+          version: data.version || '1.0',
+          category: data.category || '',
+          phases: (data.phases || []).length,
+          items,
+        };
+      }
+    } catch { clInfo = null; }
+  }
+
   async function setChecklistPreset(preset: string) {
     try {
       if ('__TAURI_INTERNALS__' in window) {
         const { invoke } = await import('@tauri-apps/api/core');
         await invoke('update_module', { moduleId: 'checklist', field: 'default_preset', value: preset });
         clActivePreset = preset;
+        loadChecklistInfo();
+        generateQR(`http://${lanIp}:8080/checklist`);
       }
     } catch {}
   }
@@ -839,7 +861,7 @@
 
   onMount(() => {
     loadDiskModules();
-    loadChecklistPresets();
+    loadChecklistPresets().then(() => loadChecklistInfo());
     checkUpdates();
     setTimeout(() => generateQR(`http://${lanIp}:8080/checklist`), 2000);
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
@@ -1036,14 +1058,19 @@
           <div class="cl-row">
             <div class="cl-card">
               <div class="efb-heading">AIRCRAFT</div>
-              <div class="cl-preset-row">
-                <select class="cl-preset-select" value={clActivePreset} onchange={(e) => setChecklistPreset((e.target as HTMLSelectElement).value)}>
-                  {#each clPresets as p}
-                    <option value={p}>{p}</option>
-                  {/each}
-                </select>
-                <button class="btn-action" style="padding:6px 10px;font-size:10px" onclick={importChecklistPreset}>Import</button>
-              </div>
+              <select class="cl-preset-select" style="width:100%;margin-bottom:6px" value={clActivePreset} onchange={(e) => setChecklistPreset((e.target as HTMLSelectElement).value)}>
+                {#each clPresets as p}
+                  <option value={p}>{p}</option>
+                {/each}
+              </select>
+              {#if clInfo}
+                <div class="cl-meta">
+                  <span class="cl-meta-name">{clInfo.name}</span>
+                  <span class="cl-meta-detail">by {clInfo.author} · v{clInfo.version}{clInfo.category ? ` · ${clInfo.category}` : ''}</span>
+                  <span class="cl-meta-detail">{clInfo.phases} phases · {clInfo.items} items</span>
+                </div>
+              {/if}
+              <button class="cl-import-btn" onclick={importChecklistPreset}>Import checklist from file</button>
             </div>
             <div class="cl-card">
               <div class="efb-heading">MODE</div>
@@ -2393,6 +2420,16 @@
   .checklist-wrap { width: 100%; height: 100%; overflow: hidden; }
   .cl-settings { padding: 14px; overflow-y: auto; height: 100%; }
   .cl-preset-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .cl-import-btn {
+    margin-top: 8px; padding: 5px 0; width: 100%;
+    background: none; border: 1px dashed var(--color-border); border-radius: 4px;
+    color: var(--color-dim); font-size: 10px; cursor: pointer; font-family: inherit;
+    transition: all .1s;
+  }
+  .cl-import-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .cl-meta { margin-top: 6px; display: flex; flex-direction: column; gap: 1px; }
+  .cl-meta-name { font-size: 13px; font-weight: 600; color: var(--color-fg); }
+  .cl-meta-detail { font-size: 10px; color: var(--color-dim); }
   .cl-preset-select { min-width: 0; flex: 1; }
   .cl-preset-select {
     padding: 6px 10px; background: var(--color-bg); border: 1px solid var(--color-border);

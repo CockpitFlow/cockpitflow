@@ -55,7 +55,6 @@
     { id: 'logbook', name: 'Logbook', icon: 'book', enabled: true, order: 9 },
     { id: 'flight', name: 'Flight', icon: 'route', enabled: true, order: 10 },
     { id: 'community', name: 'Community', icon: 'users', enabled: true, order: 11 },
-    { id: 'marketplace', name: 'Marketplace', icon: 'store', enabled: true, order: 12 },
   ];
 
   // Combined sidebar: home + enabled modules (from disk or fallback) + module manager
@@ -221,7 +220,7 @@
   });
 
   let checklistMode = $state<'app' | 'lan' | 'settings'>('app');
-  let communityTab = $state('leaderboard');
+  let communityTab = ('marketplace');
   let pilotName = $state(localStorage.getItem('sf-pilot') || 'Pilot');
   let pilotCallsign = $state(localStorage.getItem('sf-callsign') || 'N172SP');
   $effect(() => { localStorage.setItem('sf-pilot', pilotName); });
@@ -2140,12 +2139,14 @@
       {:else if active === 'community'}
         <div class="efb-panel">
           <div class="efb-tabs">
-            {#each [['leaderboard','Leaderboard'],['profile','Profile'],['connect','Connect'],['share','Share']] as [id,label]}
+            {#each [['marketplace','Marketplace'],['leaderboard','Leaderboard'],['profile','Profile'],['connect','Connect'],['share','Share']] as [id,label]}
               <button class="efb-tab" class:efb-tab-on={communityTab===id} onclick={() => communityTab=id}>{label}</button>
             {/each}
           </div>
           <div class="efb-body">
-            {#if communityTab === 'leaderboard'}
+            {#if communityTab === 'marketplace'}
+              <Marketplace />
+            {:else if communityTab === 'leaderboard'}
               {@const sorted = [...allLandings].sort((a,b) => Math.abs(a.rate) - Math.abs(b.rate))}
               <div class="efb-2col">
                 <div class="efb-section">
@@ -2271,9 +2272,6 @@
             {/if}
           </div>
         </div>
-
-      {:else if active === 'marketplace'}
-        <Marketplace />
 
       {:else if active === '_modules'}
         <ModuleManager {lanIp} onRefresh={loadDiskModules} />

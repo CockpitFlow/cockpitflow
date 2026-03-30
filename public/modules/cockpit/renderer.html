@@ -192,8 +192,7 @@ async function init() {
   const presetName = _p.get('preset') || 'cessna-172';
   try {
     let resp = await fetch(API + `/api/module/cockpit/preset/${presetName}`);
-    if (!resp.ok) resp = await fetch(API + `/api/preset/${presetName}`);
-    if (!resp.ok) throw new Error('Not found');
+    if (!resp.ok) throw new Error('Preset not found: ' + presetName);
     const preset = await resp.json();
     buildCockpit(preset);
   } catch (e) {

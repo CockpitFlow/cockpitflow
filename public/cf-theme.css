@@ -24,6 +24,10 @@
   --cf-red: #ea4a5a;
   --cf-amber: #e3b341;
 
+  /* Theme */
+  --cf-scheme: dark;
+  color-scheme: dark;
+
   /* Fonts */
   --cf-font-body: 'Inter', -apple-system, system-ui, sans-serif;
   --cf-font-display: 'Orbitron', sans-serif;
@@ -379,3 +383,65 @@ body {
 .cf-gap-md { gap: 8px; }
 .cf-gap-lg { gap: 16px; }
 .cf-text-center { text-align: center; }
+
+/* ═══════════════════ LIGHT THEME ═══════════════════ */
+/* Apply with: <html data-theme="light"> or document.documentElement.dataset.theme = 'light' */
+[data-theme="light"] {
+  --cf-scheme: light;
+  color-scheme: light;
+
+  --cf-bg: #f5f6f8;
+  --cf-surface: #ffffff;
+  --cf-surface2: #eef0f4;
+  --cf-border: #d8dce4;
+  --cf-text: #2c3340;
+  --cf-text-bright: #1a1f2b;
+  --cf-dim: #7a8494;
+  --cf-dark: #a0a8b8;
+  --cf-accent: #2b7de9;
+  --cf-green: #1a9e3f;
+  --cf-red: #d93a4a;
+  --cf-amber: #c49520;
+}
+
+/* Light overrides for specific components */
+[data-theme="light"] .cf-check {
+  border-color: #c8cdd6;
+}
+[data-theme="light"] .cf-item {
+  background: var(--cf-surface);
+  border-color: var(--cf-border);
+}
+[data-theme="light"] .cf-item:hover {
+  border-color: rgba(43,125,233,.2);
+}
+[data-theme="light"] .cf-item.current {
+  background: rgba(43,125,233,.04);
+}
+[data-theme="light"] .cf-item-expected {
+  background: rgba(43,125,233,.08);
+}
+[data-theme="light"] .cf-tab {
+  color: var(--cf-dim);
+}
+[data-theme="light"] .cf-gauge {
+  color: #1a7a35;
+  text-shadow: none;
+}
+[data-theme="light"] .cf-gauge.warn { color: #b07d10; text-shadow: none; }
+[data-theme="light"] .cf-gauge.danger { color: #c42535; text-shadow: none; }
+
+/* ═══════════════════ NIGHT MODE (extra dim) ═══════════════════ */
+[data-theme="night"] {
+  --cf-bg: #050709;
+  --cf-surface: #0a0c10;
+  --cf-surface2: #0e1015;
+  --cf-border: #151a22;
+  --cf-text: #8a9098;
+  --cf-text-bright: #b0b6c0;
+  --cf-dim: #3a4050;
+  --cf-accent: #3570cc;
+  --cf-green: #287040;
+  --cf-red: #b03040;
+  --cf-amber: #907020;
+}

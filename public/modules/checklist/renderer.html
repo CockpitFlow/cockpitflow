@@ -50,8 +50,15 @@ html,body{height:100dvh;overflow:hidden;touch-action:manipulation;user-select:no
 .item.locked{opacity:.3;pointer-events:none}
 .item.current{border-color:var(--cf-accent);background:rgba(74,158,255,.03)}
 .item.hidden{display:none}
-.item.swipe-mode{border-left:3px solid transparent;transition:border-left-color .2s}
-.item.swipe-mode:not(.checked):not(.locked){border-left-color:rgba(74,158,255,.15)}
+.item.swipe-mode{position:relative;overflow:hidden}
+.item.swipe-mode .swipe-bg{position:absolute;top:0;bottom:0;left:0;width:0;background:rgba(52,208,88,.08);transition:width .15s;pointer-events:none;border-radius:8px 0 0 8px}
+.item.swipe-mode.swiping-right .swipe-bg{background:rgba(52,208,88,.12)}
+.item.swipe-mode.swiping-left .swipe-bg{background:rgba(234,74,90,.08)}
+.item.swipe-mode.swipe-done .swipe-bg{width:100%!important;background:rgba(52,208,88,.15);transition:width .3s}
+.item.swipe-mode.swipe-undo .swipe-bg{width:100%!important;background:rgba(234,74,90,.1);transition:width .3s}
+.item.swipe-mode .i-content{position:relative;display:flex;align-items:flex-start;gap:12px;width:100%;transition:transform .15s}
+.swipe-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--cf-dim);opacity:0;transition:opacity .15s;pointer-events:none}
+.item.swipe-mode:not(.checked):not(.locked) .swipe-hint{opacity:.4}
 .chk{width:26px;height:26px;border-radius:6px;flex-shrink:0;border:2px solid var(--cf-border);position:relative;transition:all .12s;margin-top:1px}
 .chk::after{content:'';display:none;position:absolute;left:7px;top:2px;width:7px;height:13px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
 .i-body{flex:1;min-width:0}
@@ -263,24 +270,52 @@ function renderChecklist() {
       dotHtml = `<div class="i-dot ${getAutoState(item)}"></div>`;
     }
 
+    const swipeMode = settings.check_method === 'swipe';
     el.innerHTML = `
+      ${swipeMode ? '<div class="swipe-bg"></div>' : ''}
       <div class="chk"></div>
       <div class="i-body">
         <div class="i-top"><span class="i-label">${item.label}</span><span class="i-expected">${item.expected}</span></div>
         ${item.how_to ? `<div class="i-how">${item.how_to}${item.location ? `<div class="i-loc">${item.location}</div>` : ''}</div>` : ''}
       </div>
       ${dotHtml}
+      ${swipeMode && !isChecked && !isLocked ? '<span class="swipe-hint">swipe &rarr;</span>' : ''}
     `;
 
-    // Swipe detection
+    // Swipe detection with visual feedback
     let touchStartX = 0;
     if (settings.check_method === 'swipe') {
-      el.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+      const swipeBg = el.querySelector('.swipe-bg');
+
+      el.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        el.classList.remove('swipe-done', 'swipe-undo', 'swiping-right', 'swiping-left');
+      }, { passive: true });
+
+      el.addEventListener('touchmove', e => {
+        if (isLocked) return;
+        const dx = e.touches[0].clientX - touchStartX;
+        const pct = Math.min(100, Math.abs(dx) / el.offsetWidth * 100);
+        if (swipeBg) swipeBg.style.width = pct + '%';
+        el.classList.toggle('swiping-right', dx > 20);
+        el.classList.toggle('swiping-left', dx < -20);
+      }, { passive: true });
+
       el.addEventListener('touchend', e => {
         if (isLocked) return;
         const dx = e.changedTouches[0].clientX - touchStartX;
-        if (dx > 60 && !checked[item.id]) { doCheck(); } // swipe right = check
-        if (dx < -60 && checked[item.id]) { doCheck(); }  // swipe left = uncheck
+        el.classList.remove('swiping-right', 'swiping-left');
+
+        if (dx > 60 && !checked[item.id]) {
+          el.classList.add('swipe-done');
+          setTimeout(() => doCheck(), 200);
+        } else if (dx < -60 && checked[item.id]) {
+          el.classList.add('swipe-undo');
+          setTimeout(() => doCheck(), 200);
+        } else {
+          // Reset — not enough swipe
+          if (swipeBg) swipeBg.style.width = '0';
+        }
       });
     }
 

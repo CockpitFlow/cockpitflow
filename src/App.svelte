@@ -2392,7 +2392,8 @@
   /* CHECKLIST */
   .checklist-wrap { width: 100%; height: 100%; overflow: hidden; }
   .cl-settings { padding: 14px; overflow-y: auto; height: 100%; }
-  .cl-preset-row { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+  .cl-preset-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .cl-preset-select { min-width: 0; flex: 1; }
   .cl-preset-select {
     padding: 6px 10px; background: var(--color-bg); border: 1px solid var(--color-border);
     border-radius: 4px; color: var(--color-fg); font-family: 'Cascadia Code', monospace;
@@ -2554,12 +2555,12 @@
   .lan-right { flex-shrink: 0; display: flex; align-items: flex-start; }
   .lan-desc { font-size: 12px; color: var(--color-dim); line-height: 1.5; margin: 0; }
   /* Checklist page layout */
-  .cl-page { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .cl-page { padding: 14px; display: flex; flex-direction: column; gap: 12px; width: 100%; overflow-y: auto; }
   .cl-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .cl-card {
     flex: 1; min-width: 180px; padding: 12px;
     background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 5px;
+    border-radius: 5px; overflow: hidden;
   }
   .cl-mode-row { display: flex; gap: 4px; }
   .cl-mode-btn {

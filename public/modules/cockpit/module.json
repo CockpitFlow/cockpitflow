@@ -5,7 +5,7 @@
   "enabled": true,
   "icon": "crosshair",
   "id": "cockpit",
-  "name": "Cockpit Controls",
+  "name": "Controls",
   "order": 2,
   "renderer": "renderer.html",
   "version": "1.0.0"

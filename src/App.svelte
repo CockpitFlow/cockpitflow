@@ -841,7 +841,7 @@
     loadDiskModules();
     loadChecklistPresets();
     checkUpdates();
-    setTimeout(() => generateQR(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`), 2000);
+    setTimeout(() => generateQR(`http://${lanIp}:8080/checklist`), 2000);
     const tick = () => { utcTime = new Date().toISOString().slice(11, 19); }; tick();
     const ci = setInterval(tick, 1000);
     const poll = setInterval(async () => {
@@ -1094,21 +1094,21 @@
                   <div class="lan-qr" style="display:flex;align-items:center;justify-content:center;color:var(--color-dim);font-size:10px">QR</div>
                 {/if}
                 <div>
-                  <div class="cl-hint" style="margin-bottom:6px"><strong style="color:var(--color-fg)">Browser / Web</strong> — scan or open:</div>
+                  <div class="cl-hint" style="margin-bottom:6px"><strong style="color:var(--color-fg)">Browser / Web</strong> — scan QR or open:</div>
                   <div class="lan-url-row">
-                    <span class="lan-url" style="font-size:11px">http://{lanIp}:8080/modules/checklist/renderer.html?preset={clActivePreset}</span>
-                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
+                    <span class="lan-url">http://{lanIp}:8080/checklist</span>
+                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080/checklist`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
                       {lanCopied ? 'COPIED' : 'COPY'}
                     </button>
                   </div>
                   <div class="cl-hint" style="margin-top:10px"><strong style="color:var(--color-fg)">CockpitFlow App</strong> — connect to:</div>
                   <div class="lan-url-row">
-                    <span class="lan-url" style="font-size:12px">http://{lanIp}:8080</span>
+                    <span class="lan-url">http://{lanIp}:8080</span>
                     <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
                       {lanCopied ? 'COPIED' : 'COPY'}
                     </button>
                   </div>
-                  <p class="cl-hint" style="margin-top:8px;opacity:.6">Same WiFi network required</p>
+                  <p class="cl-hint" style="margin-top:8px;opacity:.6">Same WiFi network required. Preset controlled from this app.</p>
                 </div>
               </div>
             </div>

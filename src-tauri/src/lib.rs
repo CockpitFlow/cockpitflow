@@ -832,7 +832,73 @@ fn handle_request(
                 .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
                 .boxed()
         },
-        "/cockpit2" | "/cockpit2.html" => {
+        "/checklist" => {
+            // Short URL: reads active preset from module config, serves renderer
+            let module_dirs = module_base_dirs();
+            let mut preset = "cessna-172".to_string();
+            for dir in &module_dirs {
+                let manifest = dir.join("checklist/module.json");
+                if let Ok(content) = std::fs::read_to_string(&manifest) {
+                    if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
+                        if let Some(p) = parsed.get("default_preset").and_then(|v| v.as_str()) {
+                            preset = p.to_string();
+                            break;
+                        }
+                    }
+                }
+            }
+            // Serve the renderer HTML with preset injected
+            let renderer_paths = vec![
+                dist_dir.join("modules/checklist/renderer.html"),
+                dist_dir.join("../public/modules/checklist/renderer.html"),
+                std::path::PathBuf::from("../public/modules/checklist/renderer.html"),
+                std::path::PathBuf::from("public/modules/checklist/renderer.html"),
+            ];
+            let html = renderer_paths.iter()
+                .find_map(|p| std::fs::read_to_string(p).ok())
+                .unwrap_or_else(|| "<h1>Checklist not found</h1>".to_string());
+            // Inject preset param via a small script
+            let injected = html.replace(
+                "</head>",
+                &format!("<script>if(!new URLSearchParams(location.search).get('preset'))history.replaceState(null,'','/checklist?preset={}')</script></head>", preset)
+            );
+            tiny_http::Response::from_string(injected)
+                .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
+                .boxed()
+        },
+        "/cockpit" | "/cockpit2" | "/cockpit2.html" => {
+            // Short URL for cockpit
+            let module_dirs = module_base_dirs();
+            let mut preset = "cessna-172".to_string();
+            for dir in &module_dirs {
+                let manifest = dir.join("cockpit/module.json");
+                if let Ok(content) = std::fs::read_to_string(&manifest) {
+                    if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
+                        if let Some(p) = parsed.get("default_preset").and_then(|v| v.as_str()) {
+                            preset = p.to_string();
+                            break;
+                        }
+                    }
+                }
+            }
+            let renderer_paths = vec![
+                dist_dir.join("modules/cockpit/renderer.html"),
+                dist_dir.join("../public/modules/cockpit/renderer.html"),
+                std::path::PathBuf::from("../public/modules/cockpit/renderer.html"),
+                std::path::PathBuf::from("public/modules/cockpit/renderer.html"),
+            ];
+            let html = renderer_paths.iter()
+                .find_map(|p| std::fs::read_to_string(p).ok())
+                .unwrap_or_else(|| "<h1>Cockpit not found</h1>".to_string());
+            let injected = html.replace(
+                "</head>",
+                &format!("<script>if(!new URLSearchParams(location.search).get('preset'))history.replaceState(null,'','/cockpit?preset={}')</script></head>", preset)
+            );
+            tiny_http::Response::from_string(injected)
+                .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
+                .boxed()
+        },
+        "/cockpit2.html" => {
             let candidates = vec![
                 dist_dir.join("cockpit2.html"),
                 dist_dir.join("../public/cockpit2.html"),

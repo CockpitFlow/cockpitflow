@@ -237,6 +237,22 @@
   let clMode = $state<'strict' | 'smart'>('smart');
   let clAutoCheck = $state<'on' | 'off'>('on');
   let clFeedback = $state<'on' | 'off'>('on');
+
+  async function syncSettings() {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('set_settings', { newSettings: {
+          mode: clMode,
+          auto_check: clAutoCheck,
+          check_feedback: clFeedback,
+          data_mode: 'live',
+          web_theme: 'dark',
+          active_checklist: clActivePreset,
+        }});
+      }
+    } catch {}
+  }
   let clPresets = $state<string[]>([]);
   let clActivePreset = $state('cessna-172');
 
@@ -1017,11 +1033,11 @@
 
               <div class="efb-heading" style="margin-top:16px">CHECKLIST MODE</div>
               <div class="cl-option-group">
-                <button class="cl-opt" class:cl-opt-on={clMode==='strict'} onclick={() => clMode='strict'}>
+                <button class="cl-opt" class:cl-opt-on={clMode==='strict'} onclick={() => { clMode='strict'; syncSettings(); }}>
                   <strong>Strict</strong>
                   <span>Items must be checked in order. Current item highlighted, rest locked.</span>
                 </button>
-                <button class="cl-opt" class:cl-opt-on={clMode==='smart'} onclick={() => clMode='smart'}>
+                <button class="cl-opt" class:cl-opt-on={clMode==='smart'} onclick={() => { clMode='smart'; syncSettings(); }}>
                   <strong>Smart</strong>
                   <span>Check items in any order. More flexible for experienced pilots.</span>
                 </button>
@@ -1031,8 +1047,8 @@
               <div class="cl-toggle-row">
                 <span>Auto Check</span>
                 <div class="cl-toggle-group">
-                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='on'} onclick={() => clAutoCheck='on'}>ON</button>
-                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='off'} onclick={() => clAutoCheck='off'}>OFF</button>
+                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='on'} onclick={() => { clAutoCheck='on'; syncSettings(); }}>ON</button>
+                  <button class="cl-tgl" class:cl-tgl-on={clAutoCheck==='off'} onclick={() => { clAutoCheck='off'; syncSettings(); }}>OFF</button>
                 </div>
               </div>
               <p class="cl-hint">Automatically check items when sim detects correct state</p>
@@ -1040,8 +1056,8 @@
               <div class="cl-toggle-row">
                 <span>Feedback Dots</span>
                 <div class="cl-toggle-group">
-                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='on'} onclick={() => clFeedback='on'}>ON</button>
-                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='off'} onclick={() => clFeedback='off'}>OFF</button>
+                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='on'} onclick={() => { clFeedback='on'; syncSettings(); }}>ON</button>
+                  <button class="cl-tgl" class:cl-tgl-on={clFeedback==='off'} onclick={() => { clFeedback='off'; syncSettings(); }}>OFF</button>
                 </div>
               </div>
               <p class="cl-hint">Show green/red dots indicating sim variable state</p>

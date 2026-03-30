@@ -201,7 +201,7 @@ html,body{
 const _p = new URLSearchParams(window.location.search);
 const API = _p.get('api') || window.location.origin;
 
-let checklist = null, currentPhase = 0, checked = {};
+let checklist = null, currentPhase = 0, checked = {}, phaseChanged = true;
 let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on' };
 let simValues = {}, defaultChecklist = 'cessna-172';
 
@@ -261,7 +261,7 @@ function renderChecklist() {
     const tab = document.createElement('button');
     tab.className = 'phase-tab' + (i === currentPhase ? ' on' : '') + (done ? ' done' : '');
     tab.innerHTML = `${phase.name}<span class="phase-count">${count}/${phase.items.length}</span>`;
-    tab.addEventListener('click', () => { currentPhase = i; renderChecklist(); });
+    tab.addEventListener('click', () => { currentPhase = i; phaseChanged = true; renderChecklist(); });
     bar.appendChild(tab);
   });
   app.appendChild(bar);
@@ -304,11 +304,15 @@ function renderChecklist() {
   });
   app.appendChild(items);
 
-  const activeTab = bar.querySelector('.phase-tab.on');
-  if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  if (settings.mode === 'strict') {
-    const cur = items.querySelector('.item.current');
-    if (cur) setTimeout(() => cur.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  // Only scroll tabs when phase changes, not on every check
+  if (phaseChanged) {
+    const activeTab = bar.querySelector('.phase-tab.on');
+    if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (settings.mode === 'strict') {
+      const cur = items.querySelector('.item.current');
+      if (cur) setTimeout(() => cur.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    }
+    phaseChanged = false;
   }
 
   // Bottom
@@ -330,7 +334,7 @@ function renderChecklist() {
   `;
   app.appendChild(bottom);
   const nb = document.getElementById('nextPhase');
-  if (nb) nb.addEventListener('click', () => { currentPhase++; renderChecklist(); });
+  if (nb) nb.addEventListener('click', () => { currentPhase++; phaseChanged = true; renderChecklist(); });
   document.getElementById('resetBtn').addEventListener('click', () => { checked = {}; saveChecked(checklist._id); renderChecklist(); });
 }
 

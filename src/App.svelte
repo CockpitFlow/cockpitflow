@@ -1130,6 +1130,16 @@
               </div>
               <p class="cl-card-desc">Auto Check marks items when the sim confirms correct state. Feedback shows green/red dots for each item with sim detection.</p>
             </div>
+            <div class="cl-card">
+              <div class="efb-heading">MULTI-CREW</div>
+              <div class="cl-toggle-row">
+                <span>Shared Progress</span>
+                <div class="cl-toggle-group">
+                  <button class="cl-tgl cl-tgl-on" disabled>ON</button>
+                </div>
+              </div>
+              <p class="cl-card-desc">All devices share the same checklist progress. When one crew member checks an item, it appears checked on all devices within 2 seconds.</p>
+            </div>
           </div>
 
           <!-- Row 2: QR + URLs -->

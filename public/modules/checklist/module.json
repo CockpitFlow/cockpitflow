@@ -1,6 +1,6 @@
 {
   "author": "CockpitFlow",
-  "default_preset": "cessna-172",
+  "default_preset": "boeing-747",
   "description": "Pre-flight to shutdown procedures. Strict/Smart modes, auto-detect from sim data.",
   "enabled": true,
   "icon": "clipboard",

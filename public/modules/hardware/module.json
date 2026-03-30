@@ -2,7 +2,7 @@
   "author": "CockpitFlow",
   "description": "Hardware mapping — map joystick buttons and axes to sim functions.",
   "desktop_only": true,
-  "enabled": false,
+  "enabled": true,
   "icon": "cpu",
   "id": "hardware",
   "name": "Hardware",

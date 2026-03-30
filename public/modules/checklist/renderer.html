@@ -369,27 +369,7 @@ function startPoll() {
   poll();
 }
 
-/* ═══ SETTINGS ═══ */
-/* settings functions removed — controlled from desktop */
-/*
-  document.getElementById('optStrict').classList.toggle('on', settings.mode === 'strict');
-  document.getElementById('optSmart').classList.toggle('on', settings.mode === 'smart');
-  document.getElementById('autoOn').classList.toggle('on', settings.auto_check === 'on');
-  document.getElementById('autoOff').classList.toggle('on', settings.auto_check !== 'on');
-  document.getElementById('fbOn').classList.toggle('on', settings.check_feedback === 'on');
-  document.getElementById('fbOff').classList.toggle('on', settings.check_feedback !== 'on');
-  document.getElementById('settingsOv').classList.add('active');
-}
-function closeSettings() { document.getElementById('settingsOv').classList.remove('active'); renderChecklist(); }
-function setSetting(key, val) {
-  settings[key] = val;
-  if (key === 'mode') { document.getElementById('optStrict').classList.toggle('on', val === 'strict'); document.getElementById('optSmart').classList.toggle('on', val === 'smart'); }
-  if (key === 'auto_check') { document.getElementById('autoOn').classList.toggle('on', val === 'on'); document.getElementById('autoOff').classList.toggle('on', val !== 'on'); }
-  if (key === 'check_feedback') { document.getElementById('fbOn').classList.toggle('on', val === 'on'); document.getElementById('fbOff').classList.toggle('on', val !== 'on'); }
-}
-
-/* ═══ INIT ═══ */
-*/
+// Settings controlled from desktop app
 
 init();
 </script>

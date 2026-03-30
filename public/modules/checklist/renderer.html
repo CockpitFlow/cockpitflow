@@ -50,6 +50,8 @@ html,body{height:100dvh;overflow:hidden;touch-action:manipulation;user-select:no
 .item.locked{opacity:.3;pointer-events:none}
 .item.current{border-color:var(--cf-accent);background:rgba(74,158,255,.03)}
 .item.hidden{display:none}
+.item.swipe-mode{border-left:3px solid transparent;transition:border-left-color .2s}
+.item.swipe-mode:not(.checked):not(.locked){border-left-color:rgba(74,158,255,.15)}
 .chk{width:26px;height:26px;border-radius:6px;flex-shrink:0;border:2px solid var(--cf-border);position:relative;transition:all .12s;margin-top:1px}
 .chk::after{content:'';display:none;position:absolute;left:7px;top:2px;width:7px;height:13px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
 .i-body{flex:1;min-width:0}
@@ -92,7 +94,7 @@ const _p = new URLSearchParams(window.location.search);
 const API = _p.get('api') || window.location.origin;
 
 let checklist = null, currentPhase = 0, checked = {}, phaseChanged = true;
-let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on', haptic: 'on', sound: 'on' };
+let settings = { mode: 'smart', auto_check: 'on', check_feedback: 'on', haptic: 'on', sound: 'on', check_method: 'tap', auto_advance: 'on' };
 let simValues = {};
 let searchQuery = '';
 let undoStack = []; // [{itemId, phaseIdx}]
@@ -252,7 +254,7 @@ function renderChecklist() {
     const isLocked = settings.mode === 'strict' && idx > firstUnchecked && firstUnchecked >= 0 && !isChecked;
 
     const el = document.createElement('div');
-    el.className = 'item' + (isChecked ? ' checked' : '') + (isCurrent ? ' current' : '') + (isLocked ? ' locked' : '');
+    el.className = 'item' + (isChecked ? ' checked' : '') + (isCurrent ? ' current' : '') + (isLocked ? ' locked' : '') + (settings.check_method === 'swipe' ? ' swipe-mode' : '');
     el.dataset.label = (item.label || '').toLowerCase();
     el.dataset.expected = (item.expected || '').toLowerCase();
 
@@ -270,8 +272,25 @@ function renderChecklist() {
       ${dotHtml}
     `;
 
+    // Swipe detection
+    let touchStartX = 0;
+    if (settings.check_method === 'swipe') {
+      el.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+      el.addEventListener('touchend', e => {
+        if (isLocked) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (dx > 60 && !checked[item.id]) { doCheck(); } // swipe right = check
+        if (dx < -60 && checked[item.id]) { doCheck(); }  // swipe left = uncheck
+      });
+    }
+
     el.querySelector('.chk').addEventListener('click', e => {
       e.stopPropagation(); if (isLocked) return;
+      if (settings.check_method === 'swipe') return; // in swipe mode, checkbox doesn't work
+      doCheck();
+    });
+
+    function doCheck() {
       const wasChecked = checked[item.id];
       checked[item.id] = !checked[item.id];
 
@@ -302,8 +321,17 @@ function renderChecklist() {
       const allDone = checklist.phases.every(p => p.items.every(it => checked[it.id]));
       if (allDone) { if (settings.sound === 'on') playSound('complete'); if (settings.haptic === 'on') vibrate([30, 50, 30, 50, 60]); }
 
+      // Auto-advance to next phase when current is complete
+      if (settings.auto_advance === 'on') {
+        const phaseDoneNow = phase.items.every(it => checked[it.id]);
+        if (phaseDoneNow && currentPhase < checklist.phases.length - 1) {
+          setTimeout(() => { currentPhase++; phaseChanged = true; renderChecklist(); }, 600);
+          return;
+        }
+      }
+
       renderChecklist();
-    });
+    }
 
     el.querySelector('.i-body').addEventListener('click', () => el.classList.toggle('expanded'));
     items.appendChild(el);
@@ -455,6 +483,8 @@ function startPoll() {
           if (s.check_feedback && s.check_feedback !== settings.check_feedback) { settings.check_feedback = s.check_feedback; changed = true; }
           if (s.haptic) settings.haptic = s.haptic;
           if (s.sound) settings.sound = s.sound;
+          if (s.check_method && s.check_method !== settings.check_method) { settings.check_method = s.check_method; changed = true; }
+          if (s.auto_advance) settings.auto_advance = s.auto_advance;
           if (changed) renderChecklist();
         }
       } catch {}

@@ -15,6 +15,8 @@ struct AppSettings {
     check_feedback: String, // "on" or "off"
     haptic: String,         // "on" or "off"
     sound: String,          // "on" or "off"
+    check_method: String,   // "tap" or "swipe"
+    auto_advance: String,   // "on" or "off"
     data_mode: String,      // "live" or "manual"
     web_theme: String,      // "dark" or "light"
     active_checklist: String,
@@ -28,6 +30,8 @@ impl Default for AppSettings {
             check_feedback: "on".into(),
             haptic: "on".into(),
             sound: "on".into(),
+            check_method: "tap".into(),
+            auto_advance: "on".into(),
             data_mode: "live".into(),
             web_theme: "dark".into(),
             active_checklist: "cessna-172".into(),

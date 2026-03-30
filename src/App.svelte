@@ -249,6 +249,8 @@
   let clFeedback = $state<'on' | 'off'>('on');
   let clHaptic = $state<'on' | 'off'>('on');
   let clSound = $state<'on' | 'off'>('on');
+  let clCheckMethod = $state<'tap' | 'swipe'>('tap');
+  let clAutoAdvance = $state<'on' | 'off'>('on');
 
   let qrDataUrl = $state('');
   async function generateQR(url: string) {
@@ -271,6 +273,8 @@
           check_feedback: clFeedback,
           haptic: clHaptic,
           sound: clSound,
+          check_method: clCheckMethod,
+          auto_advance: clAutoAdvance,
           data_mode: 'live',
           web_theme: 'dark',
           active_checklist: clActivePreset,
@@ -1150,14 +1154,30 @@
               <p class="cl-card-desc">Auto Check from sim. Feedback dots. Haptic vibration on check. Sounds on check/phase complete.</p>
             </div>
             <div class="cl-card">
-              <div class="efb-heading">MULTI-CREW</div>
-              <div class="cl-toggle-row">
-                <span>Shared Progress</span>
-                <div class="cl-toggle-group">
-                  <button class="cl-tgl cl-tgl-on" disabled>ON</button>
+              <div class="efb-heading">INTERACTION</div>
+              <div class="cl-toggles">
+                <div class="cl-toggle-row">
+                  <span>Check method</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clCheckMethod==='tap'} onclick={() => { clCheckMethod='tap'; syncSettings(); }}>TAP</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clCheckMethod==='swipe'} onclick={() => { clCheckMethod='swipe'; syncSettings(); }}>SWIPE</button>
+                  </div>
+                </div>
+                <div class="cl-toggle-row">
+                  <span>Auto-advance</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clAutoAdvance==='on'} onclick={() => { clAutoAdvance='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clAutoAdvance==='off'} onclick={() => { clAutoAdvance='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+                <div class="cl-toggle-row">
+                  <span>Multi-crew</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl cl-tgl-on" disabled>ON</button>
+                  </div>
                 </div>
               </div>
-              <p class="cl-card-desc">All devices share the same checklist progress. When one crew member checks an item, it appears checked on all devices within 2 seconds.</p>
+              <p class="cl-card-desc">Tap = checkbox tap. Swipe = swipe right to check. Auto-advance = next phase when complete. Multi-crew = shared progress across devices.</p>
             </div>
           </div>
 

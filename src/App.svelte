@@ -1666,6 +1666,19 @@
                   </div>
                   {#if densAlt > 5000}<div class="efb-warn-msg">High density altitude — reduced performance</div>{/if}
                   {#if densAlt > 8000}<div class="efb-warn-msg" style="color:var(--color-red)">Very high DA — consider weight reduction</div>{/if}
+                  {#if navData?.performance}
+                    <div class="efb-heading" style="margin-top:12px">AIRCRAFT DATA — {navData.name || ''}</div>
+                    <table class="efb-tbl">
+                      <tbody>
+                        {#if navData.performance.takeoff_ground_roll_ft}<tr><td>Takeoff ground roll</td><td class="mono">{navData.performance.takeoff_ground_roll_ft} ft</td></tr>{/if}
+                        {#if navData.performance.takeoff_over_50ft}<tr><td>Takeoff over 50ft</td><td class="mono">{navData.performance.takeoff_over_50ft} ft</td></tr>{/if}
+                        {#if navData.performance.landing_ground_roll_ft}<tr><td>Landing ground roll</td><td class="mono">{navData.performance.landing_ground_roll_ft} ft</td></tr>{/if}
+                        {#if navData.performance.rate_of_climb_fpm}<tr><td>Rate of climb</td><td class="mono">{navData.performance.rate_of_climb_fpm} fpm</td></tr>{/if}
+                        {#if navData.performance.service_ceiling_ft}<tr><td>Service ceiling</td><td class="mono">{navData.performance.service_ceiling_ft} ft</td></tr>{/if}
+                      </tbody>
+                    </table>
+                    <div class="efb-note">Sea level ISA values. Actual performance varies with density altitude.</div>
+                  {/if}
                 </div>
               </div>
 

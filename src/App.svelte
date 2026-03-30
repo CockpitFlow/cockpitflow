@@ -1135,7 +1135,6 @@
                     <button class="cl-tgl" class:cl-tgl-on={clFeedback==='off'} onclick={() => { clFeedback='off'; syncSettings(); }}>OFF</button>
                   </div>
                 </div>
-              </div>
                 <div class="cl-toggle-row">
                   <span>Haptic</span>
                   <div class="cl-toggle-group">

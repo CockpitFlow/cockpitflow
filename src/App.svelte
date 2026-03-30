@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import ElectricalPanel from './lib/gauges/ElectricalPanel.svelte';
-  import LowerControls from './lib/gauges/LowerControls.svelte';
   import ChecklistView from './lib/gauges/Checklist.svelte';
   import FirmwareFlasher from './lib/gauges/FirmwareFlasher.svelte';
   import DeviceManager from './lib/gauges/DeviceManager.svelte';
@@ -48,7 +46,6 @@
 
   // Fallback modules if disk scan fails or is empty
   const fallbackModules = [
-    { id: 'panel', name: 'Panel', icon: 'gauge', enabled: true, order: 1 },
     { id: 'checklist', name: 'Checklist', icon: 'clipboard', enabled: true, order: 3 },
     { id: 'scenarios', name: 'Scenarios', icon: 'target', enabled: true, order: 4 },
     { id: 'debrief', name: 'Debrief', icon: 'chart', enabled: true, order: 5 },
@@ -76,7 +73,6 @@
 
   let active = $state('home');
   let collapsed = $state(false);
-  let panelTab = $state('gauges');
 
   // Update check
   let appTheme = $state(localStorage.getItem('cf-theme') || 'dark');
@@ -1090,8 +1086,6 @@
       {:else if active === 'cockpit'}
         <CockpitBuilder {lanIp} />
 
-      {:else if active === 'panel'}
-        <div class="v-row"><div class="flex-1 overflow-y-auto"><ElectricalPanel {simData} /></div><div class="flex-1 overflow-y-auto"><LowerControls {simData} /></div></div>
 
       {:else if active === 'checklist'}
         <div class="cl-page">

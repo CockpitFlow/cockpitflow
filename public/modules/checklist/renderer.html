@@ -167,11 +167,24 @@ function playSound(type) {
 
 // ═══ VOICE ═══
 function speak(text) {
-  if (!voiceEnabled || !window.speechSynthesis) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.9; u.pitch = 1; u.volume = 0.8;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  if (!voiceEnabled) return;
+  // Try own speechSynthesis first
+  if (window.speechSynthesis) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.9; u.pitch = 1; u.volume = 0.8;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+    return;
+  }
+  // Try parent (if in iframe)
+  try {
+    if (window.parent && window.parent.speechSynthesis) {
+      const u = new window.parent.SpeechSynthesisUtterance(text);
+      u.rate = 0.9; u.pitch = 1; u.volume = 0.8;
+      window.parent.speechSynthesis.cancel();
+      window.parent.speechSynthesis.speak(u);
+    }
+  } catch {}
 }
 
 // ═══ TIMER ═══
@@ -233,7 +246,7 @@ function renderChecklist() {
     <span class="topbar-badge mode-${settings.mode}">${settings.mode.toUpperCase()}</span>
     ${settings.auto_check === 'on' ? '<span class="topbar-badge auto">AUTO</span>' : ''}
     ${settings.check_feedback === 'on' ? '<span class="topbar-badge fb">DOTS</span>' : ''}
-    <button class="topbar-btn voice ${voiceEnabled ? 'on' : ''}" onclick="voiceEnabled=!voiceEnabled;renderChecklist()">&#128362; ${voiceEnabled ? 'ON' : 'OFF'}</button>
+    <button class="topbar-btn voice ${voiceEnabled ? 'on' : ''}" onclick="voiceEnabled=!voiceEnabled;if(voiceEnabled){try{speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch{}}renderChecklist()">VOICE ${voiceEnabled ? 'ON' : 'OFF'}</button>
     ${emergencyIdx >= 0 ? `<button class="topbar-btn emergency" onclick="currentPhase=${emergencyIdx};phaseChanged=true;renderChecklist()">&#9888; EMRG</button>` : ''}
   `;
   app.appendChild(topbar);

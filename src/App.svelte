@@ -1072,18 +1072,26 @@
                 <div class="cl-info-item"><span class="cl-info-label">MODE</span><span>{clMode === 'strict' ? 'Strict (ordered)' : 'Smart (flexible)'}</span></div>
               </div>
 
-              <div class="efb-heading" style="margin-top:16px">COMPANION APP</div>
-              <p class="cl-hint" style="margin-bottom:6px">Scan QR code or open URL on your phone/tablet.</p>
+              <div class="efb-heading" style="margin-top:16px">OPEN ON PHONE / TABLET</div>
+
               <div class="lan-qr-section">
-                <img class="lan-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&bgcolor=0a0e14&color=4a9eff&data={encodeURIComponent(`http://${lanIp}:8080`)}" alt="QR">
+                <img class="lan-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&bgcolor=0a0e14&color=4a9eff&data={encodeURIComponent(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`)}" alt="QR">
                 <div>
+                  <div class="cl-hint" style="margin-bottom:6px"><strong style="color:var(--color-fg)">Browser / Web</strong> — scan or open:</div>
                   <div class="lan-url-row">
-                    <span class="lan-url">http://{lanIp}:8080</span>
+                    <span class="lan-url" style="font-size:11px">http://{lanIp}:8080/modules/checklist/renderer.html?preset={clActivePreset}</span>
+                    <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080/modules/checklist/renderer.html?preset=${clActivePreset}`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
+                      {lanCopied ? 'COPIED' : 'COPY'}
+                    </button>
+                  </div>
+                  <div class="cl-hint" style="margin-top:10px"><strong style="color:var(--color-fg)">CockpitFlow App</strong> — connect to:</div>
+                  <div class="lan-url-row">
+                    <span class="lan-url" style="font-size:12px">http://{lanIp}:8080</span>
                     <button class="lan-copy" onclick={() => { navigator.clipboard.writeText(`http://${lanIp}:8080`); lanCopied = true; setTimeout(() => lanCopied = false, 2000); }}>
                       {lanCopied ? 'COPIED' : 'COPY'}
                     </button>
                   </div>
-                  <p class="cl-hint" style="margin-top:6px">Same WiFi network required</p>
+                  <p class="cl-hint" style="margin-top:8px;opacity:.6">Same WiFi network required</p>
                 </div>
               </div>
             </div>

@@ -251,6 +251,7 @@
   let clSound = $state<'on' | 'off'>('on');
   let clCheckMethod = $state<'tap' | 'swipe'>('tap');
   let clAutoAdvance = $state<'on' | 'off'>('on');
+  let clVoice = $state<'on' | 'off'>('off');
 
   let qrDataUrl = $state('');
   async function generateQR(url: string) {
@@ -275,6 +276,7 @@
           sound: clSound,
           check_method: clCheckMethod,
           auto_advance: clAutoAdvance,
+          voice: clVoice,
           data_mode: 'live',
           web_theme: 'dark',
           active_checklist: clActivePreset,
@@ -1170,13 +1172,20 @@
                   </div>
                 </div>
                 <div class="cl-toggle-row">
+                  <span>Voice (TTS)</span>
+                  <div class="cl-toggle-group">
+                    <button class="cl-tgl" class:cl-tgl-on={clVoice==='on'} onclick={() => { clVoice='on'; syncSettings(); }}>ON</button>
+                    <button class="cl-tgl" class:cl-tgl-on={clVoice==='off'} onclick={() => { clVoice='off'; syncSettings(); }}>OFF</button>
+                  </div>
+                </div>
+                <div class="cl-toggle-row">
                   <span>Multi-crew</span>
                   <div class="cl-toggle-group">
                     <button class="cl-tgl cl-tgl-on" disabled>ON</button>
                   </div>
                 </div>
               </div>
-              <p class="cl-card-desc">Tap = checkbox tap. Swipe = swipe right to check. Auto-advance = next phase when complete. Multi-crew = shared progress across devices.</p>
+              <p class="cl-card-desc">Tap/Swipe = how to check items. Auto-advance = next phase when complete. Voice = TTS reads items aloud. Multi-crew = shared progress.</p>
             </div>
           </div>
 

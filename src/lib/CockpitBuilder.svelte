@@ -75,7 +75,9 @@
 
   async function loadPresets() {
     try {
-      presets = await invoke('list_presets') as string[];
+      const modules = await invoke('list_modules') as any[];
+      const cockpit = modules.find((m: any) => m.id === 'cockpit');
+      presets = cockpit?.presets || ['cessna-172'];
     } catch {
       presets = ['cessna-172'];
     }
@@ -83,7 +85,7 @@
 
   async function loadPreset(name: string) {
     try {
-      const json = await invoke('load_preset', { name }) as string;
+      const json = await invoke('load_module_preset', { moduleId: 'cockpit', presetId: name }) as string;
       preset = JSON.parse(json);
       activePreset = name;
       selectedComp = null;
@@ -97,7 +99,7 @@
   async function savePreset() {
     if (!preset || !activePreset) return;
     try {
-      await invoke('save_preset', { name: activePreset, data: JSON.stringify(preset, null, 2) });
+      await invoke('save_module_preset', { moduleId: 'cockpit', presetId: activePreset, data: JSON.stringify(preset, null, 2) });
       dirty = false;
       saveMsg = 'Saved!';
       setTimeout(() => saveMsg = '', 2000);

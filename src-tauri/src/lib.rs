@@ -5,6 +5,8 @@ use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use tauri::{Emitter, Manager};
 
 static MOBILE_GYRO_ACTIVE: AtomicBool = AtomicBool::new(false);
@@ -405,13 +407,19 @@ async fn check_for_updates() -> Result<serde_json::Value, String> {
                 let changelog = json["body"].as_str().unwrap_or("").to_string();
 
                 // Find .msi or .exe asset for auto-update
+                // Prefer .exe (NSIS, in-place upgrade) over .msi (requires uninstall)
                 let installer_url = json["assets"].as_array()
                     .and_then(|assets| {
+                        // First try .exe
                         assets.iter().find_map(|a| {
                             let name = a["name"].as_str().unwrap_or("");
-                            if name.ends_with(".msi") || name.ends_with(".exe") {
-                                a["browser_download_url"].as_str().map(|s| s.to_string())
-                            } else { None }
+                            if name.ends_with("-setup.exe") { a["browser_download_url"].as_str().map(|s| s.to_string()) } else { None }
+                        }).or_else(|| {
+                            // Fallback to .msi
+                            assets.iter().find_map(|a| {
+                                let name = a["name"].as_str().unwrap_or("");
+                                if name.ends_with(".msi") { a["browser_download_url"].as_str().map(|s| s.to_string()) } else { None }
+                            })
                         })
                     })
                     .unwrap_or_default();
@@ -445,16 +453,17 @@ async fn download_and_install_update(url: String) -> Result<String, String> {
     if url.is_empty() { return Err("No installer URL".into()); }
 
     let temp_dir = std::env::temp_dir();
-    let filename = url.split('/').last().unwrap_or("CockpitFlow-update.msi");
+    let filename = url.split('/').last().unwrap_or("CockpitFlow-update.exe");
     let filepath = temp_dir.join(filename);
     let filepath_str = filepath.to_string_lossy().to_string();
 
-    // Download using PowerShell (handles HTTPS + redirects)
+    // Download silently using PowerShell (hidden window)
     let download = std::process::Command::new("powershell")
-        .args(["-Command", &format!(
-            "Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
+        .args(["-WindowStyle", "Hidden", "-Command", &format!(
+            "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
             url, filepath_str
         )])
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .output()
         .map_err(|e| format!("Download failed: {}", e))?;
 
@@ -462,17 +471,11 @@ async fn download_and_install_update(url: String) -> Result<String, String> {
         return Err("Download failed".into());
     }
 
-    // Launch installer
-    if filepath_str.ends_with(".msi") {
-        std::process::Command::new("msiexec")
-            .args(["/i", &filepath_str, "/passive"])
-            .spawn()
-            .map_err(|e| format!("Install failed: {}", e))?;
-    } else {
-        std::process::Command::new(&filepath_str)
-            .spawn()
-            .map_err(|e| format!("Install failed: {}", e))?;
-    }
+    // Launch NSIS installer (overwrites in-place, no uninstall needed)
+    std::process::Command::new(&filepath_str)
+        .args(["/S"]) // Silent install
+        .spawn()
+        .map_err(|e| format!("Install failed: {}", e))?;
 
     Ok("Installing...".into())
 }

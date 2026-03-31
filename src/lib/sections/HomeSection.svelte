@@ -82,18 +82,14 @@
 
   <!-- Row 2: Modules grid -->
   <div class="flex-1 min-h-0 overflow-y-auto">
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
       {#each sidebarItems.filter(m => m.id !== 'home') as m}
         <button
-          class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5 flex flex-col gap-3 text-left cursor-pointer transition-all hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 hover:shadow-lg"
+          class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-2.5 flex items-center gap-2.5 text-left cursor-pointer transition-all hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5"
           onclick={() => onNavigate(m.id)}
         >
-          <div class="w-10 h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
-            <m.icon size={22} strokeWidth={1.5} />
-          </div>
-          <div>
-            <div class="text-sm font-semibold text-[var(--color-fg)]">{m.label}</div>
-          </div>
+          <m.icon size={16} strokeWidth={1.5} class="text-[var(--color-accent)] shrink-0" />
+          <span class="text-xs font-semibold text-[var(--color-fg)]">{m.label}</span>
         </button>
       {/each}
     </div>

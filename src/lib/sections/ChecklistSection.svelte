@@ -8,6 +8,7 @@
   let { lanIp = '...', connected = false }: { lanIp?: string; connected?: boolean } = $props();
 
   let lanCopied = $state<string>('');
+  // Defaults loaded from config, overridable
   let clMode = $state<'strict' | 'smart'>('smart');
   let clAutoCheck = $state<'on' | 'off'>('on');
   let clFeedback = $state<'on' | 'off'>('on');
@@ -15,6 +16,23 @@
   let clSound = $state<'on' | 'off'>('on');
   let clCheckMethod = $state<'tap' | 'swipe'>('tap');
   let clAutoAdvance = $state<'on' | 'off'>('on');
+
+  async function loadDefaults() {
+    try {
+      const resp = await fetch('./data/defaults.json');
+      if (!resp.ok) return;
+      const d = (await resp.json()).checklist;
+      if (d) {
+        clMode = d.mode || clMode;
+        clAutoCheck = d.auto_check || clAutoCheck;
+        clFeedback = d.check_feedback || clFeedback;
+        clHaptic = d.haptic || clHaptic;
+        clSound = d.sound || clSound;
+        clCheckMethod = d.check_method || clCheckMethod;
+        clAutoAdvance = d.auto_advance || clAutoAdvance;
+      }
+    } catch {}
+  }
 
   let qrDataUrl = $state('');
   let clPresets = $state<string[]>([]);
@@ -72,7 +90,7 @@
           try {
             const json = await invoke('load_module_preset', { moduleId: 'checklist', presetId: id }) as string;
             const data = JSON.parse(json);
-            names[id] = `${data.name || id} (${data.author || 'Unknown'} v${data.version || '1.0'})`;
+            names[id] = `${data.name || id} (${data.author || (data.contributors || []).join(', ') || 'Unknown'} v${data.version || '1.0'})`;
           } catch { names[id] = id; }
         }
         clPresetNames = names;
@@ -87,7 +105,7 @@
         const json = await invoke('load_module_preset', { moduleId: 'checklist', presetId: clActivePreset }) as string;
         const data = JSON.parse(json);
         const items = (data.phases || []).reduce((s: number, p: any) => s + (p.items?.length || 0), 0);
-        clInfo = { name: data.name || clActivePreset, author: data.author || 'Unknown', version: data.version || '1.0', category: data.category || '', phases: (data.phases || []).length, items };
+        clInfo = { name: data.name || clActivePreset, author: data.author || (data.contributors || []).join(', ') || 'Unknown', version: data.version || '1.0', category: data.category || '', phases: (data.phases || []).length, items };
       }
     } catch { clInfo = null; }
   }
@@ -139,8 +157,33 @@
     input.click();
   }
 
+  async function ensureDefaults() {
+    // First run: if no presets exist, download defaults from cockpitflow-data
+    if (clPresets.length > 0) return;
+    try {
+      const resp = await fetch('./modules/checklist/defaults.json');
+      if (!resp.ok) return;
+      const defaults = await resp.json();
+      const source = defaults.source || '';
+      for (const p of defaults.presets || []) {
+        try {
+          const r = await fetch(`${source}/${p.file}?t=${Date.now()}`);
+          if (!r.ok) continue;
+          const data = await r.text();
+          if ('__TAURI_INTERNALS__' in window) {
+            const { invoke } = await import('@tauri-apps/api/core');
+            await invoke('save_module_preset', { moduleId: 'checklist', presetId: p.id, data });
+          }
+        } catch {}
+      }
+      await loadChecklistPresets();
+      toast('Default checklists installed', 'success');
+    } catch {}
+  }
+
   onMount(() => {
-    loadChecklistPresets().then(() => { loadAllPresetNames(); loadChecklistInfo(); });
+    loadDefaults();
+    loadChecklistPresets().then(() => { loadAllPresetNames(); loadChecklistInfo(); ensureDefaults(); });
     setTimeout(() => generateQR(`http://${lanIp}:8080/checklist`), 2000);
 
     // Regenerate QR when theme changes

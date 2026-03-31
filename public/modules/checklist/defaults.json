@@ -1,0 +1,8 @@
+{
+  "source": "https://raw.githubusercontent.com/CockpitFlow/cockpitflow-data/main",
+  "presets": [
+    { "id": "cessna-172-standard", "file": "checklists/cessna-172-standard.json" },
+    { "id": "boeing-747-standard", "file": "checklists/boeing-747-standard.json" },
+    { "id": "airbus-a320-standard", "file": "checklists/airbus-a320-standard.json" }
+  ]
+}

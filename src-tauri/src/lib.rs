@@ -1255,14 +1255,17 @@ fn serve_loop(
 fn start_http_server(sim_state: SimState, settings: SettingsState, capture: CaptureState, overlay: OverlayState, dist_dir: std::path::PathBuf) {
     let cl_progress: ChecklistProgress = Arc::new(Mutex::new(HashMap::new()));
 
-    // HTTP on port 8080
+    // HTTP server — configurable port (default 8080)
+    let http_port = std::env::var("CF_PORT").unwrap_or_else(|_| "8080".to_string());
     let (sim1, set1, cap1, ov1, cl1, dir1) = (sim_state.clone(), settings.clone(), capture.clone(), overlay.clone(), cl_progress.clone(), dist_dir.clone());
+    let port1 = http_port.clone();
     std::thread::spawn(move || {
-        let server = match tiny_http::Server::http("0.0.0.0:8080") {
+        let addr = format!("0.0.0.0:{}", port1);
+        let server = match tiny_http::Server::http(&addr) {
             Ok(s) => s,
-            Err(e) => { eprintln!("[HTTP] Failed to start: {}", e); return; }
+            Err(e) => { eprintln!("[HTTP] Failed to start on {}: {}", addr, e); return; }
         };
-        eprintln!("[HTTP] Serving on port 8080");
+        eprintln!("[HTTP] Serving on port {}", port1);
         serve_loop(server, sim1, set1, cap1, ov1, cl1, dir1);
     });
 

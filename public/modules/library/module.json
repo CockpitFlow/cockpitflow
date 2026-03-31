@@ -1,0 +1,11 @@
+{
+  "author": "CockpitFlow",
+  "description": "Browse and install community presets — checklists, cockpit layouts, hardware profiles.",
+  "desktop_only": true,
+  "enabled": true,
+  "icon": "store",
+  "id": "library",
+  "name": "Library",
+  "order": 10,
+  "version": "1.0.0"
+}

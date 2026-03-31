@@ -1,0 +1,28 @@
+{
+  "checklist": {
+    "mode": "strict",
+    "auto_check": "off",
+    "check_feedback": "on",
+    "haptic": "off",
+    "sound": "off",
+    "check_method": "tap",
+    "auto_advance": "on",
+    "default_preset": "cessna-172-standard"
+  },
+  "cockpit": {
+    "default_preset": "cessna-172-basic"
+  },
+  "nav": {
+    "default_preset": "cessna-172"
+  },
+  "debrief": {
+    "vne": 163,
+    "vs1": 48,
+    "max_g": 3.8,
+    "max_bank": 60
+  },
+  "server": {
+    "http_port": 8080,
+    "https_port": 8443
+  }
+}

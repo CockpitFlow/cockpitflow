@@ -48,7 +48,7 @@
     loading = true;
     error = '';
     try {
-      const resp = await fetch(`${REPO_RAW}/index.json`, { cache: 'no-cache' });
+      const resp = await fetch(`${REPO_RAW}/index.json?t=${Date.now()}`, { cache: 'no-cache' });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       index = await resp.json();
       await checkInstalled();
@@ -96,6 +96,21 @@
       installed[`${modId}/${item.id}`] = true;
       installed = { ...installed };
       msg = `Installed "${item.name}"`;
+      setTimeout(() => msg = '', 3000);
+    } catch (e: any) {
+      msg = `Error: ${e.message}`;
+    }
+    downloading[item.id] = false;
+    downloading = { ...downloading };
+  }
+
+  async function uninstallItem(item: MarketItem) {
+    const modId = categoryToModule[item.category] || item.category;
+    try {
+      await invoke('delete_module_preset', { moduleId: modId, presetId: item.id });
+      delete installed[`${modId}/${item.id}`];
+      installed = { ...installed };
+      msg = `Removed "${item.name}"`;
       setTimeout(() => msg = '', 3000);
     } catch (e: any) {
       msg = `Error: ${e.message}`;
@@ -179,7 +194,10 @@
           {/if}
           <div class="mp-card-footer">
             {#if isInstalled(item)}
-              <span class="mp-installed"><Check size={12} /> Installed</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                <span class="mp-installed"><Check size={12} /> Installed</span>
+                <button class="mp-btn danger" onclick={() => uninstallItem(item)}>Remove</button>
+              </div>
             {:else if downloading[item.id]}
               <span class="mp-downloading">Downloading...</span>
             {:else}
@@ -247,6 +265,8 @@
   .mp-btn:hover { border-color: var(--color-dim); color: var(--color-fg); }
   .mp-btn.primary { background: rgba(74,158,255,.08); border-color: rgba(74,158,255,.3); color: var(--color-accent); }
   .mp-btn.primary:hover { background: rgba(74,158,255,.15); }
+  .mp-btn.danger { background: none; border-color: var(--color-border); color: var(--color-dim); font-size: 10px; }
+  .mp-btn.danger:hover { border-color: var(--color-red); color: var(--color-red); }
 
   /* Grid */
   .mp-grid {

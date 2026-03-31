@@ -1,7 +1,9 @@
 {
+  "id": "boeing-747-standard",
   "id": "boeing-747",
   "name": "Boeing 747-400",
-  "author": "CockpitFlow Community",
+  "simulator": ["xplane"],
+  "contributors": ["CockpitFlow Community"],
   "version": "1.0",
   "category": "Heavy",
   "phases": [

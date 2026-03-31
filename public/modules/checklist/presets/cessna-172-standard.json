@@ -1,7 +1,8 @@
 {
+  "id": "cessna-172-standard",
   "id": "cessna-172",
   "name": "Cessna 172 Skyhawk",
-  "author": "CockpitFlow",
+  "contributors": ["CockpitFlow"],
   "version": "1.0",
   "category": "GA",
   "phases": [
@@ -1028,5 +1029,5 @@
       ]
     }
   ],
-  "simulator": "both"
+  "simulator": ["xplane", "msfs"]
 }

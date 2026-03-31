@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Marketplace from '../Marketplace.svelte';
   import { ExternalLink } from 'lucide-svelte';
   import { toast } from '../gauges/Toast.svelte';
 
@@ -17,7 +16,7 @@
     onClearLandings?: () => void;
   } = $props();
 
-  let communityTab = $state('marketplace');
+  let communityTab = $state('leaderboard');
   let pilotName = $state(localStorage.getItem('sf-pilot') || 'Pilot');
   let pilotCallsign = $state(localStorage.getItem('sf-callsign') || 'N172SP');
   $effect(() => { localStorage.setItem('sf-pilot', pilotName); });
@@ -26,14 +25,12 @@
 
 <div class="w-full h-full overflow-hidden flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md">
   <div class="flex border-b border-[var(--color-border)] shrink-0">
-    {#each [['marketplace','Marketplace'],['leaderboard','Leaderboard'],['profile','Profile'],['connect','Connect'],['share','Share']] as [id,label]}
+    {#each [['leaderboard','Leaderboard'],['profile','Profile'],['connect','Connect'],['share','Share']] as [id,label]}
       <button class="px-4 py-1.5 border-none bg-transparent text-[var(--color-dim)] font-mono text-[10px] font-semibold tracking-wide cursor-pointer border-b-2 border-transparent transition-all hover:text-[var(--color-fg)] {communityTab===id ? 'text-[var(--color-accent)]! border-b-[var(--color-accent)]!' : ''}" onclick={() => communityTab=id}>{label}</button>
     {/each}
   </div>
   <div class="flex-1 overflow-y-auto p-3.5">
-    {#if communityTab === 'marketplace'}
-      <Marketplace />
-    {:else if communityTab === 'leaderboard'}
+    {#if communityTab === 'leaderboard'}
       {@const sorted = [...allLandings].sort((a,b) => Math.abs(a.rate) - Math.abs(b.rate))}
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>

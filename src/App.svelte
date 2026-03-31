@@ -46,6 +46,7 @@
     { id: 'debrief', name: 'Debrief', icon: 'chart', enabled: true, order: 5 },
     { id: 'nav', name: 'Nav', icon: 'navigation', enabled: true, order: 6 },
     { id: 'hardware', name: 'Hardware', icon: 'cpu', enabled: true, order: 7 },
+    { id: 'library', name: 'Library', icon: 'store', enabled: true, order: 10 },
     { id: 'community', name: 'Community', icon: 'users', enabled: true, order: 11 },
   ];
 
@@ -466,6 +467,9 @@
 
       {:else if active === 'community'}
         <CommunitySection {allLandings} {logEntries} {gradeFromRate} {gradeColor} onClearLandings={() => allLandings = []} />
+
+      {:else if active === 'library'}
+        <Marketplace />
 
       {:else if active === '_modules'}
         <ModuleManager {lanIp} onRefresh={loadDiskModules} />

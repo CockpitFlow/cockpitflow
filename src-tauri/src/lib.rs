@@ -483,12 +483,10 @@ fn ureq_minimal_get(url: &str) -> Result<String, String> {
     let (host, path) = url.split_once('/').ok_or("Bad URL")?;
 
     // Connect with TLS via native-tls or rustls — but we don't have those deps.
-    // Simpler: shell out to curl/powershell
-    let output = std::process::Command::new("powershell")
-        .args(["-Command", &format!(
-            "(Invoke-WebRequest -Uri 'https://{}' -UseBasicParsing -Headers @{{'User-Agent'='CockpitFlow'}}).Content",
-            format!("{}/{}", host, path)
-        )])
+    // Use curl (built-in Windows 10/11, no visible window)
+    let output = std::process::Command::new("curl")
+        .args(["-s", "-L", "-H", "User-Agent: CockpitFlow", &format!("https://{}/{}", host, path)])
+        .creation_flags(0x08000000)
         .output()
         .map_err(|e| e.to_string())?;
 

@@ -1,5 +1,6 @@
 {
   "author": "CockpitFlow",
+  "badge": "BETA",
   "description": "Hardware mapping — map joystick buttons and axes to sim functions.",
   "desktop_only": true,
   "enabled": true,

@@ -1,0 +1,164 @@
+{
+  "name": "Cessna 172S Basic",
+  "author": "CockpitFlow",
+  "aircraft": "C172S",
+  "version": 2,
+  "grid": { "cols": 12, "rows": 5 },
+  "theme": {
+    "bg": "#0a0e14",
+    "panel": "#12161c",
+    "accent": "#4a9eff",
+    "green": "#34d058",
+    "amber": "#e3b341",
+    "red": "#ea4a5a"
+  },
+  "components": [
+    {
+      "id": "throttle",
+      "type": "lever",
+      "col": 1, "row": 1, "w": 1, "h": 5,
+      "label": "THR",
+      "cmd": "THROTTLE",
+      "color": "default",
+      "default": 0
+    },
+    {
+      "id": "mixture",
+      "type": "lever",
+      "col": 2, "row": 1, "w": 1, "h": 5,
+      "label": "MIX",
+      "cmd": "MIXTURE",
+      "color": "red",
+      "default": 1
+    },
+    {
+      "id": "flaps",
+      "type": "flaps",
+      "col": 3, "row": 1, "w": 1, "h": 5,
+      "label": "FLAPS",
+      "cmd": "FLAPS",
+      "detents": [
+        { "value": 0, "label": "UP" },
+        { "value": 0.33, "label": "10°" },
+        { "value": 0.66, "label": "20°" },
+        { "value": 1, "label": "FULL" }
+      ]
+    },
+    {
+      "id": "yoke",
+      "type": "yoke",
+      "col": 8, "row": 1, "w": 5, "h": 5,
+      "modes": ["touch", "gyro"],
+      "sensitivity": 1,
+      "deadzone": 0.05,
+      "cmd_ail": "AILERON",
+      "cmd_elv": "ELEVATOR"
+    },
+    {
+      "id": "ias",
+      "type": "gauge",
+      "col": 4, "row": 1, "w": 2, "h": 1,
+      "label": "IAS",
+      "dataref": "AIRSPEED",
+      "unit": "KTS",
+      "format": "int",
+      "thresholds": [
+        { "below": 45, "color": "red" },
+        { "below": 60, "color": "amber" }
+      ]
+    },
+    {
+      "id": "alt",
+      "type": "gauge",
+      "col": 6, "row": 1, "w": 2, "h": 1,
+      "label": "ALT",
+      "dataref": "ALTITUDE",
+      "unit": "FT",
+      "format": "int",
+      "thresholds": []
+    },
+    {
+      "id": "hdg",
+      "type": "gauge",
+      "col": 4, "row": 2, "w": 2, "h": 1,
+      "label": "HDG",
+      "dataref": "HEADING",
+      "unit": "°",
+      "format": "heading",
+      "thresholds": []
+    },
+    {
+      "id": "vs",
+      "type": "gauge",
+      "col": 6, "row": 2, "w": 2, "h": 1,
+      "label": "VS",
+      "dataref": "VS",
+      "unit": "FPM",
+      "format": "signed",
+      "thresholds": [
+        { "below": -1000, "color": "red" },
+        { "below": -500, "color": "amber" }
+      ]
+    },
+    {
+      "id": "rpm",
+      "type": "gauge",
+      "col": 4, "row": 3, "w": 2, "h": 1,
+      "label": "RPM",
+      "dataref": "RPM",
+      "unit": "",
+      "format": "int",
+      "thresholds": []
+    },
+    {
+      "id": "trim",
+      "type": "trim",
+      "col": 6, "row": 3, "w": 2, "h": 1,
+      "label": "TRIM",
+      "cmd": "TRIM",
+      "step": 0.03
+    },
+    {
+      "id": "magneto",
+      "type": "magneto",
+      "col": 4, "row": 4, "w": 4, "h": 1,
+      "label": "MAG",
+      "cmd": "MAGNETO",
+      "positions": ["OFF", "R", "L", "BOTH", "START"],
+      "spring_back": { "from": 4, "to": 3 },
+      "default": 3
+    },
+    {
+      "id": "master_alt",
+      "type": "toggle",
+      "col": 4, "row": 5, "w": 1, "h": 1,
+      "label": "ALT",
+      "cmd": "MASTER_ALT",
+      "style": "red"
+    },
+    {
+      "id": "master_bat",
+      "type": "toggle",
+      "col": 5, "row": 5, "w": 1, "h": 1,
+      "label": "BAT",
+      "cmd": "MASTER_BATTERY",
+      "style": "red"
+    },
+    {
+      "id": "parking_brake",
+      "type": "toggle",
+      "col": 11, "row": 5, "w": 1, "h": 1,
+      "label": "P.BRK",
+      "cmd": "PARKING_BRAKE",
+      "style": "red"
+    },
+    {
+      "id": "avionics",
+      "type": "toggle",
+      "col": 12, "row": 5, "w": 1, "h": 1,
+      "label": "AVIO",
+      "cmd": "AVIONICS_MASTER",
+      "style": "blue"
+    }
+  ]
+}

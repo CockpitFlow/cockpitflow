@@ -1,47 +1,107 @@
-# Svelte + TS + Vite
+# CockpitFlow
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Open-source cockpit companion for flight simulators. Custom cockpit layouts, checklists, hardware integration. X-Plane & MSFS.
 
-## Recommended IDE Setup
+## Features
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- **Checklist** — Pre-flight to shutdown procedures. Strict/Smart modes, auto-detect from sim data
+- **Controls** — Touch cockpit on phone/tablet. Throttle, mixture, flaps, yoke, switches
+- **Nav** — Weight & balance, crosswind calculator, fuel planner, density altitude, V-speeds
+- **Debrief** — Landing rate analysis, G-forces, speed envelope, performance scoring
+- **Failures** — Arm engine, electrical, instrument failures with configurable timing
+- **Hardware** — Map Arduino/ESP32 pins to sim functions (Beta)
+- **Community** — Landing leaderboard, pilot profile, shared presets
 
-## Need an official Svelte framework?
+## Stack
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- **Desktop**: Tauri 2 + Svelte 5 + Rust + Tailwind CSS
+- **Mobile**: Capacitor + Android (native gyro sensor)
+- **Sim**: X-Plane UDP datarefs/commands
+- **Data**: JSON presets for checklists, aircraft, cockpit layouts
 
-## Technical considerations
+## Getting Started
 
-**Why use this over SvelteKit?**
+### Desktop App
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+cd cockpitflow
+npm install
+npm run tauri dev
 ```
+
+### Mobile App
+
+```bash
+cd cockpitflow-mobile
+npm install
+npx cap sync android
+# Open in Android Studio or:
+cd android && ./gradlew assembleDebug
+```
+
+### Website
+
+```bash
+cd cockpitflow-site
+# Static files — open index.html or push to GitHub Pages
+```
+
+## Project Structure
+
+```
+cockpitflow/
+├── src/
+│   ├── App.svelte              # Main app shell (sidebar, routing)
+│   ├── lib/
+│   │   ├── sections/           # Page sections (Tailwind, zero custom CSS)
+│   │   │   ├── HomeSection.svelte
+│   │   │   ├── ChecklistSection.svelte
+│   │   │   ├── NavSection.svelte
+│   │   │   ├── DebriefSection.svelte
+│   │   │   ├── ScenariosSection.svelte
+│   │   │   ├── HardwareSection.svelte
+│   │   │   └── CommunitySection.svelte
+│   │   ├── gauges/             # Reusable components (instruments, toast, etc)
+│   │   ├── CockpitBuilder.svelte
+│   │   ├── ModuleManager.svelte
+│   │   └── Marketplace.svelte
+│   ├── app.css                 # Tailwind + CSS variables (dark/light/night themes)
+│   └── main.ts
+├── public/
+│   ├── cockpit.html            # Standalone mobile cockpit controls
+│   ├── checklist.html          # Standalone mobile checklist
+│   ├── cf-theme.css            # Shared theme (used by all pages)
+│   ├── cf-widgets.js           # Web components for cockpit renderer
+│   ├── data/
+│   │   ├── failures.json       # Failure definitions
+│   │   └── hardware-functions.json
+│   └── modules/                # Module presets (checklist, cockpit, nav, etc)
+├── src-tauri/
+│   ├── src/lib.rs              # Rust backend (UDP, HTTP server, serial)
+│   └── Cargo.toml
+cockpitflow-mobile/
+├── www/index.html              # Mobile app UI
+├── android/                    # Android project
+│   └── app/src/main/java/.../
+│       ├── MainActivity.java
+│       └── GyroPlugin.java     # Native gyro sensor → HTTP
+└── capacitor.config.json
+cockpitflow-site/               # GitHub Pages website
+```
+
+## Architecture
+
+Desktop app runs a local HTTP server (port 8080) that:
+- Receives sim data via X-Plane UDP
+- Serves cockpit/checklist pages to mobile devices on LAN
+- Provides REST API (`/api/sim-state`, `/api/command`, `/api/settings`)
+
+Mobile app connects to desktop via LAN, loads cockpit controls, and sends commands back. Gyro data is read by a native Java plugin and sent directly to the server via HTTP POST.
+
+## Themes
+
+Three themes: Dark (default), Light, Night (extra dim for cockpit use). Toggle via sidebar button. All components use CSS variables from `app.css`.
+
+## License
+
+Open source. For flight simulation use only. Not for real-world aviation.

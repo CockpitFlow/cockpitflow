@@ -1,0 +1,103 @@
+{
+  "name": "Cessna 172 Emergencies",
+  "author": "CockpitFlow",
+  "aircraft": "C172S",
+  "version": "1.0",
+  "scenarios": [
+    {
+      "id": "eng_fail_500",
+      "name": "Engine Failure at 500ft",
+      "difficulty": "HARD",
+      "description": "Complete engine failure after takeoff. Pitch for 65 KIAS best glide, find a field.",
+      "failures": [
+        { "id": "eng_fail", "severity": "full", "trigger": "immediate" }
+      ],
+      "briefing": "After takeoff at 500ft AGL, engine quits. Do NOT turn back to the runway. Pitch for 65 KIAS, pick the best field ahead ±30°."
+    },
+    {
+      "id": "eng_fail_cruise",
+      "name": "Engine Failure in Cruise",
+      "difficulty": "MED",
+      "description": "Engine fails during cruise flight. You have altitude to work with.",
+      "failures": [
+        { "id": "eng_fail", "severity": "full", "trigger": "random", "delayMin": 2, "delayMax": 10 }
+      ],
+      "briefing": "Engine will fail randomly during cruise. Maintain 65 KIAS glide, try restart: carb heat, fuel selector BOTH, mixture rich, magnetos check. If no restart, pick a field."
+    },
+    {
+      "id": "electrical_fail",
+      "name": "Electrical Failure",
+      "difficulty": "MED",
+      "description": "Alternator fails, battery drains. Shed electrical load, land soon.",
+      "failures": [
+        { "id": "alt_fail", "severity": "full", "trigger": "random", "delayMin": 1, "delayMax": 5 }
+      ],
+      "briefing": "Alternator fails — ammeter shows discharge. Shed load: turn off non-essential (autopilot, #2 radio, lights). Battery lasts ~30min. Land at nearest airport."
+    },
+    {
+      "id": "vacuum_fail",
+      "name": "Partial Panel (Vacuum Failure)",
+      "difficulty": "HARD",
+      "description": "Vacuum pump fails — attitude indicator and heading indicator lost.",
+      "failures": [
+        { "id": "vac_pump", "severity": "full", "trigger": "random", "delayMin": 3, "delayMax": 15 }
+      ],
+      "briefing": "Vacuum pump failure. AI tumbles, HI precesses. Use turn coordinator + compass + airspeed for attitude reference. 'No pitch, no bank, no yank.'"
+    },
+    {
+      "id": "pitot_ice",
+      "name": "Pitot Blockage (Icing)",
+      "difficulty": "MED",
+      "description": "Pitot tube ices over — airspeed unreliable.",
+      "failures": [
+        { "id": "pitot_block", "severity": "full", "trigger": "random", "delayMin": 2, "delayMax": 8 }
+      ],
+      "briefing": "Airspeed reading is wrong. Use pitch + power settings you know: level cruise ~2300 RPM, descent ~1800 RPM, climb ~full power 10° nose up. Turn on pitot heat."
+    },
+    {
+      "id": "engine_fire",
+      "name": "Engine Fire",
+      "difficulty": "HARD",
+      "description": "Engine fire in flight. Execute the emergency checklist immediately.",
+      "failures": [
+        { "id": "fire_eng", "severity": "full", "trigger": "immediate" }
+      ],
+      "briefing": "MIXTURE — idle cutoff. FUEL SELECTOR — OFF. MASTER — OFF. CABIN HEAT/AIR — OFF. Airspeed 100 KIAS (or Vfe if flaps needed). Forced landing."
+    },
+    {
+      "id": "crosswind",
+      "name": "Strong Crosswind Landing",
+      "difficulty": "MED",
+      "description": "15kt crosswind on approach. Use crab or wing-low method.",
+      "failures": [],
+      "briefing": "Strong crosswind from the left. Use wing-low method: aileron into wind, opposite rudder to align with runway. Touch down on upwind wheel first."
+    },
+    {
+      "id": "stall_recovery",
+      "name": "Stall Recovery Practice",
+      "difficulty": "EASY",
+      "description": "Practice power-off and power-on stall recoveries.",
+      "failures": [],
+      "briefing": "Power-off stall: reduce power, raise nose, at buffet/horn — pitch down, full power, level off. Minimize altitude loss. Repeat with power-on stall at climb attitude."
+    },
+    {
+      "id": "go_around",
+      "name": "Go-Around from 200ft",
+      "difficulty": "EASY",
+      "description": "Practice missed approach and go-around procedure.",
+      "failures": [],
+      "briefing": "On final at 200ft, runway obstructed. FULL POWER. Carb heat OFF. Pitch for Vy (74 KIAS). Flaps 20°→10°→UP incrementally. Climb, fly the pattern again."
+    },
+    {
+      "id": "double_trouble",
+      "name": "Double Failure",
+      "difficulty": "HARD",
+      "description": "Two random failures at random times. Stay calm, prioritize.",
+      "failures": [
+        { "id": "RANDOM", "trigger": "random", "delayMin": 2, "delayMax": 10 },
+        { "id": "RANDOM", "trigger": "random", "delayMin": 5, "delayMax": 20 }
+      ],
+      "briefing": "Two unknown failures will occur during the flight. Aviate, Navigate, Communicate. Handle each emergency by the book."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "groups": ["Engine", "Fuel", "Electrical", "Instruments", "Avionics", "Controls", "Misc"],
+  "failures": [
+    { "id": "eng_fail", "label": "Engine Failure", "group": "Engine", "desc": "Complete power loss", "severity": ["partial", "full"] },
+    { "id": "eng_rough", "label": "Engine Roughness", "group": "Engine", "desc": "Vibration, power fluctuation", "severity": ["mild", "severe"] },
+    { "id": "mag_l", "label": "Left Magneto Fail", "group": "Engine", "desc": "RPM drop, roughness", "severity": ["full"] },
+    { "id": "mag_r", "label": "Right Magneto Fail", "group": "Engine", "desc": "RPM drop, roughness", "severity": ["full"] },
+    { "id": "carb_ice", "label": "Carburetor Icing", "group": "Engine", "desc": "Gradual power loss", "severity": ["mild", "severe"] },
+    { "id": "oil_press", "label": "Oil Pressure Loss", "group": "Engine", "desc": "Low/no oil pressure", "severity": ["partial", "full"] },
+    { "id": "fuel_starv", "label": "Fuel Starvation", "group": "Fuel", "desc": "Empty tank or blockage", "severity": ["full"] },
+    { "id": "fuel_leak", "label": "Fuel Leak", "group": "Fuel", "desc": "Gradual fuel loss", "severity": ["slow", "fast"] },
+    { "id": "alt_fail", "label": "Alternator Failure", "group": "Electrical", "desc": "No charging, battery only", "severity": ["full"] },
+    { "id": "bat_fail", "label": "Battery Failure", "group": "Electrical", "desc": "No electrical power", "severity": ["full"] },
+    { "id": "bus_fail", "label": "Bus Failure", "group": "Electrical", "desc": "Partial electrical loss", "severity": ["partial", "full"] },
+    { "id": "vac_pump", "label": "Vacuum Pump Fail", "group": "Instruments", "desc": "Attitude + heading lost", "severity": ["full"] },
+    { "id": "pitot_block", "label": "Pitot Blockage", "group": "Instruments", "desc": "Airspeed unreliable", "severity": ["partial", "full"] },
+    { "id": "static_block", "label": "Static Port Block", "group": "Instruments", "desc": "Alt/VS/ASI affected", "severity": ["full"] },
+    { "id": "ai_fail", "label": "Attitude Indicator", "group": "Instruments", "desc": "AI tumbles/fails", "severity": ["full"] },
+    { "id": "hi_fail", "label": "Heading Indicator", "group": "Instruments", "desc": "HI precesses/fails", "severity": ["full"] },
+    { "id": "asi_fail", "label": "Airspeed Indicator", "group": "Instruments", "desc": "ASI stuck/wrong", "severity": ["full"] },
+    { "id": "alt_fail_inst", "label": "Altimeter Failure", "group": "Instruments", "desc": "Altimeter reads wrong", "severity": ["full"] },
+    { "id": "comm_fail", "label": "Comm Radio Fail", "group": "Avionics", "desc": "No radio communication", "severity": ["com1", "com2", "all"] },
+    { "id": "nav_fail", "label": "Nav Radio Fail", "group": "Avionics", "desc": "VOR/ILS unavailable", "severity": ["nav1", "nav2", "all"] },
+    { "id": "xpdr_fail", "label": "Transponder Fail", "group": "Avionics", "desc": "No transponder reply", "severity": ["full"] },
+    { "id": "gps_fail", "label": "GPS Failure", "group": "Avionics", "desc": "GPS signal lost", "severity": ["full"] },
+    { "id": "flap_fail", "label": "Flap Failure", "group": "Controls", "desc": "Flaps stuck/jammed", "severity": ["up", "down", "asym"] },
+    { "id": "trim_run", "label": "Trim Runaway", "group": "Controls", "desc": "Trim moves on its own", "severity": ["nose_up", "nose_down"] },
+    { "id": "brake_fail", "label": "Brake Failure", "group": "Controls", "desc": "No braking on landing", "severity": ["partial", "full"] },
+    { "id": "door_open", "label": "Door Pops Open", "group": "Misc", "desc": "Cabin door opens in flight", "severity": ["full"] },
+    { "id": "bird_strike", "label": "Bird Strike", "group": "Misc", "desc": "Windshield crack/engine", "severity": ["windshield", "engine"] },
+    { "id": "fire_eng", "label": "Engine Fire", "group": "Misc", "desc": "Fire warning, smoke", "severity": ["full"] }
+  ]
+}

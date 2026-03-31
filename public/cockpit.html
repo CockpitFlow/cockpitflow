@@ -3,1847 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CockpitFlow Cockpit</title>
+<title>Cessna 172S</title>
+<link rel="stylesheet" href="/cf-theme.css">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: #0f0f0f;
-  font-family: "Arial Narrow", Arial, sans-serif;
-  color: #e6e6e6;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 10px;
-  padding-bottom: 50px;
+html,body{height:100dvh;width:100vw;overflow:hidden;background:var(--cf-bg);color:var(--cf-text);
+  font-family:var(--cf-font-mono);touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+
+/* Portrait lock */
+.port{display:none;position:fixed;inset:0;z-index:999;background:var(--cf-bg);
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--cf-dim)}
+.port svg{width:40px;height:40px;color:var(--cf-accent);animation:sp 2s ease-in-out infinite}
+.port span{font-family:var(--cf-font-display);font-size:9px;letter-spacing:3px;font-weight:700}
+@keyframes sp{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
+@media(orientation:portrait){.port{display:flex}.pit{display:none!important}}
+
+/* ============================================
+   MAIN LAYOUT — horizontal strip
+   [THR][MIX] [SWITCHES 5x2] [FLAPS][TRIM] [GAUGES/YOKE]
+   ============================================ */
+.pit{
+  display:flex;
+  width:100vw;height:100dvh;
+  padding:3px;gap:3px;
 }
 
-/* ====== PANEL ====== */
-.panel {
-  max-width: 560px;
-  margin: 0 auto 12px;
-  padding: 20px;
-  background: #2a2a2a;
-  border-radius: 8px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    inset 0 -1px 0 rgba(0,0,0,.3),
-    inset 0 0 20px #000,
-    0 8px 24px rgba(0,0,0,.6);
-  position: relative;
-  overflow: hidden;
-}
-.panel-title {
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 4px;
-  color: #777;
-  margin-bottom: 18px;
-  font-weight: 600;
-}
+.pnl{background:var(--cf-surface);border-radius:8px;border:1px solid var(--cf-border)}
 
-/* Screws */
-.screw {
-  position: absolute;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #444, #1a1a1a);
-  border: 1px solid #555;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,.1), 0 1px 3px rgba(0,0,0,.5);
-}
-.screw::before, .screw::after {
-  content: '';
-  position: absolute;
-  background: #333;
-}
-.screw::before { width: 8px; height: 1px; top: 5px; left: 2px; }
-.screw::after { width: 1px; height: 8px; top: 2px; left: 5px; }
+/* === LEVERS (THR + MIX) === */
+.levers{width:110px;display:flex;gap:6px;padding:6px 6px;flex-shrink:0}
+.lv{flex:1;display:flex;flex-direction:column;align-items:center;cursor:grab;touch-action:none;-webkit-user-select:none}
+.lv-l{font-family:var(--cf-font-display);font-size:7px;font-weight:700;letter-spacing:1px;color:var(--cf-dim);margin-bottom:4px}
+.lv-t{width:28px;flex:1;background:linear-gradient(90deg,#0a0f16,var(--cf-surface2),#0a0f16);
+  border-radius:10px;position:relative;border:1px solid var(--cf-border);
+  box-shadow:inset 3px 0 6px rgba(0,0,0,.5),inset -3px 0 6px rgba(0,0,0,.5)}
+.lv-f{position:absolute;bottom:0;left:2px;right:2px;border-radius:6px;opacity:.25}
+.lv-k{position:absolute;left:50%;transform:translateX(-50%);width:40px;height:24px;
+  background:linear-gradient(180deg,#3a4458,#252d3c,#1a2234);border-radius:4px;cursor:grab;
+  box-shadow:0 3px 8px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.3)}
+.lv-k::after{content:'';position:absolute;top:50%;left:4px;right:4px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent)}
+.lv-k.bl{border:2px solid var(--cf-accent);box-shadow:0 3px 8px rgba(0,0,0,.6),0 0 6px rgba(74,158,255,.15),inset 0 1px 0 rgba(255,255,255,.12)}
+.lv-k.rd{border:2px solid var(--cf-red);box-shadow:0 3px 8px rgba(0,0,0,.6),0 0 6px rgba(231,76,60,.15),inset 0 1px 0 rgba(255,255,255,.12)}
+.lv-v{font-size:12px;font-weight:700;margin-top:3px}
 
-/* ====== MAGNETO KEY SWITCH ====== */
-.magneto-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  padding: 8px 12px;
-}
-.magneto-wrap {
-  position: relative;
-  width: 110px; height: 110px;
-}
-.magneto-ring {
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #383838, #0e0e0e);
-  border: 3px solid #4a4a4a;
-  box-shadow:
-    inset 0 3px 8px rgba(0,0,0,.7),
-    inset 0 -2px 4px rgba(255,255,255,.04),
-    0 1px 0 rgba(255,255,255,.06),
-    0 4px 12px rgba(0,0,0,.6);
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-}
-/* Outer chrome bezel ring */
-.magneto-ring::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid #555;
-  background: linear-gradient(135deg, #444, #222);
-  z-index: -1;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 2px 6px rgba(0,0,0,.5);
-}
-/* Inner barrel shadow */
-.magneto-ring::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #0a0a0a 30%, transparent 70%);
-  box-shadow: inset 0 2px 6px rgba(0,0,0,.8);
-  pointer-events: none;
-}
-.key-slot {
-  position: absolute;
-  width: 10px; height: 10px;
-  background: #050505;
-  border-radius: 2px;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.9);
-  z-index: 2;
-}
-.key-body {
-  position: absolute;
-  width: 5px; height: 28px;
-  background: linear-gradient(90deg, #999, #d0d0d0, #bbb, #d0d0d0, #999);
-  top: 14px; left: 50%;
-  transform-origin: bottom center;
-  margin-left: -2.5px;
-  border-radius: 2px 2px 1px 1px;
-  box-shadow: 0 0 6px rgba(0,0,0,.6), 1px 0 0 rgba(255,255,255,.12), -1px 0 0 rgba(0,0,0,.3);
-  transition: transform .2s ease;
-  z-index: 3;
-}
-.key-head {
-  position: absolute;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 30%, #d5d5d5, #777);
-  border: 1.5px solid #888;
-  top: -8px; left: -4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2);
-}
-/* Magneto position labels - positioned around the wrap container */
-.mag-mark {
-  position: absolute;
-  font-size: 9px;
-  font-weight: 700;
-  color: #555;
-  letter-spacing: .5px;
-  transition: color .2s, text-shadow .2s;
-  text-shadow: 0 1px 2px rgba(0,0,0,.5);
-  cursor: pointer;
-  padding: 4px 6px;
-  z-index: 5;
-}
-.mag-mark:hover { color: #888; }
-.mag-mark.active { color: #4af; text-shadow: 0 0 6px rgba(74,170,255,.4); }
-.mag-mark.start-mark { color: #a44; }
-.mag-mark.start-mark:hover { color: #e55; }
-.mag-mark.start-mark:active { color: #f66; text-shadow: 0 0 8px rgba(255,80,80,.4); }
-.mag-state {
-  font-size: 10px;
-  font-weight: 700;
-  color: #4af;
-  letter-spacing: 2px;
-  text-shadow: 0 0 6px rgba(74,170,255,.3);
-  min-height: 14px;
-}
+/* === SWITCHES 5x2 === */
+.switches{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr) 1fr 1fr;gap:2px;padding:2px}
+.sw{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:6px;padding:0 8px;
+  background:var(--cf-surface);border:1.5px solid var(--cf-border);border-radius:6px;cursor:pointer;transition:all .1s}
+.sw:active{transform:scale(.95)}
+.sw-d{width:6px;height:6px;border-radius:50%;background:#1a2030;flex-shrink:0;transition:all .15s}
+.sw.on .sw-d{background:var(--cf-green);box-shadow:0 0 8px var(--cf-green)}
+.sw.on.red .sw-d{background:var(--cf-red);box-shadow:0 0 8px var(--cf-red)}
+.sw.on{border-color:rgba(46,204,113,.3);background:rgba(46,204,113,.04)}
+.sw.on.red{border-color:rgba(231,76,60,.3);background:rgba(231,76,60,.04)}
+.sw-l{font-family:var(--cf-font-display);font-size:8px;font-weight:700;letter-spacing:.5px;color:var(--cf-dim)}
+.sw.on .sw-l{color:var(--cf-text)}
 
-/* ====== MASTER ROCKER ====== */
-.sw-group { display: flex; gap: 3px; }
-.sw-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 28px; }
-.sw-label { font-size: 7px; font-weight: 700; color: #999; letter-spacing: .5px; text-align: center; line-height: 1.1; min-height: 16px; display: flex; align-items: flex-end; justify-content: center; }
-.sw-state { font-size: 6px; color: #444; letter-spacing: .5px; }
+/* === FLAPS + TRIM === */
+.ftcol{width:50px;display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.flaps{flex:3;display:flex;flex-direction:column;gap:2px;padding:3px}
+.fl-l{font-family:var(--cf-font-display);font-size:5px;font-weight:700;letter-spacing:1px;color:var(--cf-dim);text-align:center;padding:1px}
+.fl-b{flex:1;border:1.5px solid var(--cf-border);background:var(--cf-surface2);color:var(--cf-dim);font-family:var(--cf-font-display);
+  font-size:9px;font-weight:700;letter-spacing:1px;border-radius:5px;cursor:pointer;transition:all .1s;
+  display:flex;align-items:center;justify-content:center}
+.fl-b:active{transform:scale(.93)}
+.fl-b.on{border-color:var(--cf-accent);color:var(--cf-accent);background:rgba(74,158,255,.06)}
+.trimw{flex:2;background:linear-gradient(90deg,#151515,#2a2a2a,#383838,#2a2a2a,#151515);
+  border-radius:6px;border:1px solid #444;box-shadow:inset 2px 0 5px rgba(0,0,0,.5),inset -2px 0 5px rgba(0,0,0,.5);
+  cursor:grab;overflow:hidden;position:relative}
+.trimw:active{cursor:grabbing}
+.tr-gr{position:absolute;inset:0;display:flex;flex-direction:column;gap:4px;padding:2px 0;pointer-events:none}
+.tr-g{width:65%;height:2px;margin:0 auto;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.2));
+  border-radius:1px;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.tr-i{position:absolute;bottom:1px;left:0;right:0;text-align:center;pointer-events:none}
+.tr-v{font-size:9px;font-weight:700;color:var(--cf-accent)}
 
-.rocker {
-  width: 30px; height: 56px;
-  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-  border-radius: 4px;
-  border: 2px solid #444;
-  position: relative;
-  cursor: pointer;
-  box-shadow:
-    inset 0 0 8px rgba(0,0,0,.6),
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 2px 6px rgba(0,0,0,.4);
-  overflow: hidden;
-}
-.rocker-knob {
-  position: absolute; left: 3px; right: 3px; height: 24px;
-  border-radius: 3px; transition: top .12s;
-  box-shadow: 0 2px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.15);
-}
-.rocker.on .rocker-knob { top: 2px; }
-.rocker:not(.on) .rocker-knob { top: 27px; }
+/* === RIGHT SIDE (gauges + yoke) === */
+.right{width:33%;display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.gauges{display:flex;gap:6px;align-items:center;justify-content:center;padding:4px 8px;flex-shrink:0}
+.gbox{display:flex;flex-direction:column;align-items:center}
+.g-l{font-family:var(--cf-font-display);font-size:6px;font-weight:700;letter-spacing:1.5px;color:var(--cf-dim)}
+.g-v{font-size:18px;font-weight:700;line-height:1.1}
+.g-u{font-size:5px;color:var(--cf-dim);letter-spacing:1px}
 
-/* Red master rocker */
-.rocker-red .rocker-knob {
-  background: linear-gradient(180deg, #c42020, #6a1010);
-  border: 1px solid #d44;
-}
-.rocker-red.on .rocker-knob {
-  background: linear-gradient(180deg, #dd3535, #aa1818);
-  box-shadow: 0 2px 8px rgba(220,50,50,.3), inset 0 1px 0 rgba(255,150,150,.2);
-}
-.rocker-red.on { border-color: #c44; box-shadow: inset 0 0 8px rgba(0,0,0,.6), 0 0 6px rgba(220,50,50,.15); }
+/* Button groups (magneto, fuel) */
+.grp{display:flex;align-items:center;gap:2px;background:var(--cf-surface);border:1px solid var(--cf-border);border-radius:6px;padding:4px 6px}
+.grp-l{font-family:var(--cf-font-display);font-size:6px;font-weight:700;letter-spacing:1px;color:var(--cf-dim);margin-right:4px;flex-shrink:0}
+.gb{flex:1;padding:6px 2px;border:1px solid var(--cf-border);background:var(--cf-surface2);color:var(--cf-dim);font-family:var(--cf-font-display);
+  font-size:8px;font-weight:700;letter-spacing:.5px;border-radius:4px;cursor:pointer;transition:all .1s;text-align:center}
+.gb:active{transform:scale(.93)}
+.gb-on{border-color:var(--cf-accent);color:var(--cf-accent);background:rgba(74,158,255,.08)}
+.gb-st{border-color:var(--cf-red);color:var(--cf-red)}
+.gb-st:active{background:rgba(231,76,60,.1)}
 
-/* White avionics rocker */
-.rocker-white .rocker-knob {
-  background: linear-gradient(180deg, #888, #444);
-  border: 1px solid #999;
-}
-.rocker-white.on .rocker-knob {
-  background: linear-gradient(180deg, #ddd, #999);
-  box-shadow: 0 2px 6px rgba(255,255,255,.1), inset 0 1px 0 rgba(255,255,255,.3);
-}
-.rocker-white.on { border-color: #aaa; }
+/* Header buttons */
+.hb{padding:3px 8px;background:var(--cf-surface);border:1px solid var(--cf-border);border-radius:4px;
+  color:var(--cf-dim);font-family:var(--cf-font-display);font-size:7px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .1s}
+.hb:active{transform:scale(.93)}
+.hb-on{border-color:var(--cf-accent);color:var(--cf-accent);background:rgba(74,158,255,.08)}
 
-/* ====== TOGGLE SWITCH ====== */
-.toggle {
-  width: 16px; height: 44px;
-  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-  border-radius: 8px;
-  border: 1.5px solid #3a3a3a;
-  position: relative;
-  cursor: pointer;
-  box-shadow: inset 0 0 6px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.3);
-}
-.toggle-knob {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  position: absolute; left: 0;
-  transition: top .12s;
-  box-shadow: 0 2px 4px rgba(0,0,0,.5);
-}
-.toggle.on .toggle-knob {
-  top: 2px;
-  background: radial-gradient(circle at 35% 30%, #eee, #aaa);
-  border: 1px solid #ccc;
-}
-.toggle:not(.on) .toggle-knob {
-  top: 26px;
-  background: radial-gradient(circle at 35% 30%, #777, #444);
-  border: 1px solid #555;
-}
-
-/* Separator */
-.sep { width: 1px; height: 90px; background: linear-gradient(180deg, transparent, #444, transparent); align-self: center; margin: 0 3px; flex-shrink: 0; }
-
-/* Electrical layout - column grid: CB on top, switch below */
-.elec-layout { }
-.elec-grid {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  justify-content: center;
-  padding: 0 4px;
-  flex-wrap: wrap;
-}
-.elec-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  min-width: 28px;
-  flex-shrink: 0;
-}
-.elec-col .cb { margin-bottom: 2px; }
-/* Responsive: group sections that wrap together */
-.elec-section {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-/* ====== CIRCUIT BREAKERS ====== */
-.cb-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
-.cb-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.cb-label { font-size: 6px; color: #555; font-weight: 600; text-align: center; line-height: 1.1; letter-spacing: .3px; }
-.cb {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #2a2a2a, #0a0a0a);
-  border: 1.5px solid #3a3a3a;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
-  cursor: pointer;
-  transition: all .15s;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 700; color: #999;
-}
-.cb:active { transform: scale(.9); }
-.cb.popped {
-  transform: translateY(-5px);
-  background: radial-gradient(circle at 40% 35%, #444, #222);
-  border-color: #f80;
-  color: #f80;
-  box-shadow: 0 4px 6px rgba(0,0,0,.4), 0 0 6px rgba(255,136,0,.2);
-}
-
-/* ====== CONTROLS ROW ====== */
-.controls-row { display: flex; gap: 0; justify-content: space-evenly; padding: 10px 0; width: 100%; }
-.ctrl-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.ctrl-name { font-size: 9px; font-weight: 700; color: #888; letter-spacing: 1px; }
-.ctrl-body { height: 140px; display: flex; align-items: center; justify-content: center; }
-.lever-val { font-family: monospace; font-size: 14px; font-weight: 800; color: #4af; }
-.lever-range {
-  writing-mode: vertical-lr; direction: rtl;
-  width: 44px; height: 140px;
-  -webkit-appearance: none; appearance: none;
-  background: transparent; cursor: grab;
-}
-.lever-range::-webkit-slider-runnable-track {
-  width: 24px;
-  background: linear-gradient(90deg, #060606, #1a1a1a, #060606);
-  border: 1.5px solid #3a3a3a;
-  border-radius: 12px;
-  box-shadow: inset 0 0 8px #000, inset 2px 0 3px rgba(0,0,0,.4), inset -2px 0 3px rgba(0,0,0,.4);
-}
-.lever-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 52px; height: 22px;
-  border-radius: 5px;
-  margin-left: -15px;
-  box-shadow: 0 3px 8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.15);
-}
-.lever-range.throttle::-webkit-slider-thumb { background: linear-gradient(180deg, #444, #1a1a1a); border: 2px solid #666; }
-.lever-range.mixture::-webkit-slider-thumb { background: linear-gradient(180deg, #dd2525, #771010); border: 2px solid #e44; }
-.lever-range.carb::-webkit-slider-thumb { background: linear-gradient(180deg, #999, #555); border: 2px solid #aaa; }
-.lever-val { font-family: monospace; font-size: 14px; font-weight: 800; color: #4af; }
-
-/* ====== FLAPS ====== */
-.flap-lever-wrap { position: relative; }
-.flap-track {
-  width: 50px; height: 140px;
-  background: linear-gradient(90deg, #1a1a1a, #252525, #1a1a1a);
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-shadow: inset 0 0 8px rgba(0,0,0,.5);
-  position: relative;
-}
-.flap-notch {
-  position: absolute;
-  left: 0; right: 0;
-  height: 2px;
-  background: #444;
-  cursor: pointer;
-}
-.flap-notch span {
-  position: absolute;
-  right: -32px;
-  top: -6px;
-  font-size: 8px;
-  font-weight: 700;
-  color: #666;
-  letter-spacing: .5px;
-}
-.flap-notch.active span { color: #4af; }
-.flap-handle {
-  position: absolute;
-  left: -4px; right: -4px;
-  height: 20px;
-  background: linear-gradient(180deg, #666, #333);
-  border: 1.5px solid #888;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.2);
-  top: 2%;
-  cursor: grab;
-  transition: top .08s ease;
-  z-index: 2;
-}
-.flap-handle:active { cursor: grabbing; border-color: #4af; }
-.flap-handle::after {
-  content: '';
-  position: absolute;
-  top: 7px; left: 6px; right: 6px;
-  height: 2px;
-  background: rgba(0,0,0,.3);
-  border-radius: 1px;
-  box-shadow: 0 1px 0 rgba(255,255,255,.1);
-}
-
-/* ====== TRIM WHEEL ====== */
-.trim-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.trim-wheel {
-  width: 44px; height: 140px;
-  background: linear-gradient(90deg, #1a1a1a, #333, #444, #333, #1a1a1a);
-  border-radius: 6px;
-  border: 1px solid #555;
-  box-shadow:
-    inset 2px 0 4px rgba(0,0,0,.4),
-    inset -2px 0 4px rgba(0,0,0,.4),
-    0 2px 6px rgba(0,0,0,.5);
-  cursor: grab;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  padding: 4px 0;
-}
-.trim-wheel:active { cursor: grabbing; }
-.trim-grooves {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 3px 0;
-  transition: none;
-}
-.trim-groove {
-  width: 32px; height: 3px;
-  background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.2));
-  margin: 0 auto;
-  border-radius: 1px;
-  box-shadow: 0 1px 0 rgba(255,255,255,.1);
-}
-.trim-labels { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.trim-txt { font-size: 7px; color: #555; letter-spacing: 1px; }
-.trim-val { font-family: monospace; font-size: 11px; font-weight: 800; color: #4af; }
-
-/* ====== FUEL ====== */
-.fuel-row { display: flex; gap: 6px; justify-content: center; padding: 6px 0; }
-.fuel-btn {
-  padding: 10px 18px;
-  background: linear-gradient(180deg, #222, #111);
-  border: 2px solid #3a3a3a;
-  border-radius: 5px;
-  color: #666; font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.3);
-}
-.fuel-btn:active { transform: translateY(1px); }
-.fuel-btn.active { border-color: #4a9eff; color: #4af; background: linear-gradient(180deg, #1a2535, #0f1520); }
-.fuel-layout { display: flex; align-items: flex-start; justify-content: center; gap: 24px; padding: 10px 0; }
-.fuel-sel-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.fuel-plate {
-  width: 220px; height: 160px;
-  background: #222;
-  border: 2px solid #444;
-  border-radius: 6px;
-  box-shadow: inset 0 0 10px #000, 0 3px 8px rgba(0,0,0,.5);
-  position: relative;
-  overflow: hidden;
-}
-.fpl { position: absolute; font-size: 9px; font-weight: 700; color: #999; line-height: 1.2; text-align: center; pointer-events: none; }
-.fpl-sm { font-size: 7px; color: #666; font-weight: 500; }
-/* Diamond handle */
-.fuel-handle {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex; align-items: center;
-  transition: transform .2s ease;
-  z-index: 2;
-  pointer-events: none;
-}
-.fh-center {
-  width: 28px; height: 44px;
-  background: linear-gradient(180deg, #999, #666, #888);
-  border: 1px solid #aaa;
-  border-radius: 3px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-}
-.fh-screw {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #555, #222);
-  border: 1px solid #666;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
-}
-.fh-wing {
-  width: 36px; height: 16px;
-  background: linear-gradient(180deg, #999, #777);
-  border: 1px solid #aaa;
-  box-shadow: 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
-}
-.fh-left { border-radius: 4px 0 0 4px; }
-.fh-right { border-radius: 0 4px 4px 0; }
-/* Click zones */
-.fzone { position: absolute; cursor: pointer; z-index: 3; }
-.fuel-val { font-family: monospace; font-size: 12px; font-weight: 800; color: #4af; }
-.fuel-section-label { display: block; font-size: 8px; font-weight: 700; color: #555; letter-spacing: 2px; text-align: center; margin-bottom: 6px; }
-.fuel-shutoff-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.fuel-shutoff {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #cc2020, #661010);
-  border: 3px solid #992020;
-  box-shadow: 0 3px 8px rgba(0,0,0,.5), inset 0 2px 4px rgba(255,100,100,.15);
-  cursor: pointer;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  transition: all .15s;
-  position: relative;
-}
-.fuel-shutoff:active { transform: scale(.92); }
-.fuel-shutoff.pulled {
-  background: radial-gradient(circle at 35% 30%, #ee3030, #881515);
-  border-color: #e44;
-  box-shadow: 0 3px 8px rgba(0,0,0,.5), 0 0 10px rgba(255,50,50,.3), inset 0 2px 4px rgba(255,150,150,.2);
-  transform: translateY(-4px);
-}
-.shutoff-knob {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #ff6666, #cc2020);
-  border: 1px solid rgba(255,255,255,.15);
-}
-.shutoff-text { font-size: 6px; font-weight: 800; color: rgba(255,255,255,.5); letter-spacing: 1px; margin-top: 1px; }
-.shutoff-state { font-family: monospace; font-size: 10px; font-weight: 800; color: #444; }
-
-/* ====== RADIO ====== */
-.radio-unit {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px;
-  background: linear-gradient(180deg, #181818, #0e0e0e);
-  border-radius: 5px;
-  margin-bottom: 4px;
-  border: 1px solid #2a2a2a;
-  box-shadow: inset 0 0 6px rgba(0,0,0,.4);
-}
-.radio-id { font-size: 11px; font-weight: 800; color: #4af; width: 40px; letter-spacing: 1px; }
-.freq-act { font-family: monospace; font-size: 18px; font-weight: 800; color: #3d5; letter-spacing: 1px; text-shadow: 0 0 6px rgba(51,221,85,.2); }
-.freq-flip {
-  width: 28px; height: 24px;
-  background: linear-gradient(180deg, #2a2a2a, #111);
-  border: 1.5px solid #444;
-  border-radius: 3px;
-  color: #4af; font-size: 14px;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-}
-.freq-flip:active { background: #333; }
-.freq-stby { font-family: monospace; font-size: 14px; font-weight: 600; color: #777; }
-.knobs { display: flex; gap: 2px; margin-left: auto; }
-.knob {
-  width: 26px; height: 24px;
-  background: linear-gradient(180deg, #2a2a2a, #111);
-  border: 1.5px solid #333;
-  border-radius: 3px;
-  color: #888; font-size: 11px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-}
-.knob:active { background: #333; color: #fff; }
-.knob.sm { width: 22px; height: 20px; font-size: 9px; }
-.knob-sep { font-size: 7px; color: #444; padding: 0 1px; }
-.xpdr-digits { display: flex; gap: 2px; }
-.xpdr-d {
-  font-family: monospace; font-size: 20px; font-weight: 900;
-  color: #3d5; background: #050505;
-  padding: 2px 6px; border-radius: 2px;
-  border: 1px solid #1a1a1a;
-  box-shadow: inset 0 0 4px #000;
-  text-shadow: 0 0 6px rgba(51,221,85,.3);
-}
-.xpdr-modes { display: flex; gap: 3px; }
-.xpdr-m {
-  padding: 5px 8px;
-  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-  border: 1.5px solid #333;
-  border-radius: 3px;
-  color: #555; font-size: 8px; font-weight: 700;
-  cursor: pointer;
-}
-.xpdr-m.active { border-color: #4af; color: #4af; }
-.ident {
-  padding: 5px 10px;
-  background: linear-gradient(180deg, #0a1a0a, #051005);
-  border: 1.5px solid rgba(52,208,88,.3);
-  border-radius: 3px;
-  color: #3d5; font-size: 8px; font-weight: 700;
-  cursor: pointer;
-}
-.ident:active { background: rgba(52,208,88,.15); }
-
-/* ====== YOKE CONTROL ====== */
-.yoke-panel { text-align: center; }
-.yoke-header { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
-.yoke-mode-btn {
-  padding: 6px 14px;
-  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-  border: 1.5px solid #333;
-  border-radius: 4px;
-  color: #555;
-  font-size: 9px; font-weight: 700; letter-spacing: 1px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.yoke-mode-btn.active { border-color: #4af; color: #4af; background: linear-gradient(180deg, #1a2535, #0d1520); box-shadow: 0 0 8px rgba(74,158,255,.1); }
-.yoke-actions { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; }
-.yoke-act-btn {
-  padding: 5px 10px;
-  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-  border: 1.5px solid #333;
-  border-radius: 3px;
-  color: #666;
-  font-size: 8px; font-weight: 700; letter-spacing: .5px;
-  cursor: pointer;
-}
-.yoke-act-btn:active { background: #222; }
-.yoke-act-btn.caution { border-color: #a63; color: #da5; }
-
-/* Crosshair area */
-.yoke-area {
-  position: relative;
-  width: 260px; height: 260px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 70%, #050505 100%);
-  border: 2px solid #333;
-  box-shadow: inset 0 0 30px rgba(0,0,0,.8), 0 4px 12px rgba(0,0,0,.4);
-  touch-action: none;
-  overflow: hidden;
-}
-/* Grid lines */
-.yoke-area::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 49.5%, #222 49.5%, #222 50.5%, transparent 50.5%),
-    linear-gradient(0deg, transparent 49.5%, #222 49.5%, #222 50.5%, transparent 50.5%);
-  pointer-events: none;
-}
-/* Outer ring marks */
-.yoke-area::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  border: 1px dashed #1a1a1a;
-  pointer-events: none;
-}
-.yoke-dot {
-  position: absolute;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #5af, #28e);
-  box-shadow: 0 0 12px rgba(74,170,255,.4), inset 0 1px 0 rgba(255,255,255,.2);
-  transform: translate(-50%, -50%);
-  top: 50%; left: 50%;
-  pointer-events: none;
-  transition: none;
-  z-index: 2;
-}
-.yoke-dot.smooth { transition: top .1s, left .1s; }
-/* Crosshair center ring */
-.yoke-center-ring {
-  position: absolute;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 1px solid #333;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-/* Value readouts */
-.yoke-values {
-  display: flex; justify-content: center; gap: 20px;
-  margin-top: 10px;
-}
-.yoke-val {
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 700;
-}
-.yoke-val-label { font-size: 8px; color: #555; letter-spacing: 1px; display: block; }
-.yoke-val-num { color: #4af; }
-
-/* Sensitivity slider */
-.yoke-settings { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; }
-.yoke-settings label { font-size: 8px; color: #555; font-weight: 700; letter-spacing: .5px; }
-.yoke-slider {
-  width: 80px; height: 4px;
-  -webkit-appearance: none; appearance: none;
-  background: #222; border-radius: 2px; outline: none;
-}
-.yoke-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #666, #333);
-  border: 1px solid #555;
-  cursor: pointer;
-}
-.yoke-gyro-msg {
-  font-size: 9px;
-  color: #666;
-  margin-top: 8px;
-  min-height: 16px;
-}
-
-/* ====== LANDSCAPE — unified cockpit ====== */
-@media (orientation: landscape) {
-  body {
-    padding: 0;
-    overflow: hidden;
-    height: 100vh; height: 100dvh;
-    background: #1a1a1a;
-  }
-
-  /* Kill all panel chrome */
-  .cockpit-grid {
-    display: grid;
-    grid-template-columns: minmax(80px, 140px) 1fr minmax(90px, 160px);
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas:
-      "sw    sw    sw"
-      "lev   yoke  info"
-      "stat  stat  stat";
-    height: 100vh; height: 100dvh;
-    gap: 0;
-  }
-  .panel {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
-    box-shadow: none;
-    background: transparent;
-    overflow: visible;
-  }
-  .panel > .screw { display: none; }
-  .panel > .panel-title { display: none; }
-
-  /* ── TOP: switch strip ── */
-  .panel-elec {
-    grid-area: sw;
-    background: #222;
-    border-bottom: 1px solid #333;
-    padding: 3px 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-  .elec-grid {
-    display: flex !important;
-    align-items: center;
-    gap: 2px;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-  .elec-grid .magneto-section { padding: 2px 4px; gap: 2px; }
-  .elec-grid .magneto-wrap { width: 56px; height: 56px; }
-  .elec-grid .magneto-ring { width: 40px; height: 40px; border-width: 2px; }
-  .elec-grid .magneto-ring::before { inset: -3px; border-width: 1.5px; }
-  .elec-grid .magneto-ring::after { inset: 6px; }
-  .elec-grid .key-body { height: 18px; width: 3px; margin-left: -1.5px; top: 11px; }
-  .elec-grid .key-head { width: 9px; height: 9px; top: -5px; left: -3px; }
-  .elec-grid .key-slot { width: 6px; height: 6px; }
-  .elec-grid .mag-mark { font-size: 6px; padding: 1px 2px; }
-  .elec-grid .mag-state { font-size: 7px; }
-  .elec-grid .rocker { width: 20px; height: 36px; }
-  .elec-grid .rocker-knob { height: 16px; left: 2px; right: 2px; }
-  .elec-grid .rocker.on .rocker-knob { top: 1px; }
-  .elec-grid .rocker:not(.on) .rocker-knob { top: 17px; }
-  .elec-grid .toggle { width: 10px; height: 28px; }
-  .elec-grid .toggle-knob { width: 9px; height: 9px; }
-  .elec-grid .toggle.on .toggle-knob { top: 1px; }
-  .elec-grid .toggle:not(.on) .toggle-knob { top: 16px; }
-  .elec-grid .sw-label, .elec-grid .cb-label { font-size: 5px; }
-  .elec-grid .sw-state { display: none; }
-  .elec-grid .cb { width: 14px; height: 14px; font-size: 5px; border-width: 1px; }
-  .elec-grid .sep { height: 40px; margin: 0 1px; }
-  .elec-grid .elec-col { min-width: 18px; gap: 1px; }
-  .elec-grid .elec-section { gap: 1px; }
-
-  /* ── LEFT: engine levers (vertical sliders, side by side) ── */
-  .panel-engine {
-    grid-area: lev;
-    display: flex;
-    flex-direction: column;
-    background: #1e1e1e;
-    border-right: 1px solid #333;
-    padding: 2px 2px;
-  }
-  .panel-engine .controls-row {
-    display: flex;
-    flex-direction: row;
-    gap: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    justify-content: space-evenly;
-  }
-  .panel-engine .ctrl-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-  }
-  .panel-engine .ctrl-name {
-    font-size: 6px;
-    flex-shrink: 0;
-  }
-  .panel-engine .ctrl-body {
-    flex: 1;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-  }
-  .panel-engine .lever-range {
-    writing-mode: vertical-lr;
-    direction: rtl;
-    width: 30px;
-    height: 100%;
-  }
-  .panel-engine .lever-val {
-    font-size: 8px;
-    flex-shrink: 0;
-  }
-  .panel-engine .flap-track {
-    width: auto;
-    height: 100%;
-    min-height: 0;
-  }
-  .panel-engine .flap-notch span { font-size: 5px; }
-  .panel-engine .trim-wheel {
-    width: auto;
-    height: 100%;
-    min-height: 0;
-  }
-  .panel-engine .trim-val,
-  .panel-engine #flapVal { font-size: 8px; flex-shrink: 0; }
-
-  /* ── CENTER: yoke ── */
-  .panel-yoke {
-    grid-area: yoke;
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    background: #181818;
-  }
-  .panel-yoke .yoke-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: center;
-  }
-  .yoke-header { margin-bottom: 3px; gap: 4px; }
-  .yoke-mode-btn { padding: 2px 8px; font-size: 7px; }
-  .yoke-actions { margin-bottom: 2px; gap: 3px; }
-  .yoke-act-btn { padding: 2px 6px; font-size: 6px; }
-  .yoke-area {
-    width: calc(100vh - 160px);
-    height: calc(100vh - 160px);
-    max-width: 55vw;
-    max-height: 55vw;
-  }
-  .yoke-values { margin-top: 3px; gap: 10px; }
-  .yoke-val-num { font-size: 11px; }
-  .yoke-val-label { font-size: 6px; }
-  .yoke-settings { margin-top: 2px; gap: 3px; }
-  .yoke-settings label { font-size: 6px; }
-  .yoke-slider { width: 40px; height: 3px; }
-  .yoke-gyro-msg { font-size: 7px; margin-top: 1px; }
-
-  /* ── RIGHT: gauges + fuel + radio stacked ── */
-  .gauge-strip {
-    display: flex !important;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 4px;
-    align-items: stretch;
-  }
-  .gauge-item {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
-  }
-  .gauge-label {
-    font-size: 6px;
-    color: #555;
-    font-weight: 700;
-    letter-spacing: .5px;
-    width: 22px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .gauge-num {
-    font-family: monospace;
-    font-size: 15px;
-    font-weight: 900;
-    color: #3d5;
-    text-shadow: 0 0 4px rgba(51,221,85,.15);
-    flex: 1;
-    text-align: right;
-  }
-  .gauge-unit { font-size: 6px; color: #444; width: 18px; }
-  .gauge-num.warn { color: #da5; text-shadow: 0 0 4px rgba(220,170,50,.15); }
-  .gauge-num.danger { color: #f44; text-shadow: 0 0 4px rgba(255,68,68,.2); }
-
-  .panel-fuel, .panel-radio {
-    display: none !important;
-  }
-  .info-col {
-    grid-area: info;
-    display: flex !important;
-    flex-direction: column;
-    background: #161616;
-    border-left: 1px solid #333;
-    overflow: hidden;
-  }
-  .info-col .gauge-strip { flex: 0 0 auto; border-bottom: 1px solid #2a2a2a; }
-  .info-col .mini-fuel {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
-    border-bottom: 1px solid #2a2a2a;
-  }
-  .mini-fuel-label { font-size: 7px; color: #555; font-weight: 700; letter-spacing: 1px; }
-  .mini-fuel-btns { display: flex; gap: 2px; }
-  .mini-fuel-btn {
-    padding: 3px 6px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 2px;
-    color: #555;
-    font-size: 7px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .mini-fuel-btn.active { border-color: #4af; color: #4af; }
-  .mini-fuel-val { font-family: monospace; font-size: 11px; color: #4af; font-weight: 700; }
-  .info-col .mini-radio {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 2px 6px;
-    gap: 3px;
-    overflow: hidden;
-  }
-  .mini-radio-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .mini-radio-id { font-size: 7px; color: #555; font-weight: 700; width: 28px; }
-  .mini-radio-freq { font-family: monospace; font-size: 13px; color: #3d5; font-weight: 700; }
-  .mini-radio-stby { font-family: monospace; font-size: 10px; color: #444; }
-  .mini-radio-flip {
-    background: none;
-    border: 1px solid #333;
-    border-radius: 2px;
-    color: #555;
-    font-size: 10px;
-    padding: 1px 4px;
-    cursor: pointer;
-  }
-  .mini-xpdr { display: flex; align-items: center; gap: 4px; }
-  .mini-xpdr-code { font-family: monospace; font-size: 13px; color: #3d5; font-weight: 700; letter-spacing: 2px; }
-
-  /* ── BOTTOM: status ── */
-  .statusbar {
-    grid-area: stat;
-    position: static;
-    padding: 2px 8px;
-    font-size: 7px;
-    background: #111;
-    border-top: 1px solid #2a2a2a;
-  }
-}
-
-/* Landscape-only elements hidden in portrait */
-.gauge-strip { display: none; }
-.info-col { display: none; }
-.mini-fuel { display: none; }
-.mini-radio { display: none; }
-
-/* ====== STATUS ====== */
-.statusbar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  display: flex; justify-content: space-between;
-  padding: 5px 12px;
-  background: #111; border-top: 1px solid #2a2a2a;
-  font-family: monospace; font-size: 9px; color: #444;
-}
-.dot { width: 6px; height: 6px; border-radius: 50%; background: #e44; display: inline-block; margin-right: 4px; vertical-align: middle; }
-.dot.on { background: #3d5; box-shadow: 0 0 4px #3d5; }
+/* === YOKE === */
+.yoke{flex:1;position:relative;overflow:hidden;touch-action:none}
+.yk-a{position:absolute;inset:0;touch-action:none;z-index:1}
+.yk-h,.yk-v{position:absolute;background:var(--cf-border);pointer-events:none}
+.yk-h{top:50%;left:6%;right:6%;height:1px}.yk-v{left:50%;top:6%;bottom:6%;width:1px}
+.yk-r{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  border:1px solid rgba(74,158,255,.08);border-radius:50%;width:min(88%,88vh);aspect-ratio:1;pointer-events:none}
+.yk-d{position:absolute;width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle,rgba(74,158,255,.8),rgba(74,158,255,.05));
+  box-shadow:0 0 24px rgba(74,158,255,.25),0 0 48px rgba(74,158,255,.08);
+  transform:translate(-50%,-50%);top:50%;left:50%;transition:all 30ms;pointer-events:none}
 </style>
 </head>
 <body>
+<div class="port"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>ROTATE LANDSCAPE</span></div>
 
-<div class="cockpit-grid">
+<div class="pit">
+  <!-- LEVERS -->
+  <div class="pnl levers">
+    <div class="lv" id="thr"><span class="lv-l">THR</span><div class="lv-t"><div class="lv-f" style="height:0%;background:var(--cf-accent)"></div><div class="lv-k bl" style="bottom:0%"></div></div><span class="lv-v" style="color:var(--cf-accent)">0</span></div>
+    <div class="lv" id="mix"><span class="lv-l">MIX</span><div class="lv-t"><div class="lv-f" style="height:100%;background:var(--cf-red)"></div><div class="lv-k rd" style="bottom:100%"></div></div><span class="lv-v" style="color:var(--cf-red)">100</span></div>
+  </div>
 
-<!-- ELECTRICAL PANEL -->
-<div class="panel panel-elec">
-  <div class="screw" style="top:6px;left:6px"></div>
-  <div class="screw" style="top:6px;right:6px"></div>
-  <div class="screw" style="bottom:6px;left:6px"></div>
-  <div class="screw" style="bottom:6px;right:6px"></div>
-  <div class="panel-title">ELECTRICAL PANEL</div>
-
-  <!-- C172S electrical panel: magneto + aligned CB/switch columns -->
-  <div class="elec-layout">
-
-    <!-- Row: Magneto + switches grid -->
-    <div class="elec-grid">
-
-      <!-- Section: Magneto + Master -->
-      <div class="elec-section">
-        <div class="magneto-section">
-          <div class="magneto-wrap">
-            <div class="magneto-ring" id="magnetoRing">
-              <div class="key-slot"></div>
-              <div class="key-body" id="keyBody"><div class="key-head"></div></div>
-            </div>
-            <!-- Labels positioned around the ring -->
-            <span class="mag-mark active" data-mag="0" style="top:0;left:50%;transform:translateX(-50%)">OFF</span>
-            <span class="mag-mark" data-mag="1" style="right:0;top:28px">R</span>
-            <span class="mag-mark" data-mag="2" style="left:0;top:28px">L</span>
-            <span class="mag-mark" data-mag="3" style="bottom:0;left:50%;transform:translateX(-50%)">BOTH</span>
-            <span class="mag-mark start-mark" data-mag="4" style="right:0;bottom:8px">START</span>
-          </div>
-          <span class="mag-state" id="magState">BOTH</span>
-        </div>
-        <div class="sep"></div>
-        <div class="elec-col">
-          <span class="sw-label">ALT</span>
-          <div class="rocker rocker-red" data-cmd="MASTER_ALT" data-key="MASTER_ALT"><div class="rocker-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="sw-label">BAT</span>
-          <div class="rocker rocker-red" data-cmd="MASTER_BATTERY" data-key="MASTER_BATTERY"><div class="rocker-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-      </div>
-
-      <div class="sep"></div>
-
-      <!-- Section: Fuel pump + Lights -->
-      <div class="elec-section">
-        <div class="elec-col">
-          <span class="cb-label">15A</span>
-          <div class="cb" data-cb="FUEL_PUMP">&#8226;</div>
-          <span class="sw-label">FUEL<br>PUMP</span>
-          <div class="toggle" data-cmd="FUEL_PUMP" data-key="FUEL_PUMP"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="sep"></div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="BCN">&#8226;</div>
-          <span class="sw-label">BCN</span>
-          <div class="toggle" data-cmd="BEACON" data-key="BEACON"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="cb-label">15A</span>
-          <div class="cb" data-cb="LAND">&#8226;</div>
-          <span class="sw-label">LAND</span>
-          <div class="toggle" data-cmd="LANDING_LIGHT" data-key="LANDING_LIGHT"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="TAXI">&#8226;</div>
-          <span class="sw-label">TAXI</span>
-          <div class="toggle" data-cmd="TAXI_LIGHT" data-key="TAXI_LIGHT"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="NAV">&#8226;</div>
-          <span class="sw-label">NAV</span>
-          <div class="toggle" data-cmd="NAV_LIGHT" data-key="NAV_LIGHT"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="STRB">&#8226;</div>
-          <span class="sw-label">STRB</span>
-          <div class="toggle" data-cmd="STROBE" data-key="STROBE"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-      </div>
-
-      <div class="sep"></div>
-
-      <!-- Section: Pitot + Avionics -->
-      <div class="elec-section">
-        <div class="elec-col">
-          <span class="cb-label">7.5A</span>
-          <div class="cb" data-cb="PITOT">&#8226;</div>
-          <span class="sw-label">PITOT<br>HEAT</span>
-          <div class="toggle" data-cmd="PITOT_HEAT" data-key="PITOT_HEAT"><div class="toggle-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="sep"></div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="BUS1">&#8226;</div>
-          <span class="sw-label">BUS 1</span>
-          <div class="rocker rocker-white" data-cmd="AVIONICS_MASTER" data-key="AVIONICS_MASTER"><div class="rocker-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-        <div class="elec-col">
-          <span class="cb-label">5A</span>
-          <div class="cb" data-cb="BUS2">&#8226;</div>
-          <span class="sw-label">BUS 2</span>
-          <div class="rocker rocker-white" data-cmd="AVIONICS_MASTER_2" data-key="AVIONICS_MASTER_2"><div class="rocker-knob"></div></div>
-          <span class="sw-state">OFF</span>
-        </div>
-      </div>
-
-    </div><!-- /elec-grid -->
-  </div><!-- /elec-layout -->
-</div>
-
-<!-- YOKE -->
-<div class="panel panel-yoke">
-  <div class="screw" style="top:6px;left:6px"></div>
-  <div class="screw" style="top:6px;right:6px"></div>
-  <div class="screw" style="bottom:6px;left:6px"></div>
-  <div class="screw" style="bottom:6px;right:6px"></div>
-  <div class="panel-title">FLIGHT CONTROL</div>
-  <div class="yoke-panel">
-    <div class="yoke-header">
-      <button class="yoke-mode-btn active" data-yoke-mode="touch" id="yokeModeTouchBtn">TOUCH</button>
-      <button class="yoke-mode-btn" data-yoke-mode="gyro" id="yokeModeGyroBtn">GYRO</button>
+  <!-- SWITCHES 5x2 -->
+  <div class="pnl switches">
+    <div class="sw red on" data-cmd="PARKING_BRAKE"><div class="sw-d"></div><span class="sw-l">P.BRK</span></div>
+    <div class="sw red" data-cmd="MASTER_ALT"><div class="sw-d"></div><span class="sw-l">ALT</span></div>
+    <div class="sw red" data-cmd="MASTER_BATTERY"><div class="sw-d"></div><span class="sw-l">BAT</span></div>
+    <div class="sw" data-cmd="AVIONICS_MASTER"><div class="sw-d"></div><span class="sw-l">AVIO</span></div>
+    <div class="sw" data-cmd="FUEL_PUMP"><div class="sw-d"></div><span class="sw-l">PUMP</span></div>
+    <div class="sw" data-cmd="BEACON"><div class="sw-d"></div><span class="sw-l">BCN</span></div>
+    <div class="sw" data-cmd="LANDING_LIGHT"><div class="sw-d"></div><span class="sw-l">LAND</span></div>
+    <div class="sw" data-cmd="NAV_LIGHT"><div class="sw-d"></div><span class="sw-l">NAV</span></div>
+    <div class="sw" data-cmd="STROBE"><div class="sw-d"></div><span class="sw-l">STRB</span></div>
+    <div class="sw" data-cmd="PITOT_HEAT"><div class="sw-d"></div><span class="sw-l">PITOT</span></div>
+    <div class="sw" data-cmd="TAXI_LIGHT"><div class="sw-d"></div><span class="sw-l">TAXI</span></div>
+    <div class="sw" data-cmd="CARB_HEAT"><div class="sw-d"></div><span class="sw-l">CARB</span></div>
+    <!-- Magneto row -->
+    <div class="grp" style="grid-column:1/4"><span class="grp-l">MAG</span>
+      <button class="gb" data-mag="0">OFF</button><button class="gb" data-mag="1">R</button>
+      <button class="gb" data-mag="2">L</button><button class="gb gb-on" data-mag="3">BOTH</button>
+      <button class="gb gb-st" data-mag="4">START</button>
     </div>
-    <div class="yoke-actions">
-      <button class="yoke-act-btn" id="yokeCenter">CENTER</button>
-      <button class="yoke-act-btn caution" id="yokeLock">LOCK</button>
+    <!-- Fuel selector row -->
+    <div class="grp" style="grid-column:1/4"><span class="grp-l">FUEL</span>
+      <button class="gb" data-fuel="1">LEFT</button><button class="gb gb-on" data-fuel="2">BOTH</button>
+      <button class="gb" data-fuel="3">RIGHT</button>
     </div>
-    <div class="yoke-area" id="yokeArea">
-      <div class="yoke-center-ring"></div>
-      <div class="yoke-dot" id="yokeDot"></div>
+  </div>
+
+  <!-- FLAPS + TRIM -->
+  <div class="ftcol">
+    <div class="pnl flaps"><span class="fl-l">FLAPS</span>
+      <button class="fl-b on" data-v="0">UP</button><button class="fl-b" data-v="0.33">10°</button>
+      <button class="fl-b" data-v="0.66">20°</button><button class="fl-b" data-v="1">FULL</button>
     </div>
-    <div class="yoke-values">
-      <div class="yoke-val"><span class="yoke-val-label">AILERON</span><span class="yoke-val-num" id="yokeAilVal">0</span></div>
-      <div class="yoke-val"><span class="yoke-val-label">ELEVATOR</span><span class="yoke-val-num" id="yokeElvVal">0</span></div>
+    <div class="pnl trimw" id="trimW"><div class="tr-gr" id="trimGr"></div><div class="tr-i"><span class="tr-v" id="trimV">0</span></div></div>
+  </div>
+
+  <!-- RIGHT: nav + gauges + yoke -->
+  <div class="right">
+    <!-- Nav bar -->
+    <div class="pnl" style="display:flex;align-items:center;padding:3px 6px;gap:3px;flex-shrink:0">
+      <button class="hb" id="btnBack">&#9664; BACK</button>
+      <button class="hb hb-on" id="btnTouch">TOUCH</button>
+      <button class="hb" id="btnGyro">GYRO</button>
+      <button class="hb" id="btnCtr">CTR</button>
+      <button class="hb" id="btnPause">&#10074;&#10074;</button>
     </div>
-    <div class="yoke-settings">
-      <label>SENS</label>
-      <input type="range" class="yoke-slider" id="yokeSens" min="0.3" max="2" step="0.1" value="1">
-      <label>DEAD</label>
-      <input type="range" class="yoke-slider" id="yokeDead" min="0" max="0.15" step="0.01" value="0.05">
+    <!-- Gauges -->
+    <div class="pnl" style="display:flex;align-items:center;justify-content:space-around;padding:2px 8px;flex-shrink:0">
+      <div class="gbox"><span class="g-l">IAS</span><span class="g-v" style="color:var(--cf-accent);font-size:22px" id="rI">0</span><span class="g-u">KTS</span></div>
+      <div class="gbox"><span class="g-l">ALT</span><span class="g-v" style="font-size:22px" id="rA">0</span><span class="g-u">FT</span></div>
+      <div class="gbox"><span class="g-l">HDG</span><span class="g-v" style="color:var(--cf-green);font-size:22px" id="rH">---</span><span class="g-u">°</span></div>
+      <div class="gbox"><span class="g-l">VS</span><span class="g-v" style="color:var(--cf-amber);font-size:22px" id="rV">0</span><span class="g-u">FPM</span></div>
     </div>
-    <div class="yoke-gyro-msg" id="yokeGyroMsg"></div>
+    <div class="pnl yoke"><div class="yk-a" id="ykA"><div class="yk-h"></div><div class="yk-v"></div><div class="yk-r"></div><div class="yk-d" id="yd"></div></div></div>
   </div>
 </div>
-
-<!-- ENGINE -->
-<div class="panel panel-engine">
-  <div class="screw" style="top:6px;left:6px"></div>
-  <div class="screw" style="top:6px;right:6px"></div>
-  <div class="panel-title">ENGINE & CONTROLS</div>
-  <div class="controls-row">
-    <!-- Throttle -->
-    <div class="ctrl-col">
-      <span class="ctrl-name">THRTL</span>
-      <div class="ctrl-body">
-        <input type="range" class="lever-range throttle" data-cmd="THROTTLE" min="0" max="1" step="0.01" value="0" />
-      </div>
-      <span class="lever-val" data-disp="THROTTLE">0%</span>
-    </div>
-    <!-- Mixture -->
-    <div class="ctrl-col">
-      <span class="ctrl-name">MIX</span>
-      <div class="ctrl-body">
-        <input type="range" class="lever-range mixture" data-cmd="MIXTURE" min="0" max="1" step="0.01" value="1" />
-      </div>
-      <span class="lever-val" data-disp="MIXTURE">100%</span>
-    </div>
-    <!-- Carb -->
-    <div class="ctrl-col">
-      <span class="ctrl-name">CARB</span>
-      <div class="ctrl-body">
-        <input type="range" class="lever-range carb" data-cmd="CARB_HEAT" min="0" max="1" step="0.01" value="0" />
-      </div>
-      <span class="lever-val" data-disp="CARB_HEAT">0%</span>
-    </div>
-    <!-- Flaps -->
-    <div class="ctrl-col">
-      <span class="ctrl-name">FLAPS</span>
-      <div class="ctrl-body">
-        <div class="flap-track">
-          <div class="flap-notch" data-flap="0" style="top:5%"><span>UP</span></div>
-          <div class="flap-notch" data-flap="0.33" style="top:30%"><span>10°</span></div>
-          <div class="flap-notch" data-flap="0.66" style="top:60%"><span>20°</span></div>
-          <div class="flap-notch" data-flap="1" style="top:88%"><span>FULL</span></div>
-          <div class="flap-handle" id="flapHandle"></div>
-        </div>
-      </div>
-      <span class="lever-val" id="flapVal">UP</span>
-    </div>
-    <!-- Trim -->
-    <div class="ctrl-col">
-      <span class="ctrl-name">TRIM</span>
-      <div class="ctrl-body">
-        <div class="trim-wheel" id="trimWheel">
-          <div class="trim-grooves" id="trimGrooves">
-            <div class="trim-groove"></div><div class="trim-groove"></div><div class="trim-groove"></div>
-            <div class="trim-groove"></div><div class="trim-groove"></div><div class="trim-groove"></div>
-            <div class="trim-groove"></div><div class="trim-groove"></div><div class="trim-groove"></div>
-            <div class="trim-groove"></div><div class="trim-groove"></div><div class="trim-groove"></div>
-          </div>
-        </div>
-      </div>
-      <span class="trim-val" id="trimVal">0</span>
-    </div>
-  </div>
-</div>
-
-<!-- FUEL -->
-<div class="panel panel-fuel">
-  <div class="panel-title">FUEL</div>
-  <div class="fuel-layout">
-    <div class="fuel-sel-col">
-      <div class="fuel-plate">
-        <!-- Labels -->
-        <span class="fpl" style="top:8px;left:50%;transform:translateX(-50%)">BOTH</span>
-        <span class="fpl fpl-sm" style="top:20px;left:22%">TAKEOFF<br>LANDING</span>
-        <span class="fpl fpl-sm" style="top:20px;right:18%">ALL FLIGHT<br>ATTITUDES</span>
-        <span class="fpl" style="bottom:10px;left:15%">LEFT<br><span class="fpl-sm">26.5 gal.<br>LEVEL FLIGHT<br>ONLY</span></span>
-        <span class="fpl" style="bottom:10px;right:10%">RIGHT<br><span class="fpl-sm">26.5 gal.<br>LEVEL FLIGHT<br>ONLY</span></span>
-        <span class="fpl" style="top:4px;right:8px;font-size:8px">FUEL<br>SELECTOR</span>
-        <!-- Diamond handle -->
-        <div class="fuel-handle" id="fuelHandle">
-          <div class="fh-wing fh-left"></div>
-          <div class="fh-center">
-            <div class="fh-screw"></div>
-          </div>
-          <div class="fh-wing fh-right"></div>
-        </div>
-        <!-- Click zones -->
-        <div class="fzone" style="top:0;left:30%;width:40%;height:35%" data-fpos="2"></div>
-        <div class="fzone" style="top:35%;left:0;width:35%;height:40%" data-fpos="1"></div>
-        <div class="fzone" style="top:35%;right:0;width:35%;height:40%" data-fpos="3"></div>
-        <div class="fzone" style="bottom:0;left:30%;width:40%;height:25%" data-fpos="0"></div>
-      </div>
-      <span class="fuel-val" id="fuelDisplay">BOTH</span>
-    </div>
-    <div class="fuel-shutoff-col">
-      <span class="fuel-section-label">SHUTOFF</span>
-      <div class="fuel-shutoff" id="fuelShutoff">
-        <div class="shutoff-knob"></div>
-        <span class="shutoff-text">PULL</span>
-      </div>
-      <span class="shutoff-state" id="shutoffState">IN</span>
-    </div>
-  </div>
-</div>
-
-<!-- RIGHT INFO COLUMN (landscape only) -->
-<div class="info-col">
-  <div class="gauge-strip">
-    <div class="gauge-item"><span class="gauge-label">IAS</span><span class="gauge-num" id="gIAS">---</span><span class="gauge-unit">KTS</span></div>
-    <div class="gauge-item"><span class="gauge-label">ALT</span><span class="gauge-num" id="gALT">---</span><span class="gauge-unit">FT</span></div>
-    <div class="gauge-item"><span class="gauge-label">VS</span><span class="gauge-num" id="gVS">---</span><span class="gauge-unit">FPM</span></div>
-    <div class="gauge-item"><span class="gauge-label">HDG</span><span class="gauge-num" id="gHDG">---</span><span class="gauge-unit">°</span></div>
-    <div class="gauge-item"><span class="gauge-label">RPM</span><span class="gauge-num" id="gRPM">---</span><span class="gauge-unit"></span></div>
-  </div>
-  <div class="mini-fuel">
-    <span class="mini-fuel-label">FUEL</span>
-    <span class="mini-fuel-val" id="miniFuelDisp">BOTH</span>
-    <div class="mini-fuel-btns">
-      <button class="mini-fuel-btn" data-mfuel="1">L</button>
-      <button class="mini-fuel-btn active" data-mfuel="2">BOTH</button>
-      <button class="mini-fuel-btn" data-mfuel="3">R</button>
-    </div>
-  </div>
-  <div class="mini-radio">
-    <div class="mini-radio-row">
-      <span class="mini-radio-id">COM1</span>
-      <span class="mini-radio-freq" id="miniCom1">121.800</span>
-    </div>
-    <div class="mini-radio-row">
-      <span class="mini-radio-id">NAV1</span>
-      <span class="mini-radio-freq" id="miniNav1">111.70</span>
-    </div>
-    <div class="mini-xpdr">
-      <span class="mini-radio-id">XPDR</span>
-      <span class="mini-xpdr-code" id="miniXpdr">1200</span>
-    </div>
-  </div>
-</div>
-
-<!-- RADIO -->
-<div class="panel panel-radio">
-  <div class="panel-title">RADIO STACK</div>
-  <div class="radio-unit">
-    <span class="radio-id">COM1</span>
-    <span class="freq-act">121.800</span>
-    <button class="freq-flip" data-flip="COM1_FLIP">&#8596;</button>
-    <span class="freq-stby">121.800</span>
-    <div class="knobs">
-      <button class="knob" data-knob="COM1_COARSE" data-dir="-1">&#9664;</button>
-      <span class="knob-sep">MHz</span>
-      <button class="knob" data-knob="COM1_COARSE" data-dir="1">&#9654;</button>
-      <button class="knob sm" data-knob="COM1_FINE" data-dir="-1">&#9664;</button>
-      <span class="knob-sep">kHz</span>
-      <button class="knob sm" data-knob="COM1_FINE" data-dir="1">&#9654;</button>
-    </div>
-  </div>
-  <div class="radio-unit">
-    <span class="radio-id">NAV1</span>
-    <span class="freq-act">111.70</span>
-    <button class="freq-flip" data-flip="NAV1_FLIP">&#8596;</button>
-    <span class="freq-stby">111.70</span>
-    <div class="knobs">
-      <button class="knob" data-knob="NAV1_COARSE" data-dir="-1">&#9664;</button>
-      <span class="knob-sep">MHz</span>
-      <button class="knob" data-knob="NAV1_COARSE" data-dir="1">&#9654;</button>
-      <button class="knob sm" data-knob="NAV1_FINE" data-dir="-1">&#9664;</button>
-      <span class="knob-sep">kHz</span>
-      <button class="knob sm" data-knob="NAV1_FINE" data-dir="1">&#9654;</button>
-    </div>
-  </div>
-  <div class="radio-unit" style="flex-wrap:wrap;gap:6px">
-    <span class="radio-id">XPDR</span>
-    <div class="xpdr-digits"><span class="xpdr-d">1</span><span class="xpdr-d">2</span><span class="xpdr-d">0</span><span class="xpdr-d">0</span></div>
-    <div class="xpdr-modes">
-      <button class="xpdr-m" data-xm="0">OFF</button>
-      <button class="xpdr-m" data-xm="1">STBY</button>
-      <button class="xpdr-m active" data-xm="2">ON</button>
-      <button class="xpdr-m" data-xm="3">ALT</button>
-    </div>
-    <button class="ident">IDENT</button>
-  </div>
-</div>
-
-<div class="statusbar">
-  <span><span class="dot" id="sDot"></span><span id="sTxt">CONNECTING</span></span>
-  <span>COCKPITFLOW</span>
-</div>
-
-</div><!-- /cockpit-grid -->
 
 <script>
-const API = window.location.origin;
-// Magneto: 0=OFF, 1=R, 2=L, 3=BOTH, 4=START
-// Key angles: OFF=top(-135°), L=left(-45°), R=right(-90°?), BOTH=bottom(0°), START=45°
-const magAngles = [-135, -90, -45, 0, 45];
-const magNames = ['OFF', 'R', 'L', 'BOTH', 'START'];
-let curMag = 3;
+const API=new URLSearchParams(location.search).get('api')||location.origin;
+const snd=(c,v)=>fetch(API+'/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:c,value:v})}).catch(()=>{});
 
-function setMag(pos) {
-  curMag = pos;
-  document.getElementById('keyBody').style.transform = `translateX(-50%) rotate(${magAngles[pos]}deg)`;
-  document.querySelectorAll('.mag-mark').forEach(m => {
-    const v = parseInt(m.dataset.mag);
-    m.classList.toggle('active', v === pos);
-  });
-  document.getElementById('magState').textContent = magNames[pos];
-}
-setMag(3);
-
-// Click on position labels to rotate
-document.querySelectorAll('.mag-mark').forEach(mark => {
-  mark.addEventListener('pointerdown', e => {
-    e.preventDefault();
-    const v = parseInt(mark.dataset.mag);
-    sendCmd('MAGNETO', v);
-    setMag(v);
-  });
-  // START springs back to BOTH on release
-  if (mark.dataset.mag === '4') {
-    mark.addEventListener('pointerup', () => { sendCmd('MAGNETO', 3); setMag(3); });
-    mark.addEventListener('pointerleave', () => { if (curMag === 4) { sendCmd('MAGNETO', 3); setMag(3); } });
-  }
+// Levers
+['thr','mix'].forEach(id=>{
+  const el=document.getElementById(id),tr=el.querySelector('.lv-t'),fl=el.querySelector('.lv-f'),kb=el.querySelector('.lv-k'),vl=el.querySelector('.lv-v');
+  const cm=id==='thr'?'THROTTLE':'MIXTURE';let val=id==='mix'?1:0,drag=false;
+  const upd=v=>{val=Math.max(0,Math.min(1,v));const p=val*100;fl.style.height=p+'%';kb.style.bottom=`calc(${p}% - 8px)`;vl.textContent=Math.round(p)};
+  const mv=y=>{const r=tr.getBoundingClientRect();upd(1-(y-r.top)/r.height);snd(cm,val)};
+  el.onpointerdown=e=>{e.preventDefault();drag=true;el.setPointerCapture(e.pointerId);mv(e.clientY)};
+  el.onpointermove=e=>{if(drag)mv(e.clientY)};el.onpointerup=el.onpointercancel=()=>{drag=false};
+  upd(val);
 });
 
-// Click on the ring itself to cycle: OFF→R→L→BOTH (no START)
-document.getElementById('magnetoRing').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  const next = (curMag + 1) % 4; // cycle 0-3
-  sendCmd('MAGNETO', next);
-  setMag(next);
-});
+// Yoke
+(function(){
+  const a=document.getElementById('ykA'),d=document.getElementById('yd');let t=false;
+  const mv=(x,y)=>{if(typeof gyroActive!=='undefined'&&gyroActive)return;const r=a.getBoundingClientRect();const ax=Math.max(-1,Math.min(1,((x-r.left)/r.width)*2-1));const ey=Math.max(-1,Math.min(1,((y-r.top)/r.height)*2-1));d.style.left=((ax+1)/2*100)+'%';d.style.top=((ey+1)/2*100)+'%';snd('AILERON',ax);snd('ELEVATOR',ey)};
+  const ctr=()=>{if(typeof gyroActive!=='undefined'&&gyroActive)return;d.style.left='50%';d.style.top='50%';snd('AILERON',0);snd('ELEVATOR',0)};
+  a.onpointerdown=e=>{e.preventDefault();t=true;a.setPointerCapture(e.pointerId);mv(e.clientX,e.clientY)};
+  a.onpointermove=e=>{if(t)mv(e.clientX,e.clientY)};a.onpointerup=a.onpointercancel=()=>{if(t){t=false;ctr()}};
+  window.addEventListener('message',e=>{if(e.data?.type==='capacitor-orientation'){const ai=Math.max(-1,Math.min(1,(e.data.gamma||0)/45));const el=Math.max(-1,Math.min(1,(e.data.beta||0)/35));d.style.left=((ai+1)/2*100)+'%';d.style.top=((el+1)/2*100)+'%'}});
+})();
 
-document.querySelectorAll('.toggle, .rocker').forEach(el => {
-  el.addEventListener('pointerdown', e => { e.preventDefault(); sendCmd(el.dataset.cmd, el.classList.contains('on') ? 0 : 1); });
-});
+// Flaps
+document.querySelectorAll('.fl-b').forEach(b=>{b.onclick=()=>{document.querySelectorAll('.fl-b').forEach(x=>x.classList.remove('on'));b.classList.add('on');snd('FLAPS',parseFloat(b.dataset.v))}});
 
-document.querySelectorAll('[data-cb]').forEach(el => { el.addEventListener('pointerdown', e => { e.preventDefault(); el.classList.toggle('popped'); }); });
+// Trim wheel
+(function(){
+  const w=document.getElementById('trimW'),gr=document.getElementById('trimGr'),vEl=document.getElementById('trimV');
+  for(let i=0;i<30;i++){const g=document.createElement('div');g.className='tr-g';gr.appendChild(g)}
+  let val=0,drag=false,lastY=0,gOff=0;
+  w.onpointerdown=e=>{e.preventDefault();drag=true;lastY=e.clientY;w.setPointerCapture(e.pointerId)};
+  w.onpointermove=e=>{if(!drag)return;const dy=e.clientY-lastY;lastY=e.clientY;val=Math.max(-1,Math.min(1,val+dy*.006));snd('TRIM',val);gOff+=dy;gr.style.transform=`translateY(${gOff%7}px)`;vEl.textContent=Math.round(val*100)};
+  w.onpointerup=w.onpointercancel=()=>{drag=false};
+})();
 
-document.querySelectorAll('.lever-range').forEach(i => { i.addEventListener('input', () => sendCmd(i.dataset.cmd, parseFloat(i.value))); });
+// Switches
+document.querySelectorAll('.sw').forEach(s=>{s.onclick=()=>{s.classList.toggle('on');snd(s.dataset.cmd,s.classList.contains('on')?1:0)}});
+snd('PARKING_BRAKE',1);
 
-// Flaps - drag handle + click notch, snaps to detents
-const flapDetents = [0, 0.33, 0.66, 1];
-const flapLabels = { 0: '2%', 0.33: '27%', 0.66: '57%', 1: '85%' };
-let flapDragging = false;
-let flapVal = 0;
-const flapHandle = document.getElementById('flapHandle');
-const flapTrack = document.querySelector('.flap-track');
+// Magneto selector
+document.querySelectorAll('[data-mag]').forEach(b=>{b.onclick=()=>{
+  const v=parseInt(b.dataset.mag);
+  document.querySelectorAll('[data-mag]').forEach(x=>x.classList.remove('gb-on'));
+  b.classList.add('gb-on');
+  snd('MAGNETO',v);
+  // START springs back to BOTH
+  if(v===4)setTimeout(()=>{b.classList.remove('gb-on');document.querySelector('[data-mag="3"]').classList.add('gb-on');snd('MAGNETO',3)},500);
+}});
 
-function setFlapVisual(val) {
-  flapVal = val;
-  const pct = 2 + val * 83;
-  flapHandle.style.top = pct + '%';
-  document.querySelectorAll('.flap-notch').forEach(n => {
-    n.classList.toggle('active', Math.abs(parseFloat(n.dataset.flap) - val) < 0.05);
-  });
-  const deg = Math.round(val * 30);
-  const label = deg === 0 ? 'UP' : deg >= 28 ? 'FULL' : deg + '°';
-  document.getElementById('flapVal').textContent = label;
-}
+// Fuel selector
+document.querySelectorAll('[data-fuel]').forEach(b=>{b.onclick=()=>{
+  document.querySelectorAll('[data-fuel]').forEach(x=>x.classList.remove('gb-on'));
+  b.classList.add('gb-on');
+  snd('FUEL_SEL',parseInt(b.dataset.fuel));
+}});
 
-function snapToDetent(raw) {
-  let closest = 0, minDist = 999;
-  flapDetents.forEach(d => { const dist = Math.abs(raw - d); if (dist < minDist) { minDist = dist; closest = d; } });
-  return closest;
-}
+// Header buttons
+document.getElementById('btnBack').onclick=()=>{ history.back(); };
+document.getElementById('btnPause').onclick=()=>{
+  snd('PAUSE',1);
+  const b=document.getElementById('btnPause');
+  b.classList.toggle('hb-on');
+};
 
-flapTrack.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  flapDragging = true;
-  flapTrack.setPointerCapture(e.pointerId);
-  updateFlapFromPointer(e);
-});
-flapTrack.addEventListener('pointermove', e => {
-  if (!flapDragging) return;
-  updateFlapFromPointer(e);
-});
-flapTrack.addEventListener('pointerup', e => {
-  if (!flapDragging) return;
-  flapDragging = false;
-  // Snap to nearest detent
-  const snapped = snapToDetent(flapVal);
-  setFlapVisual(snapped);
-  sendCmd('FLAPS', snapped);
-});
-flapTrack.addEventListener('pointercancel', () => { flapDragging = false; });
+// TOUCH/GYRO mode — sends message to parent Capacitor app
+document.getElementById('btnTouch').onclick=()=>{
+  document.getElementById('btnTouch').classList.add('hb-on');
+  document.getElementById('btnGyro').classList.remove('hb-on');
+  try{window.parent.postMessage({type:'cf-gyro-mode',active:false},'*')}catch{}
+};
+// Gyro control — native plugin sends HTTP directly, we just toggle it via API
+let gyroActive=false;
 
-function updateFlapFromPointer(e) {
-  const rect = flapTrack.getBoundingClientRect();
-  let raw = (e.clientY - rect.top) / rect.height;
-  raw = Math.max(0, Math.min(1, raw));
-  setFlapVisual(raw);
-  // While dragging, send continuous value
-  sendCmd('FLAPS', raw);
-}
+const gyroApi=(active)=>fetch(API+'/api/mobile-gyro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active})}).catch(()=>{});
 
-// Click on notch directly
-document.querySelectorAll('.flap-notch').forEach(n => {
-  n.addEventListener('pointerdown', e => {
-    e.stopPropagation();
-    e.preventDefault();
-    const val = parseFloat(n.dataset.flap);
-    setFlapVisual(val);
-    sendCmd('FLAPS', val);
-  });
-});
+document.getElementById('btnGyro').onclick=()=>{
+  gyroActive=true;
+  document.getElementById('btnGyro').classList.add('hb-on');
+  document.getElementById('btnTouch').classList.remove('hb-on');
+  gyroApi(true);
+};
+document.getElementById('btnTouch').onclick=()=>{
+  gyroActive=false;
+  document.getElementById('btnTouch').classList.add('hb-on');
+  document.getElementById('btnGyro').classList.remove('hb-on');
+  gyroApi(false);
+  snd('AILERON',0);snd('ELEVATOR',0);
+  document.getElementById('yd').style.left='50%';
+  document.getElementById('yd').style.top='50%';
+};
+document.getElementById('btnCtr').onclick=()=>{ gyroApi('center'); };
 
-// Fuel selector - handle rotates: BOTH=0°, LEFT=-90°, RIGHT=90°, OFF=180°
-const fuelAngles = { 0: 180, 1: -90, 2: 0, 3: 90 };
-const fuelNames = { 0: 'OFF', 1: 'LEFT', 2: 'BOTH', 3: 'RIGHT' };
-let curFuel = 2;
+// Default: gyro off
+gyroApi(false);
 
-function setFuelSel(pos) {
-  curFuel = pos;
-  document.getElementById('fuelHandle').style.transform = `translate(-50%,-50%) rotate(${fuelAngles[pos]}deg)`;
-  document.getElementById('fuelDisplay').textContent = fuelNames[pos];
-  document.querySelectorAll('.fpl').forEach(l => l.style.color = '');
-  sendCmd('FUEL_SEL', pos);
-}
-setFuelSel(2);
-
-document.querySelectorAll('.fzone').forEach(z => {
-  z.addEventListener('pointerdown', e => { e.preventDefault(); setFuelSel(parseInt(z.dataset.fpos)); });
-});
-
-// Fuel shutoff
-const shutoff = document.getElementById('fuelShutoff');
-shutoff.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  const pulled = shutoff.classList.toggle('pulled');
-  sendCmd('FUEL_SHUTOFF', pulled ? 1 : 0);
-  document.getElementById('shutoffState').textContent = pulled ? 'OUT' : 'IN';
-  document.getElementById('shutoffState').style.color = pulled ? '#f44' : '#444';
-});
-
-// Trim wheel - drag or scroll
-const trimWheel = document.getElementById('trimWheel');
-let trimDragging = false;
-let trimLastY = 0;
-let trimValue = 0;
-
-trimWheel.addEventListener('pointerdown', e => { e.preventDefault(); trimDragging = true; trimLastY = e.clientY; trimWheel.setPointerCapture(e.pointerId); });
-trimWheel.addEventListener('pointermove', e => {
-  if (!trimDragging) return;
-  const dy = e.clientY - trimLastY;
-  trimLastY = e.clientY;
-  trimValue = Math.max(-1, Math.min(1, trimValue + dy * 0.005));
-  sendCmd('TRIM', trimValue);
-  updateTrimVisual(dy);
-});
-trimWheel.addEventListener('pointerup', () => trimDragging = false);
-trimWheel.addEventListener('pointercancel', () => trimDragging = false);
-trimWheel.addEventListener('wheel', e => {
-  e.preventDefault();
-  const dy = e.deltaY > 0 ? 1 : -1;
-  trimValue = Math.max(-1, Math.min(1, trimValue + dy * 0.02));
-  sendCmd('TRIM', trimValue);
-  updateTrimVisual(dy * 3);
-}, { passive: false });
-
-let grooveOffset = 0;
-function updateTrimVisual(dy) {
-  grooveOffset += dy;
-  document.getElementById('trimGrooves').style.transform = `translateY(${grooveOffset % 9}px)`;
-  document.getElementById('trimVal').textContent = Math.round(trimValue * 100);
-}
-
-document.querySelectorAll('.freq-flip').forEach(b => { b.addEventListener('pointerdown', e => { e.preventDefault(); sendCmd(b.dataset.flip, 1); }); });
-document.querySelectorAll('.knob').forEach(b => { b.addEventListener('pointerdown', e => { e.preventDefault(); sendCmd(b.dataset.knob, parseInt(b.dataset.dir)); }); });
-document.querySelectorAll('.xpdr-m').forEach(b => { b.addEventListener('pointerdown', e => { e.preventDefault(); document.querySelectorAll('.xpdr-m').forEach(x => x.classList.remove('active')); b.classList.add('active'); }); });
-document.querySelector('.ident')?.addEventListener('pointerdown', e => { e.preventDefault(); sendCmd('XPDR_IDENT', 1); });
-
-// Mini-fuel buttons (landscape)
-document.querySelectorAll('[data-mfuel]').forEach(btn => {
-  btn.addEventListener('pointerdown', e => {
-    e.preventDefault();
-    const pos = parseInt(btn.dataset.mfuel);
-    setFuelSel(pos);
-    document.querySelectorAll('[data-mfuel]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.mfuel) === pos));
-    const d = document.getElementById('miniFuelDisp');
-    if (d) d.textContent = fuelNames[pos];
-  });
-});
-
-// ====== YOKE CONTROL ======
-const yokeArea = document.getElementById('yokeArea');
-const yokeDot = document.getElementById('yokeDot');
-const yokeAilVal = document.getElementById('yokeAilVal');
-const yokeElvVal = document.getElementById('yokeElvVal');
-const yokeSens = document.getElementById('yokeSens');
-const yokeDead = document.getElementById('yokeDead');
-const yokeGyroMsg = document.getElementById('yokeGyroMsg');
-
-let yokeMode = 'touch'; // 'touch' or 'gyro'
-let yokeLocked = false;
-let yokeAil = 0, yokeElv = 0;
-let yokeTouchActive = false;
-
-// Gyro state
-let gyroAvail = false;
-let gyroBetaCenter = 0, gyroGammaCenter = 0;
-let gyroPermission = false;
-
-function applyDeadZone(val) {
-  const dz = parseFloat(yokeDead.value);
-  if (Math.abs(val) < dz) return 0;
-  const sign = val > 0 ? 1 : -1;
-  return sign * (Math.abs(val) - dz) / (1 - dz);
-}
-
-function updateYoke(ail, elv) {
-  if (yokeLocked) return;
-  const sens = parseFloat(yokeSens.value);
-  yokeAil = Math.max(-1, Math.min(1, applyDeadZone(ail * sens)));
-  yokeElv = Math.max(-1, Math.min(1, applyDeadZone(elv * sens)));
-
-  // Update dot position (center = 50%, edges = 0%/100%)
-  const px = 50 + yokeAil * 45;
-  const py = 50 + yokeElv * 45;
-  yokeDot.style.left = px + '%';
-  yokeDot.style.top = py + '%';
-
-  // Update readouts
-  yokeAilVal.textContent = (yokeAil >= 0 ? '+' : '') + yokeAil.toFixed(2);
-  yokeElvVal.textContent = (yokeElv >= 0 ? '+' : '') + yokeElv.toFixed(2);
-
-  // Send to sim (throttled)
-  yokeSendThrottled();
-}
-
-let yokeSendTimer = null;
-function yokeSendThrottled() {
-  if (yokeSendTimer) return;
-  yokeSendTimer = setTimeout(() => {
-    yokeSendTimer = null;
-    sendCmd('AILERON', yokeAil);
-    sendCmd('ELEVATOR', yokeElv);
-  }, 33); // ~30fps
-}
-
-function resetYoke() {
-  updateYoke(0, 0);
-  yokeDot.style.left = '50%';
-  yokeDot.style.top = '50%';
-  yokeAilVal.textContent = '0';
-  yokeElvVal.textContent = '0';
-}
-
-// --- TOUCH MODE ---
-yokeArea.addEventListener('pointerdown', e => {
-  if (yokeMode !== 'touch' || yokeLocked) return;
-  e.preventDefault();
-  yokeTouchActive = true;
-  yokeArea.setPointerCapture(e.pointerId);
-  yokeDot.classList.remove('smooth');
-  handleTouchMove(e);
-});
-
-yokeArea.addEventListener('pointermove', e => {
-  if (!yokeTouchActive) return;
-  handleTouchMove(e);
-});
-
-yokeArea.addEventListener('pointerup', () => {
-  if (!yokeTouchActive) return;
-  yokeTouchActive = false;
-  yokeDot.classList.add('smooth');
-  resetYoke();
-});
-
-yokeArea.addEventListener('pointercancel', () => {
-  yokeTouchActive = false;
-  yokeDot.classList.add('smooth');
-  resetYoke();
-});
-
-function handleTouchMove(e) {
-  const rect = yokeArea.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const radius = rect.width / 2;
-
-  let dx = (e.clientX - cx) / radius;
-  let dy = (e.clientY - cy) / radius;
-
-  // Clamp to circle
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  if (dist > 1) { dx /= dist; dy /= dist; }
-
-  updateYoke(dx, dy);
-}
-
-// --- GYRO MODE ---
-function gyroMsg(text, color) {
-  yokeGyroMsg.textContent = text;
-  yokeGyroMsg.style.color = color || '#666';
-}
-
-function getOrientationAngle() {
-  if (screen.orientation && screen.orientation.angle !== undefined) return screen.orientation.angle;
-  return window.orientation || 0;
-}
-
-function startGyroListener() {
-  window.addEventListener('deviceorientation', e => {
-    if (yokeMode !== 'gyro' || yokeLocked) return;
-    if (e.beta === null && e.gamma === null) return;
-    const rawBeta = e.beta || 0;
-    const rawGamma = e.gamma || 0;
-
-    // Remap axes based on screen orientation
-    const angle = getOrientationAngle();
-    let beta, gamma;
-    switch (angle) {
-      case 90:   // landscape-left (home button right)
-        beta = -rawGamma;
-        gamma = rawBeta;
-        break;
-      case -90:  // landscape-right (home button left)
-      case 270:
-        beta = rawGamma;
-        gamma = -rawBeta;
-        break;
-      case 180:  // upside-down portrait
-        beta = -rawBeta;
-        gamma = -rawGamma;
-        break;
-      default:   // 0 = portrait
-        beta = rawBeta;
-        gamma = rawGamma;
-    }
-
-    // Auto-calibrate on first event
-    if (!gyroAvail) {
-      gyroBetaCenter = beta;
-      gyroGammaCenter = gamma;
-      gyroAvail = true;
-      gyroMsg('Gyroscope active — tilt to fly', '#3d5');
-    }
-
-    const ail = (gamma - gyroGammaCenter) / 45;
-    const elv = (beta - gyroBetaCenter) / 35;
-    updateYoke(ail, elv);
-  });
-
-  // Re-calibrate when orientation changes
-  const orientEvt = screen.orientation ? 'change' : 'orientationchange';
-  const orientTarget = screen.orientation || window;
-  orientTarget.addEventListener(orientEvt, () => {
-    // Reset center so axes don't jump after rotation
-    gyroAvail = false; // triggers auto-calibrate on next event
-    gyroMsg('Orientation changed — re-calibrating...', '#da5');
-  });
-}
-
-async function requestGyro() {
-  // Check secure context (HTTPS or localhost)
-  if (window.isSecureContext === false) {
-    const host = window.location.hostname;
-    gyroMsg('Gyro requires HTTPS — open https://' + host + ':8443/cockpit.html', '#f80');
-    return;
-  }
-
-  if (typeof DeviceOrientationEvent === 'undefined') {
-    gyroMsg('DeviceOrientation API not available', '#f44');
-    return;
-  }
-
-  // iOS 13+ — needs explicit permission from user gesture
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    gyroMsg('Requesting permission...', '#da5');
-    try {
-      const perm = await DeviceOrientationEvent.requestPermission();
-      if (perm === 'granted') {
-        gyroPermission = true;
-        startGyroListener();
-        gyroMsg('Waiting for gyro data...', '#da5');
-      } else {
-        gyroMsg('Permission denied — check Safari settings', '#f44');
-      }
-    } catch (err) {
-      gyroMsg('Permission error: ' + err.message, '#f44');
-    }
-    return;
-  }
-
-  // Android / desktop — no permission needed, just listen
-  gyroPermission = true;
-  startGyroListener();
-  gyroMsg('Listening for gyro...', '#da5');
-
-  // Check if we actually get events after 1.5s
-  setTimeout(() => {
-    if (!gyroAvail) {
-      gyroMsg('No gyro events — device may not have a gyroscope', '#f80');
-    }
-  }, 1500);
-}
-
-// --- MODE TOGGLE ---
-document.querySelectorAll('[data-yoke-mode]').forEach(btn => {
-  // Use 'click' for iOS permission (must be user-initiated gesture)
-  btn.addEventListener('click', async e => {
-    e.preventDefault();
-    const mode = btn.dataset.yokeMode;
-    yokeMode = mode;
-    document.querySelectorAll('[data-yoke-mode]').forEach(b => b.classList.toggle('active', b.dataset.yokeMode === mode));
-    resetYoke();
-    yokeDot.classList.toggle('smooth', mode === 'gyro');
-
-    if (mode === 'gyro') {
-      if (gyroAvail) {
-        gyroMsg('Gyroscope active — tilt to fly', '#3d5');
-      } else {
-        await requestGyro();
-      }
-    } else {
-      gyroMsg('');
-    }
-  });
-});
-
-// CENTER — calibrate gyro neutral
-document.getElementById('yokeCenter').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  resetYoke();
-  // If gyro mode, recalibrate center from current device orientation
-  if (yokeMode === 'gyro') {
-    const onOrient = ev => {
-      gyroBetaCenter = ev.beta || 0;
-      gyroGammaCenter = ev.gamma || 0;
-      window.removeEventListener('deviceorientation', onOrient);
-      yokeGyroMsg.textContent = 'Centered (' + Math.round(gyroBetaCenter) + '°, ' + Math.round(gyroGammaCenter) + '°)';
-    };
-    window.addEventListener('deviceorientation', onOrient);
-  }
-});
-
-// LOCK — freeze yoke output
-document.getElementById('yokeLock').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  yokeLocked = !yokeLocked;
-  const btn = document.getElementById('yokeLock');
-  btn.textContent = yokeLocked ? 'UNLOCK' : 'LOCK';
-  btn.style.borderColor = yokeLocked ? '#e44' : '';
-  btn.style.color = yokeLocked ? '#f66' : '';
-});
-
-async function sendCmd(cmd, value) {
-  try { await fetch(API + '/api/command', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, value }) }); } catch {}
-}
-
-async function poll() {
-  try {
-    const r = await fetch(API + '/api/sim-state');
-    const d = await r.json();
-    const v = d.values || {};
-    document.getElementById('sDot').className = 'dot' + (d.connected ? ' on' : '');
-    document.getElementById('sTxt').textContent = d.connected ? 'ONLINE' : 'OFFLINE';
-    document.querySelectorAll('.toggle, .rocker').forEach(el => {
-      const k = el.dataset.key, on = (v[k] || 0) > 0.5;
-      el.classList.toggle('on', on);
-      const s = el.closest('.sw-col')?.querySelector('.sw-state');
-      if (s) { s.textContent = on ? 'ON' : 'OFF'; s.style.color = on ? '#4af' : '#444'; }
-    });
-    document.querySelectorAll('.lever-range').forEach(i => {
-      const k = i.dataset.cmd; if (v[k] !== undefined) { i.value = v[k]; const d = document.querySelector(`[data-disp="${k}"]`); if (d) d.textContent = Math.round(v[k] * 100) + '%'; }
-    });
-    if (v['MAGNETO'] !== undefined) setMag(Math.min(4, Math.round(v['MAGNETO'])));
-
-    // Update gauges
-    const gIAS = document.getElementById('gIAS');
-    const gALT = document.getElementById('gALT');
-    const gVS = document.getElementById('gVS');
-    const gHDG = document.getElementById('gHDG');
-    const gRPM = document.getElementById('gRPM');
-    if (v['AIRSPEED'] !== undefined) {
-      const ias = Math.round(v['AIRSPEED']);
-      gIAS.textContent = ias;
-      gIAS.className = 'gauge-num' + (ias < 45 ? ' danger' : ias < 60 ? ' warn' : '');
-    }
-    if (v['ALTITUDE'] !== undefined) gALT.textContent = Math.round(v['ALTITUDE']);
-    if (v['VS'] !== undefined) {
-      const vs = Math.round(v['VS']);
-      gVS.textContent = (vs >= 0 ? '+' : '') + vs;
-      gVS.className = 'gauge-num' + (vs < -1000 ? ' danger' : vs < -500 ? ' warn' : '');
-    }
-    if (v['HEADING'] !== undefined) gHDG.textContent = Math.round(v['HEADING']).toString().padStart(3, '0');
-    if (v['RPM'] !== undefined) gRPM.textContent = Math.round(v['RPM']);
-  } catch {}
-  setTimeout(poll, 500);
+// Poll gauges
+async function poll(){
+  try{const r=await fetch(API+'/api/sim-state');const d=await r.json();const v=d.values||{};
+    if(v.AIRSPEED!==undefined){const s=Math.round(v.AIRSPEED);document.getElementById('rI').textContent=s;document.getElementById('rI').style.color=s<45?'var(--cf-red)':s<60?'var(--cf-amber)':'var(--cf-accent)'}
+    if(v.ALTITUDE!==undefined)document.getElementById('rA').textContent=Math.round(v.ALTITUDE);
+    if(v.HEADING!==undefined)document.getElementById('rH').textContent=Math.round(v.HEADING).toString().padStart(3,'0');
+    if(v.VS!==undefined){const vs=Math.round(v.VS);document.getElementById('rV').textContent=(vs>=0?'+':'')+vs;document.getElementById('rV').style.color=vs<-1000?'var(--cf-red)':'var(--cf-amber)'}
+  }catch{}
+  setTimeout(poll,500);
 }
 poll();
 </script>

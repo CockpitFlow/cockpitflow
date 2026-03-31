@@ -3,8 +3,11 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tauri::{Emitter, Manager};
+
+static MOBILE_GYRO_ACTIVE: AtomicBool = AtomicBool::new(false);
 
 type SimState = Arc<Mutex<HashMap<String, f64>>>;
 
@@ -199,7 +202,7 @@ fn send_command(cmd: String, value: f64) -> Result<(), String> {
         },
         // These work as DREF (continuous values)
         "THROTTLE" | "MIXTURE" | "CARB_HEAT" | "FLAPS" | "TRIM"
-        | "AILERON" | "ELEVATOR" | "RUDDER" => {
+        | "AILERON" | "ELEVATOR" | "RUDDER" | "PARKING_BRAKE" => {
             let dataref = match cmd.as_str() {
                 "THROTTLE" => "sim/cockpit2/engine/actuators/throttle_ratio[0]",
                 "MIXTURE" => "sim/cockpit2/engine/actuators/mixture_ratio[0]",
@@ -209,12 +212,22 @@ fn send_command(cmd: String, value: f64) -> Result<(), String> {
                 "AILERON" => "sim/cockpit2/controls/yoke_roll_ratio",
                 "ELEVATOR" => "sim/cockpit2/controls/yoke_pitch_ratio",
                 "RUDDER" => "sim/cockpit2/controls/rudder_ratio",
+                "PARKING_BRAKE" => "sim/cockpit2/controls/parking_brake_ratio",
                 _ => unreachable!(),
             };
             let mut pkt = Vec::with_capacity(509);
             pkt.extend_from_slice(b"DREF\0");
             pkt.extend_from_slice(&(value as f32).to_le_bytes());
             pkt.extend_from_slice(dataref.as_bytes());
+            pkt.resize(509, 0);
+            sock.send_to(&pkt, "127.0.0.1:49000").map_err(|e| e.to_string())?;
+            return Ok(());
+        },
+        "PAUSE" => {
+            // X-Plane toggle pause via CMND
+            let mut pkt = Vec::with_capacity(509);
+            pkt.extend_from_slice(b"CMND\0");
+            pkt.extend_from_slice(b"sim/operation/pause_toggle");
             pkt.resize(509, 0);
             sock.send_to(&pkt, "127.0.0.1:49000").map_err(|e| e.to_string())?;
             return Ok(());
@@ -391,11 +404,24 @@ async fn check_for_updates() -> Result<serde_json::Value, String> {
                 let download_url = json["html_url"].as_str().unwrap_or("").to_string();
                 let changelog = json["body"].as_str().unwrap_or("").to_string();
 
+                // Find .msi or .exe asset for auto-update
+                let installer_url = json["assets"].as_array()
+                    .and_then(|assets| {
+                        assets.iter().find_map(|a| {
+                            let name = a["name"].as_str().unwrap_or("");
+                            if name.ends_with(".msi") || name.ends_with(".exe") {
+                                a["browser_download_url"].as_str().map(|s| s.to_string())
+                            } else { None }
+                        })
+                    })
+                    .unwrap_or_default();
+
                 Ok(serde_json::json!({
                     "current": current,
                     "latest": latest,
                     "update_available": update_available,
                     "download_url": download_url,
+                    "installer_url": installer_url,
                     "changelog": changelog,
                 }))
             } else {
@@ -412,6 +438,43 @@ async fn check_for_updates() -> Result<serde_json::Value, String> {
             "update_available": false,
         }))
     }
+}
+
+#[tauri::command]
+async fn download_and_install_update(url: String) -> Result<String, String> {
+    if url.is_empty() { return Err("No installer URL".into()); }
+
+    let temp_dir = std::env::temp_dir();
+    let filename = url.split('/').last().unwrap_or("CockpitFlow-update.msi");
+    let filepath = temp_dir.join(filename);
+    let filepath_str = filepath.to_string_lossy().to_string();
+
+    // Download using PowerShell (handles HTTPS + redirects)
+    let download = std::process::Command::new("powershell")
+        .args(["-Command", &format!(
+            "Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
+            url, filepath_str
+        )])
+        .output()
+        .map_err(|e| format!("Download failed: {}", e))?;
+
+    if !download.status.success() {
+        return Err("Download failed".into());
+    }
+
+    // Launch installer
+    if filepath_str.ends_with(".msi") {
+        std::process::Command::new("msiexec")
+            .args(["/i", &filepath_str, "/passive"])
+            .spawn()
+            .map_err(|e| format!("Install failed: {}", e))?;
+    } else {
+        std::process::Command::new(&filepath_str)
+            .spawn()
+            .map_err(|e| format!("Install failed: {}", e))?;
+    }
+
+    Ok("Installing...".into())
 }
 
 /// Simple HTTP GET without external deps
@@ -585,7 +648,8 @@ fn handle_request(
     checklist_progress: &ChecklistProgress,
     dist_dir: &std::path::Path,
 ) -> tiny_http::ResponseBox {
-    let url = request.url().to_string();
+    let full_url = request.url().to_string();
+    let url = full_url.split('?').next().unwrap_or(&full_url).to_string();
     match url.as_str() {
         "/api/sim-state" => {
             let s = sim_state.lock().unwrap();
@@ -923,36 +987,17 @@ fn handle_request(
                 .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
                 .boxed()
         },
-        "/cockpit" | "/cockpit2" | "/cockpit2.html" => {
-            // Short URL for cockpit
-            let module_dirs = module_base_dirs();
-            let mut preset = "cessna-172".to_string();
-            for dir in &module_dirs {
-                let manifest = dir.join("cockpit/module.json");
-                if let Ok(content) = std::fs::read_to_string(&manifest) {
-                    if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
-                        if let Some(p) = parsed.get("default_preset").and_then(|v| v.as_str()) {
-                            preset = p.to_string();
-                            break;
-                        }
-                    }
-                }
-            }
-            let renderer_paths = vec![
-                dist_dir.join("modules/cockpit/renderer.html"),
-                dist_dir.join("../public/modules/cockpit/renderer.html"),
-                std::path::PathBuf::from("../public/modules/cockpit/renderer.html"),
-                std::path::PathBuf::from("public/modules/cockpit/renderer.html"),
+        "/cockpit-basic" | "/cockpit-basic.html" | "/cockpit" | "/cockpit.html" => {
+            let paths = vec![
+                dist_dir.join("cockpit.html"),
+                dist_dir.join("../public/cockpit.html"),
+                std::path::PathBuf::from("../public/cockpit.html"),
+                std::path::PathBuf::from("public/cockpit.html"),
             ];
-            let html = renderer_paths.iter()
-                .find_map(|p| std::fs::read_to_string(p).ok())
-                .unwrap_or_else(|| "<h1>Cockpit not found</h1>".to_string());
-            let injected = html.replace(
-                "</head>",
-                &format!("<script>if(!new URLSearchParams(location.search).get('preset'))history.replaceState(null,'','/cockpit?preset={}')</script></head>", preset)
-            );
-            tiny_http::Response::from_string(injected)
-                .with_header("Content-Type: text/html".parse::<tiny_http::Header>().unwrap())
+            let html = paths.iter().find_map(|p| std::fs::read_to_string(p).ok()).unwrap_or_else(|| "<h1>cockpit.html not found</h1>".to_string());
+            tiny_http::Response::from_string(html)
+                .with_header("Content-Type: text/html; charset=utf-8".parse::<tiny_http::Header>().unwrap())
+                .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
                 .boxed()
         },
         "/panel" | "/panel.html" => {
@@ -1070,6 +1115,25 @@ fn handle_request(
                     .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
                     .boxed()
             }
+        },
+        "/api/mobile-gyro" => {
+            if request.method() == &tiny_http::Method::Post {
+                let mut body = String::new();
+                request.as_reader().read_to_string(&mut body).ok();
+                if body.contains("center") {
+                    // Signal recenter by toggling off briefly
+                    MOBILE_GYRO_ACTIVE.store(false, Ordering::Relaxed);
+                    std::thread::spawn(|| { std::thread::sleep(Duration::from_millis(100)); MOBILE_GYRO_ACTIVE.store(true, Ordering::Relaxed); });
+                } else {
+                    let active = body.contains("true");
+                    MOBILE_GYRO_ACTIVE.store(active, Ordering::Relaxed);
+                }
+            }
+            let active = MOBILE_GYRO_ACTIVE.load(Ordering::Relaxed);
+            tiny_http::Response::from_string(format!("{{\"active\":{}}}", active))
+                .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap())
+                .with_header("Access-Control-Allow-Origin: *".parse::<tiny_http::Header>().unwrap())
+                .boxed()
         },
         "/api/command" => {
             let mut body = String::new();
@@ -1462,7 +1526,7 @@ fn start_arduino_reader(app: tauri::AppHandle) {
                     let _ = app.emit("arduino-status", "connected");
                     s
                 }
-                Err(e) => { eprintln!("[ARDUINO] COM7 error: {}", e); std::thread::sleep(Duration::from_secs(3)); continue; }
+                Err(_) => { std::thread::sleep(Duration::from_secs(10)); continue; }
             };
 
             let mut buf = [0u8; 256];
@@ -1595,11 +1659,12 @@ pub fn run() {
     let overlay_http = overlay.clone();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .manage(sim_state)
         .manage(settings)
         .manage(capture)
         .manage(overlay)
-        .invoke_handler(tauri::generate_handler![get_gauge_data, send_command, get_local_ip, get_settings, set_settings, list_sim_windows, capture_window, capture_screen_region, store_capture, store_overlay, list_presets, load_preset, save_preset, list_modules, update_module, load_module_preset, save_module_preset, delete_module_preset, check_for_updates])
+        .invoke_handler(tauri::generate_handler![get_gauge_data, send_command, get_local_ip, get_settings, set_settings, list_sim_windows, capture_window, capture_screen_region, store_capture, store_overlay, list_presets, load_preset, save_preset, list_modules, update_module, load_module_preset, save_module_preset, delete_module_preset, check_for_updates, download_and_install_update])
         .setup(move |app| {
             start_xplane(sim_clone, app.handle().clone());
             start_arduino_reader(app.handle().clone());

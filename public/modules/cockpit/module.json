@@ -1,6 +1,6 @@
 {
   "author": "CockpitFlow",
-  "default_preset": "cessna-172",
+  "default_preset": "cessna-172-basic",
   "description": "Flight controls, engine levers, gauges, switches. Fully customizable grid layout.",
   "enabled": true,
   "icon": "crosshair",

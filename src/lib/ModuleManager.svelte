@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Power } from 'lucide-svelte';
+  import { toast } from './gauges/Toast.svelte';
 
   interface Module {
     id: string;
@@ -16,7 +16,6 @@
   let { onRefresh = () => {} }: { onRefresh?: () => void } = $props();
 
   let modules = $state<Module[]>([]);
-  let msg = $state('');
 
   onMount(load);
 
@@ -30,69 +29,41 @@
       mod.enabled = !mod.enabled;
       modules = [...modules];
       onRefresh();
-      msg = `${mod.name} ${mod.enabled ? 'enabled' : 'disabled'}`;
-      setTimeout(() => msg = '', 2000);
+      toast(`${mod.name} ${mod.enabled ? 'enabled' : 'disabled'}`, mod.enabled ? 'success' : 'info');
     } catch (e: any) {
-      msg = 'Error: ' + e;
+      toast('Error: ' + e, 'error');
     }
   }
 </script>
 
-<div class="mm">
-  <div class="mm-header">
-    <div class="label">MODULES</div>
-    <p class="desc">Enable or disable modules. Disabled modules are hidden from the sidebar and mobile companion.</p>
-  </div>
+<div class="w-full h-full overflow-y-auto p-4">
+  <div class="font-mono text-[9px] font-bold tracking-[1.5px] text-[var(--color-dim)] mb-1">MODULES</div>
+  <p class="text-[11px] text-[var(--color-dim)] mb-4">Enable or disable modules. Disabled modules are hidden from the sidebar and mobile companion.</p>
 
-  <div class="mm-list">
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3">
     {#each [...modules].sort((a, b) => (a.order || 99) - (b.order || 99)) as mod}
-      <div class="mm-item" class:off={!mod.enabled}>
-        <div class="mm-info">
-          <span class="mm-name">{mod.name}</span>
-          <span class="mm-desc">{mod.description}</span>
+      <div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 flex flex-col gap-3 transition-opacity {mod.enabled ? '' : 'opacity-40'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex flex-col gap-1 flex-1 min-w-0">
+            <span class="font-semibold text-sm text-[var(--color-fg)]">{mod.name}</span>
+            <span class="text-[11px] text-[var(--color-dim)] leading-snug">{mod.description}</span>
+          </div>
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <div
+            class="w-10 h-5 rounded-full border cursor-pointer transition-all shrink-0 relative mt-0.5 {mod.enabled ? 'bg-[var(--color-green)]/12 border-[var(--color-green)]' : 'bg-[var(--color-surface-2)] border-[var(--color-border)]'}"
+            role="switch"
+            aria-checked={mod.enabled}
+            onclick={() => toggle(mod)}
+          >
+            <div class="absolute w-4 h-4 rounded-full top-[1.5px] transition-all {mod.enabled ? 'left-[21px] bg-[var(--color-green)]' : 'left-[1.5px] bg-[var(--color-dim)]'}"></div>
+          </div>
         </div>
-        <div
-          class="mm-switch" class:on={mod.enabled}
-          onclick={() => toggle(mod)}
-          role="switch"
-        ></div>
+        <div class="flex items-center gap-2 text-[9px] text-[var(--color-dim)] font-mono">
+          <span>v{mod.version || '1.0.0'}</span>
+          <span class="opacity-30">·</span>
+          <span>{mod.enabled ? 'Enabled' : 'Disabled'}</span>
+        </div>
       </div>
     {/each}
   </div>
-
-  {#if msg}
-    <div class="mm-msg">{msg}</div>
-  {/if}
 </div>
-
-<style>
-  .mm { padding: 4px; }
-  .mm-header { margin-bottom: 14px; }
-  .mm-list { display: flex; flex-direction: column; gap: 4px; }
-
-  .mm-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px; background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 5px; transition: opacity .15s;
-  }
-  .mm-item.off { opacity: .45; }
-
-  .mm-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-  .mm-name { font-weight: 600; font-size: 12px; }
-  .mm-desc { font-size: 10px; color: var(--color-dim); line-height: 1.3; }
-
-  .mm-switch {
-    width: 36px; height: 18px; border-radius: 9px;
-    background: var(--color-surface-2); border: 1px solid var(--color-border);
-    position: relative; cursor: pointer; transition: all .15s; flex-shrink: 0;
-    margin-left: 12px;
-  }
-  .mm-switch::after {
-    content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
-    top: 1px; left: 1px; background: var(--color-dim); transition: all .15s;
-  }
-  .mm-switch.on { background: rgba(52,208,88,.12); border-color: var(--color-green); }
-  .mm-switch.on::after { left: 19px; background: var(--color-green); }
-
-  .mm-msg { font-size: 10px; color: var(--color-green); margin-top: 10px; text-align: center; }
-</style>

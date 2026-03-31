@@ -24,6 +24,11 @@
   --color-green: #34d058;
   --color-red: #ea4a5a;
   --color-yellow: #e3b341;
+  --color-discord: #5865F2;
+  --color-gold: #ffd700;
+  --color-silver: #c0c0c0;
+  --color-bronze: #cd7f32;
+  --color-orange: #e07020;
 }
 
 /* ═══ LIGHT THEME ═══ */
@@ -34,7 +39,7 @@
   --color-bg: #f5f6f8; --color-surface: #ffffff; --color-surface-2: #eef0f4;
   --color-border: #d8dce4; --color-dim: #7a8494; --color-fg: #2c3340;
   --color-bright: #1a1f2b; --color-accent: #2b7de9;
-  --color-green: #1a9e3f; --color-red: #d93a4a; --color-yellow: #c49520;
+  --color-green: #1a9e3f; --color-red: #d93a4a; --color-yellow: #c49520; --color-orange: #c06018;
   color-scheme: light;
 }
 
@@ -46,10 +51,10 @@
   --color-bg: #050709; --color-surface: #0a0c10; --color-surface-2: #0e1015;
   --color-border: #151a22; --color-dim: #3a4050; --color-fg: #8a9098;
   --color-bright: #b0b6c0; --color-accent: #3570cc;
-  --color-green: #287040; --color-red: #b03040; --color-yellow: #907020;
+  --color-green: #287040; --color-red: #b03040; --color-yellow: #907020; --color-orange: #805018;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* box-sizing handled by Tailwind preflight */
 html, body, #app { width: 100%; height: 100%; overflow: hidden; }
 body {
   background: var(--color-bg);

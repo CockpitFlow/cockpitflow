@@ -457,12 +457,9 @@ async fn download_and_install_update(url: String) -> Result<String, String> {
     let filepath = temp_dir.join(filename);
     let filepath_str = filepath.to_string_lossy().to_string();
 
-    // Download silently using PowerShell (hidden window)
-    let download = std::process::Command::new("powershell")
-        .args(["-WindowStyle", "Hidden", "-Command", &format!(
-            "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
-            url, filepath_str
-        )])
+    // Download silently using curl (built-in Windows 10/11, no window)
+    let download = std::process::Command::new("curl")
+        .args(["-L", "-s", "-o", &filepath_str, &url])
         .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .output()
         .map_err(|e| format!("Download failed: {}", e))?;

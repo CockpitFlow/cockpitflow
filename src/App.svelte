@@ -15,6 +15,7 @@
   import NavSection from './lib/sections/NavSection.svelte';
   import HardwareSection from './lib/sections/HardwareSection.svelte';
   import CommunitySection from './lib/sections/CommunitySection.svelte';
+  import Marketplace from './lib/Marketplace.svelte';
 
   // Icon name → Lucide component mapping
   const iconMap: Record<string, any> = {

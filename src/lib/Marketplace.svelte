@@ -228,7 +228,7 @@
 </div>
 
 <style>
-  .mp { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+  .mp { display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }
 
   .mp-header { padding: 12px 14px; border-bottom: 1px solid var(--color-border); flex-shrink: 0; }
   .mp-title-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
